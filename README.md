@@ -31,7 +31,7 @@ Install the FiveM skills from https://github.com/mri-Qbox-Brasil/mri-fivem-skill
 ```
 
 **Claude app chat:** download the skill's zip from the
-[site](https://mri-qbox-brasil.github.io/mri-fivem-skills/#install) and upload it in Settings >
+[site](https://skills.mriqbox.com.br/#install) and upload it in Settings >
 Capabilities > Skills.
 
 **By hand:** clone and link each folder into the agent's skills folder (a link, not a copy, so
