@@ -18,13 +18,25 @@ The skills are written in English; the agent still answers in the user's languag
 
 ## Install
 
-Clone and link each folder into the agent's skills folder (a link, not a copy, so `git pull`
-updates it):
+**Claude Code, Codex and other coding agents** (terminal, the Code tab of the Claude desktop
+app, IDE extensions): paste this and the agent installs everything by itself. Send it again
+later to update.
+
+```
+Install the FiveM skills from https://github.com/mri-Qbox-Brasil/mri-fivem-skills by following its INSTALL.md.
+```
+
+**Claude app chat:** download the skill's zip from the
+[site](https://mri-qbox-brasil.github.io/mri-fivem-skills/#install) and upload it in Settings >
+Capabilities > Skills.
+
+**By hand:** clone and link each folder into the agent's skills folder (a link, not a copy, so
+`git pull` updates it).
 
 Windows (PowerShell):
 
 ```powershell
-git clone https://github.com/mur4i/mri-fivem-skills "$HOME\mri-fivem-skills"
+git clone https://github.com/mri-Qbox-Brasil/mri-fivem-skills "$HOME\mri-fivem-skills"
 New-Item -ItemType Directory -Force "$HOME\.claude\skills" | Out-Null
 Get-ChildItem "$HOME\mri-fivem-skills" -Directory | Where-Object { Test-Path "$($_.FullName)\SKILL.md" } |
   ForEach-Object { New-Item -ItemType Junction -Path "$HOME\.claude\skills\$($_.Name)" -Target $_.FullName }
@@ -33,7 +45,7 @@ Get-ChildItem "$HOME\mri-fivem-skills" -Directory | Where-Object { Test-Path "$(
 macOS / Linux:
 
 ```bash
-git clone https://github.com/mur4i/mri-fivem-skills ~/mri-fivem-skills
+git clone https://github.com/mri-Qbox-Brasil/mri-fivem-skills ~/mri-fivem-skills
 mkdir -p ~/.claude/skills
 for d in ~/mri-fivem-skills/*/; do [ -f "$d/SKILL.md" ] && ln -s "${d%/}" ~/.claude/skills/; done
 ```
