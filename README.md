@@ -21,16 +21,24 @@ The skills are written in English; the agent still answers in the user's languag
 Clone and link each folder into the agent's skills folder (a link, not a copy, so `git pull`
 updates it):
 
+Windows (PowerShell):
+
 ```powershell
-git clone https://github.com/mur4i/mri-fivem-skills C:\Github\mri-fivem-skills
-foreach ($s in Get-ChildItem C:\Github\mri-fivem-skills -Directory) {
-  if (Test-Path "$($s.FullName)\SKILL.md") {
-    New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\$($s.Name)" -Target $s.FullName
-  }
-}
+git clone https://github.com/mur4i/mri-fivem-skills "$HOME\mri-fivem-skills"
+New-Item -ItemType Directory -Force "$HOME\.claude\skills" | Out-Null
+Get-ChildItem "$HOME\mri-fivem-skills" -Directory | Where-Object { Test-Path "$($_.FullName)\SKILL.md" } |
+  ForEach-Object { New-Item -ItemType Junction -Path "$HOME\.claude\skills\$($_.Name)" -Target $_.FullName }
 ```
 
-Linux/macOS: `ln -s` each folder into `~/.claude/skills/`. Codex: `~/.codex/skills`.
+macOS / Linux:
+
+```bash
+git clone https://github.com/mur4i/mri-fivem-skills ~/mri-fivem-skills
+mkdir -p ~/.claude/skills
+for d in ~/mri-fivem-skills/*/; do [ -f "$d/SKILL.md" ] && ln -s "${d%/}" ~/.claude/skills/; done
+```
+
+The clone can live in any folder. For Codex, use `.codex` instead of `.claude`.
 
 `mri-txadmin` needs a `config.json` (copy `config.example.json`); it stays out of git.
 
