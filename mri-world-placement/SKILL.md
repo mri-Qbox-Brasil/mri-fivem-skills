@@ -1,6 +1,6 @@
 ---
 name: mri-world-placement
-description: World placement standard for FiveM resource creation panels - place an NPC, object, point or zone by aiming with a preview (ghost), record a route or path stop by stop with a line on the ground, a key rail on the NUI instead of a textUI, and NPCs walking the route without stalling. Ships the ready Lua module (WorldPlacer.point and WorldPlacer.path), the React rail (PlaceRail) and the rules that prevent flickering markers, missed keys and coordinate fields. Use when asked to "place in the world", "record a route", "place the NPC/object/zone in game", "in-game creator", "the marker flickers", "I don't want to type coordinates" (pt-BR: "posicionar no mundo", "marcar rota", "o marcador tá piscando", "não quero digitar coordenada"), or when building any admin panel that stores a position, heading, zone or path.
+description: World placement standard for FiveM resource creation panels - place an NPC, object or point by aiming with a preview (ghost), mark a box zone with heading and size around the player (elevator floor, garage spot, stash), record a route or path stop by stop with a line on the ground, a key rail on the NUI instead of a textUI, and NPCs walking the route without stalling. Ships the ready Lua module (WorldPlacer.point, WorldPlacer.zone and WorldPlacer.path), the React rail (PlaceRail) and the rules that prevent flickering markers, missed keys and coordinate fields. Use when asked to "place in the world", "record a route", "place the NPC/object/zone in game", "in-game creator", "the marker flickers", "I don't want to type coordinates" (pt-BR: "posicionar no mundo", "marcar rota", "o marcador tá piscando", "não quero digitar coordenada"), or when building any admin panel that stores a position, heading, zone or path.
 ---
 
 # World placement
@@ -14,20 +14,26 @@ marked in the world, with a preview; never a number field, a coordinate or a typ
 | --- | --- | --- |
 | Point with ghost | NPC, object, interaction point: a see-through copy follows the aim | `WorldPlacer.point` |
 | Path | NPC route, trail, fence: stops with a line on the ground | `WorldPlacer.path` |
-| Zone at the player | elevator, area: a box drawn around whoever walks | reference `mri_Qelevators` (`client/placement.lua`) |
+| Zone (box with heading) | anything shaped like a cube that faces a way: elevator floor, garage spot, shop counter, stash, trigger area | `WorldPlacer.zone` |
+
+Pick by shape: a model to stand somewhere is a point; a sequence is a path; a volume with a
+front is a zone. The zone sits on the player (walk to it, the player's heading turns it), with
+a yellow box, an arrow for the heading and the size written above; zones already placed show
+in green with their label (`refs`). `multiple` marks several in a row (floors of an elevator).
+Pattern from `mri_Qelevators` (`client/placement.lua`).
 
 ### Keys (the same in every resource)
 
 | Key | Point | Path | Zone |
 | --- | --- | --- | --- |
-| Aim / walk | moves the ghost | previews the next stop | the box follows |
-| `E` | confirm | mark stop | mark |
-| `←` `→`, wheel | rotate | | wheel: size; `Shift` + wheel: height |
-| `Backspace` | cancel | undo the last one | one step back |
-| `Enter` | | finish (no stop = cancel) | finish |
+| Aim / walk | moves the ghost | previews the next stop | the box follows the player |
+| `E` | confirm | mark stop | mark (single: confirm) |
+| `←` `→`, wheel | rotate | | wheel: width; `Shift` + wheel: height |
+| `Backspace` | cancel | undo the last one | undo the last one (single: cancel) |
+| `Enter` | | finish (no stop = cancel) | finish (no zone = cancel) |
 | `Esc` | cancel | cancel | cancel |
 
-`mri_Qelevators` still finishes a zone on `Backspace` (it predates this standard).
+`mri_Qelevators` itself still finishes on `Backspace` (it predates this standard).
 Cancelling always gives back what was there before. Sound: `SELECT` on mark, `BACK` on undo
 or cancel (`HUD_FRONTEND_DEFAULT_SOUNDSET`).
 
@@ -35,9 +41,9 @@ or cancel (`HUD_FRONTEND_DEFAULT_SOUNDSET`).
 
 1. `templates/placement.lua` into `client/` (rename the global). Before the files that use
    it in `fxmanifest.lua`; a new file in the manifest needs `refresh` before `ensure`.
-2. `templates/panel.lua`: `place` and `recordRoute` callbacks with `inWorld` (hides the
-   panel, runs the tool, comes back with the result; inside mri_Qadmin it closes and reopens
-   the tab).
+2. `templates/panel.lua`: `place`, `recordRoute` and `placeZone` callbacks with `inWorld`
+   (hides the panel, runs the tool, comes back with the result; inside mri_Qadmin it closes
+   and reopens the tab).
 3. NUI: `templates/PlaceRail.tsx` and the keys from `templates/rail.locales.json`. A store
    with `hud` fed by the `placeHud` message (`false` clears it). The rail shows with the panel
    hidden, on the resource's own ui_page; inside the Qadmin iframe it doesn't render (the
