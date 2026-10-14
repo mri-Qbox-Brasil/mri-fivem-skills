@@ -81,6 +81,9 @@ Lua traps the parser can't see:
     by themselves (read the `Stopping resource` lines and `ensure` each one);
   - a resource that `provide`s another name (target systems): re-ensuring its dependents can
     start it twice on the client. Ask the player to reconnect instead.
+- A resource can't restart itself: `StopResource` on its own name does nothing, and
+  `ExecuteCommand('ensure ...')` needs `add_ace resource.<name> command.ensure allow`. Another
+  resource (an admin panel) or the admin restarts it.
 - Never put a server-only resource in `dependencies`: the client can't find it and FiveM
   drops the player ("Could not find dependency ... Killing network").
 
