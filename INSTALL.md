@@ -56,5 +56,5 @@ Rules:
 ## Claude app chat (no file access)
 
 If you are the Claude chat app without access to the user's files, you can't install. Tell the
-user to download each skill's zip from https://mri-qbox-brasil.github.io/mri-fivem-skills and upload it
+user to download each skill's zip from https://skills.mriqbox.com.br and upload it
 in Settings > Capabilities > Skills.
