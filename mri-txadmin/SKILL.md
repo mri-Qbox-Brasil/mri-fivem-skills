@@ -26,7 +26,7 @@ node scripts/tx.mjs refresh                    # rescan resources (new folder)
 | `ensure <res>` | Starts it, or restarts if running. The default to reload a change. |
 | `restart <res>` | Restarts (fails if stopped). |
 | `start <res>` / `stop <res>` | Starts / stops. |
-| `refresh` | Server `refresh`, to see a new resource or a changed `fxmanifest.lua` (new file in `client_scripts`): without it `ensure` starts with the old manifest and the client gets `attempt to index a nil value` on the missing file's global. |
+| `refresh` | Server `refresh`, to see a new resource or a changed `fxmanifest.lua` (new file in `client_scripts` or `server_scripts`): without it `ensure` starts with the old manifest and the client or the server gets `attempt to index a nil value` on the missing file's global. Run it before the `ensure` whenever the manifest file lists changed. |
 | `say <message>` | txAdmin announcement to every player. Only when asked. |
 
 **Login:** txAdmin blocks login for 15 minutes after about 10 attempts in a row (error 429).
