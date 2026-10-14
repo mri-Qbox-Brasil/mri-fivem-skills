@@ -29,14 +29,15 @@ my-skill/
 ```markdown
 ---
 name: my-skill
-description: What it does and when to use it, with the phrases people would type to ask for it.
+description: "What it does and when to use it, with the phrases people would type to ask for it."
 ---
 ```
 
 - `name`: the folder name, lowercase kebab-case, up to 64 characters.
 - `description`: up to 1024 characters. The agent only sees this before opening the skill, so
   every capability and trigger phrase goes here. Phrases in other languages are welcome in
-  parentheses.
+  parentheses. Keep it on one line in double quotes (escape `"` inside as `\"`): unquoted, a
+  `: ` or ` #` breaks strict YAML readers such as GitHub's preview.
 - `SKILL.md` up to ~150 lines; move details to `references/` and say when to read each one.
 - English. The agent still answers in the user's language.
 

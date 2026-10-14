@@ -1,6 +1,6 @@
 ---
 name: mri-game-ux
-description: Makes FiveM resource screens and scenes (multichar, character creation, spawn, appearance, loading, cutscenes, NPC conversation) feel like an AAA game - menus that say where they lead, camera and interface transitions without hard cuts, depth of field and handheld camera, music in phases with crossfade, cinema bars, destructive confirmation without a modal. Use when asked for "AAA feel", "more cinematic", "too sudden", "it flickers", "the music stops" (pt-BR: "cara de triple A", "mais cinematográfico", "tá repentino", "tá piscando", "a música para"), or when designing or reviewing an in-game screen flow with a scripted camera and NUI.
+description: "Makes FiveM resource screens and scenes (multichar, character creation, spawn, appearance, loading, cutscenes, NPC conversation) feel like an AAA game - menus that say where they lead, camera and interface transitions without hard cuts, depth of field and handheld camera, music in phases with crossfade, cinema bars, destructive confirmation without a modal. Use when asked for \"AAA feel\", \"more cinematic\", \"too sudden\", \"it flickers\", \"the music stops\" (pt-BR: \"cara de triple A\", \"mais cinematográfico\", \"tá repentino\", \"tá piscando\", \"a música para\"), or when designing or reviewing an in-game screen flow with a scripted camera and NUI."
 ---
 
 # AAA game UX in FiveM resources

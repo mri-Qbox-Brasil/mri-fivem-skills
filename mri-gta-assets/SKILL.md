@@ -1,6 +1,6 @@
 ---
 name: mri-gta-assets
-description: GTA V/FiveM 3D and stream files (cars, clothes, peds, weapons, animations, maps) - RPF7 and RSC7 formats (.ytd, .yft, .ydr, .ydd, .ycd, .ymap, .ytyp), metas (vehicles.meta, carcols, peds.meta, shop_ped_apparel), converting a single player mod into a FiveM resource, texture optimization (DXT, video memory, pages) and how to read and write these files without OpenIV/CodeWalker. Use when asked to "optimize this car", "convert this mod to FiveM", "why is this car/map so heavy", "read/write ytd", "uncompressed texture", "install a clothing/ped/weapon/map mod" (pt-BR: "otimiza esse carro", "converte esse mod pra FiveM", "por que pesa tanto"), or when writing code that reads or writes these formats.
+description: "GTA V/FiveM 3D and stream files (cars, clothes, peds, weapons, animations, maps) - RPF7 and RSC7 formats (.ytd, .yft, .ydr, .ydd, .ycd, .ymap, .ytyp), metas (vehicles.meta, carcols, peds.meta, shop_ped_apparel), converting a single player mod into a FiveM resource, texture optimization (DXT, video memory, pages) and how to read and write these files without OpenIV/CodeWalker. Use when asked to \"optimize this car\", \"convert this mod to FiveM\", \"why is this car/map so heavy\", \"read/write ytd\", \"uncompressed texture\", \"install a clothing/ped/weapon/map mod\" (pt-BR: \"otimiza esse carro\", \"converte esse mod pra FiveM\", \"por que pesa tanto\"), or when writing code that reads or writes these formats."
 ---
 
 # GTA V assets (models, textures, mods)
