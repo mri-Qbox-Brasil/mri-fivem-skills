@@ -1,96 +1,107 @@
-# Câmera e cena
+# Camera and scene
 
-## Quando a câmera anda
+## When the camera moves
 
-- Só em mudança de contexto: abrir um item, trocar de categoria, voltar. Nunca em foco, hover ou seta
-  andando numa lista: girar a cada foco dá vertigem ("parece um ventilador").
-- Movimento lento: seguimento exponencial por tempo com ~1 s pra assentar (fator 2.2/s), nunca por quadro.
+- Only on a context change: opening an item, switching category, going back. Never on focus,
+  hover or arrows walking a list: turning on every focus causes vertigo ("feels like a fan").
+- Slow movement: time-based exponential follow settling in ~1 s (factor 2.2/s), never per
+  frame.
 
-## Thread de render
+## Render thread
 
-Uma câmera scriptada, um thread por frame que calcula a pose (glide, arco, balanço),
-aplica `SetCamCoord`/`PointCamAtCoord` e desenha o que é por frame (luzes, texto 3D,
-desfoque). Invalide o thread com um token quando a cena for remontada.
+One scripted camera, one per-frame thread that computes the pose (glide, arc, sway), applies
+`SetCamCoord`/`PointCamAtCoord` and draws what is per frame (lights, 3D text, depth of field).
+Invalidate the thread with a token when the scene is rebuilt.
 
-## Desfoque de fundo (DOF)
+## Background blur (DOF)
 
-- Nativos: `SetCamUseShallowDofMode(cam, true)`, `SetCamNearDof`, `SetCamFarDof`,
-  `SetCamDofStrength` e, por frame, `SetUseHiDof()` (sem ele o efeito não aparece).
-- Foco dinâmico: distância da câmera ao ponto de mira. Nítido de `foco - near` a
-  `foco + far` (showroom: near 0.8, far 1.3, força 0.85; close de criação: 0.35 / 0.9 / 1.0).
-- Desligue durante voos longos (abertura descendo até o palco): borra a cidade inteira.
-- Passagem pra outro resource que usa a própria câmera (editor de aparência): repita o
-  plano e o DOF dele no fim da sua cena, com os mesmos nativos e valores, e a troca some.
+- Natives: `SetCamUseShallowDofMode(cam, true)`, `SetCamNearDof`, `SetCamFarDof`,
+  `SetCamDofStrength` and, per frame, `SetUseHiDof()` (without it the effect doesn't show).
+- Dynamic focus: distance from the camera to the aim point. Sharp from `focus - near` to
+  `focus + far` (showroom: near 0.8, far 1.3, strength 0.85; creation close-up:
+  0.35 / 0.9 / 1.0).
+- Turn it off during long flights (opening shot descending to the stage): it blurs the whole
+  city.
+- Handing over to another resource that uses its own camera (appearance editor): repeat its
+  shot and DOF at the end of your scene, with the same natives and values, and the switch
+  disappears.
 
-## Câmera na mão
+## Handheld camera
 
-Balanço lento com senos de frequências diferentes nos três eixos, somado à pose só no
-render (não no estado, senão o glide seguinte parte do ponto balançado):
+Slow sway with sines of different frequencies on the three axes, added to the pose only at
+render time (not in the state, or the next glide starts from the swayed point):
 
-- posição ~3 cm, mira ~1,8 cm, velocidade 1.0;
-- desligue onde o plano precisa terminar cravado (último plano antes de passar a câmera
-  pra outro resource).
+- position ~3 cm, aim ~1.8 cm, speed 1.0;
+- turn it off where the shot must end exact (last shot before handing the camera to another
+  resource).
 
-## Carregar a área antes de mostrar
+## Load the area before showing it
 
-Textura borrada e prédio aparecendo é o que mais denuncia "não é jogo". Antes de cada
-plano distante:
+Blurry textures and buildings popping in are what most give away "not a game". Before each
+distant shot:
 
-- `NewLoadSceneStartSphere(x, y, z, raio, 0)` (ou `NewLoadSceneStart` com direção),
-  `SetFocusPosAndVel` no ponto, espere `IsNewLoadSceneLoaded()` com teto (5 s) e avise no
-  F8 se estourar;
-- `GetNumberOfStreamingRequests()` antes e depois ajuda a diagnosticar;
-- no fim, `NewLoadSceneStop()` e `ClearFocus()`.
+- `NewLoadSceneStartSphere(x, y, z, radius, 0)` (or `NewLoadSceneStart` with a direction),
+  `SetFocusPosAndVel` on the point, wait for `IsNewLoadSceneLoaded()` with a cap (5 s) and
+  warn in F8 if it runs out;
+- `GetNumberOfStreamingRequests()` before and after helps diagnose;
+- at the end, `NewLoadSceneStop()` and `ClearFocus()`.
 
-## Hora e clima fixos
+## Fixed time and weather
 
-A vitrine não pode aparecer de madrugada ou na chuva. Integre pelo contrato do
-qb-weathersync (o Renewed-Weathersync atende):
+The showcase can't show up at dawn or in the rain. Integrate through the qb-weathersync
+contract (Renewed-Weathersync implements it):
 
-- `TriggerEvent('qb-weathersync:client:DisableSync')` e aplique `ClearOverrideWeather`,
+- `TriggerEvent('qb-weathersync:client:DisableSync')` and apply `ClearOverrideWeather`,
   `SetWeatherTypeNowPersist`, `NetworkOverrideClockTime`;
-- ponha o clima também em `LocalPlayer.state.playerWeather` (o Renewed repete ele
-  enquanto a sync está desligada);
-- o Renewed zera o relógio ao desligar a sync: reaplique num
-  `AddStateBagChangeHandler('syncWeather', ...)` com `SetTimeout(0)`;
-- o compat qb do Renewed religa a sync no `QBCore:Client:OnPlayerLoaded`: reaplique
-  depois dele se o fluxo ainda está na vitrine;
-- no fim, `qb-weathersync:client:EnableSync`.
+- also put the weather in `LocalPlayer.state.playerWeather` (Renewed repeats it while the sync
+  is off);
+- Renewed resets the clock when the sync goes off: reapply in an
+  `AddStateBagChangeHandler('syncWeather', ...)` with `SetTimeout(0)`;
+- Renewed's qb compat turns the sync back on at `QBCore:Client:OnPlayerLoaded`: reapply after
+  it if the flow is still in the showcase;
+- at the end, `qb-weathersync:client:EnableSync`.
 
-## Iluminação do palco
+## Stage lighting
 
-Holofote de cima (`DrawSpotLight` por frame) deixa o rosto escuro. Some uma luz de
-preenchimento frontal fraca do lado da câmera (`DrawLightWithRange`).
+A top spotlight (`DrawSpotLight` per frame) leaves the face dark. Add a weak front fill light
+on the camera side (`DrawLightWithRange`).
 
-## Texto 3D atrás do personagem
+## 3D text behind the character
 
-Nome num quad world-space (DUI) atrás do ped fica bonito, mas nome comprido sai do quadro.
-Limite a largura a uma fração do que a câmera enxerga naquela distância:
+A name on a world-space quad (DUI) behind the ped looks good, but a long name leaves the
+frame. Limit the width to a fraction of what the camera sees at that distance:
 
 ```lua
 local visible = 2 * dist * math.tan(math.rad(GetCamFov(cam)) / 2) * GetAspectRatio(false)
 width = math.min(nt.width, visible * nt.fit) -- fit ~0.8
 ```
 
-`GetCamFov` é vertical; multiplique pelo aspecto pra ter a largura.
+`GetCamFov` is vertical; multiply by the aspect ratio for the width.
 
-## Ped de vitrine
+## Showcase ped
 
-- Aterre com `SetEntityCoords` (não o `NoOffset`) no chão achado por
+- Ground it with `SetEntityCoords` (not the `NoOffset` one) on the floor found by
   `GetGroundZFor_3dCoord`.
-- Animação idle por posição (cenário ou dict/clip). Ped em pose padrão (braços retos,
-  olhando pra cima) = animação não tocou: instrumente (`IsPedActiveInScenario`,
-  `GetScriptTaskStatus`, clip atual) antes de mexer.
-- Preset inicial de criação com rosto (head blend dos pais), cabelo, sobrancelha e
-  cores. O mesmo preset no preview e no ped real, pra troca não aparecer.
+- Idle animation per position (scenario or dict/clip). A ped in default pose (straight arms,
+  looking up) means the animation didn't play: instrument it (`IsPedActiveInScenario`,
+  `GetScriptTaskStatus`, current clip) before changing anything.
+- Initial creation preset with a face (parents head blend), hair, eyebrows and colors. The
+  same preset on the preview and the real ped, so the swap doesn't show.
 
-## Conversa com NPC
+## NPC conversation
 
-Padrão do mri_Qnpc (`client/dialog.lua`, `web/src/components/Conversation.tsx`):
+Pattern from `mri_Qnpc` (`client/dialog.lua`, `web/src/components/Conversation.tsx`):
 
-- A câmera segue a cabeça dos dois ao vivo (seguimento exponencial, fator 4/s), nunca mira fixa: o NPC vira o corpo pra você e a mira fixa corta o rosto.
-- Planos: por cima do ombro do jogador na primeira fala e na resposta; close no NPC em cada fala nova (1 m, lente 42, rosto no terço com espaço pra onde ele olha), corte seco e aproximação lenta de 10 cm durante a fala.
-- Nunca virar a câmera pro rosto do jogador na resposta: ele gesticula de costas, o NPC acena com a cabeça.
-- Tela é legenda, não cartão: nome pequeno em destaque, fala branca com sombra, no máximo duas linhas; fala longa em partes (120 caracteres, tempo de leitura ou Enter, contador 2/6).
-- Escolhas numa lista à direita, na altura da legenda, só depois da última parte; barra de destaque, setas/W/S, números, mouse, som `NAV_UP_DOWN`.
-- Valor de config vindo de JSON: `40` vira inteiro e native de float lê errado; forçar `+ 0.0` no merge.
+- The camera follows both heads live (exponential follow, factor 4/s), never a fixed aim: the
+  NPC turns its body to you and a fixed aim cuts the face.
+- Shots: over the player's shoulder on the first line and on the answer; close-up on the NPC
+  on each new line (1 m, 42 lens, face on the third with room where it looks), hard cut and a
+  slow 10 cm push-in during the line.
+- Never turn the camera to the player's face on the answer: the player gestures with their
+  back to the camera, the NPC nods.
+- The screen is a subtitle, not a card: small highlighted name, white line with shadow, at
+  most two lines; long lines in parts (120 characters, reading time or Enter, counter 2/6).
+- Choices in a list on the right, at subtitle height, only after the last part; highlight
+  bar, arrows/W/S, numbers, mouse, `NAV_UP_DOWN` sound.
+- Config values from JSON: `40` becomes an integer and a float native reads it wrong; force
+  `+ 0.0` on merge.

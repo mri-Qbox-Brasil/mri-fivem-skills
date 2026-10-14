@@ -1,13 +1,13 @@
 /**
- * Roda passos numa NUI em modo browser (vite dev) via Chrome headless: manda mensagens
- * como o Lua mandaria, clica, tira prints e mede opacidade por quadro.
+ * Runs steps on a NUI in browser mode (vite dev) through headless Chrome: posts messages
+ * as Lua would, clicks, takes screenshots and measures opacity per frame.
  *
- * Uso: node nui-probe.mjs <url> <pasta-saida> <passos.json> [espera-inicial-ms]
- * Ex.: node nui-probe.mjs http://localhost:5173/ ./shots steps.json 10000
+ * Usage: node nui-probe.mjs <url> <out-dir> <steps.json> [initial-wait-ms]
+ * E.g.:  node nui-probe.mjs http://localhost:5173/ ./shots steps.json 10000
  *
- * Injeta window.invokeNative antes da página carregar, pra o fetchNui cair no mock de
- * dev em vez de responder { success: true } fixo. Formato dos passos em
- * references/verification.md. Precisa do Google Chrome (caminho em CHROME ou o padrão).
+ * Injects window.invokeNative before the page loads, so fetchNui reaches the dev mock
+ * instead of answering a fixed { success: true }. Step format in
+ * references/verification.md. Needs Google Chrome (path in CHROME or the default).
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -15,13 +15,13 @@ import { openBrowser, sleep } from './cdp.mjs';
 
 const [url, outDir = './shots', stepsFile, waitArg = '10000'] = process.argv.slice(2);
 if (!url || !stepsFile) {
-  console.error('uso: node nui-probe.mjs <url> <pasta-saida> <passos.json> [espera-inicial-ms]');
+  console.error('usage: node nui-probe.mjs <url> <out-dir> <steps.json> [initial-wait-ms]');
   process.exit(1);
 }
 const steps = JSON.parse(fs.readFileSync(stepsFile, 'utf8'));
 fs.mkdirSync(outDir, { recursive: true });
 
-// fundo imitando céu e chão, pra scrims e textos claros aparecerem (o body do dev é claro)
+// Sky and ground backdrop so scrims and light text show (the dev body is light).
 const BACKDROP = 'linear-gradient(180deg, #3a2a4a 0%, #6b4a55 40%, #1d2733 62%, #0c1118 100%)';
 
 const browser = await openBrowser({ viewport: { width: 1600, height: 900 } });
@@ -35,7 +35,7 @@ try {
   const run = (expression, awaitPromise = false) => browser.evaluate(expression, { awaitPromise });
   const shot = async (name) => console.log('print', await browser.screenshot(path.join(outDir, `${name}.png`)));
   const clickJs = (label) =>
-    `(() => { const b = [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === ${JSON.stringify(label)}); if (!b) return 'botão não achado: ' + ${JSON.stringify(label)}; b.click(); return 'ok' })()`;
+    `(() => { const b = [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === ${JSON.stringify(label)}); if (!b) return 'button not found: ' + ${JSON.stringify(label)}; b.click(); return 'ok' })()`;
 
   await send('Page.addScriptToEvaluateOnNewDocument', { source: 'window.invokeNative = function () {}' });
   await send('Page.navigate', { url });
@@ -44,13 +44,13 @@ try {
 
   for (const step of steps) {
     if (step.measure) {
-      // opacidade efetiva por quadro a partir do clique (ou já, sem clique)
+      // Effective opacity per frame from the click (or right away, without one).
       const expr = `new Promise((res) => {
         const out = []; const t0 = performance.now();
         const eff = (el) => { let o = 1; for (let n = el; n; n = n.parentElement) o *= parseFloat(getComputedStyle(n).opacity); return o };
         const tick = () => {
           const els = [...document.querySelectorAll(${JSON.stringify(step.measure)})];
-          out.push(Math.round(performance.now() - t0) + 'ms:' + (els.map((e) => eff(e).toFixed(2)).join(',') || 'nenhum'));
+          out.push(Math.round(performance.now() - t0) + 'ms:' + (els.map((e) => eff(e).toFixed(2)).join(',') || 'none'));
           if (performance.now() - t0 < ${Number(step.ms) || 450}) requestAnimationFrame(tick); else res(out.join(' '));
         };
         ${step.click ? `${clickJs(step.click)};` : ''}
@@ -67,7 +67,7 @@ try {
     if (step.shot) await shot(step.shot);
   }
 
-  console.log('erros:', JSON.stringify(errors));
+  console.log('errors:', JSON.stringify(errors));
 } finally {
   await browser.close();
 }

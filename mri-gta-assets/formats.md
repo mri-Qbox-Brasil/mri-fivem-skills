@@ -1,85 +1,86 @@
-# Formatos
+# Formats
 
-Tudo little-endian. Valores validados lendo arquivos reais de mods (BMW M2, Elegy RH7, Sultan,
-Rossati, peds e roupas).
+Everything little-endian. Values validated by reading real mod files (BMW M2, Elegy RH7,
+Sultan, Rossati, peds and clothes).
 
-## RPF7 (pacote `.rpf`)
+## RPF7 (`.rpf` package)
 
-- Cabeçalho de 16 bytes: magic `0x52504637`, número de entradas, tamanho da tabela de nomes,
-  criptografia. Só abre com criptografia `0` ou `OPEN` (`0x4E45504F`); AES/NG é recusado (os
-  `.rpf` do jogo base são NG, os de mod costumam ser OPEN).
-- Entradas de 16 bytes logo após o cabeçalho; nomes depois delas.
-  - Diretório: segundo u32 == `0x7FFFFF00`; terceiro = índice da primeira filha, quarto =
-    quantidade.
-  - Arquivo: os dois primeiros u32 formam um u64. Nome em 16 bits, tamanho em 24 bits, offset
-    em blocos de 512 bytes.
-  - **Resource** (yft, ytd...): bit 31 do segundo u32 ligado; offset com máscara `0x7FFFFF`.
-    Os dois últimos u32 são as flags de sistema e de gráficos. Tamanho `0xFFFFFF` = grande: o
-    real está espalhado no cabeçalho guardado, bytes `[7] | [14]<<8 | [5]<<16 | [2]<<24`.
-  - Binário: deflate cru quando o tamanho guardado difere do descomprimido.
-- Para extrair um resource, remontar o cabeçalho RSC7: `version = (gfx>>28) | ((sys>>28)<<4)`,
-  depois as flags de sistema e de gráficos, depois os dados guardados a partir do byte 16
-  (sempre remontar: nos grandes os 16 primeiros bytes guardados estão corrompidos).
-- `.rpf` dentro de `.rpf` é aberto recursivamente (limite de profundidade 4).
+- 16-byte header: magic `0x52504637`, entry count, name table size, encryption. Only opens
+  with encryption `0` or `OPEN` (`0x4E45504F`); AES/NG is refused (base game `.rpf` files are
+  NG, mod ones are usually OPEN).
+- 16-byte entries right after the header; names after them.
+  - Directory: second u32 == `0x7FFFFF00`; third = index of the first child, fourth = count.
+  - File: the first two u32 form a u64. Name in 16 bits, size in 24 bits, offset in 512-byte
+    blocks.
+  - **Resource** (yft, ytd...): bit 31 of the second u32 set; offset masked with `0x7FFFFF`.
+    The last two u32 are the system and graphics flags. Size `0xFFFFFF` = large: the real
+    size is scattered in the stored header, bytes `[7] | [14]<<8 | [5]<<16 | [2]<<24`.
+  - Binary: raw deflate when the stored size differs from the uncompressed one.
+- To extract a resource, rebuild the RSC7 header: `version = (gfx>>28) | ((sys>>28)<<4)`,
+  then the system and graphics flags, then the stored data from byte 16 on (always rebuild:
+  in large ones the first 16 stored bytes are corrupted).
+- `.rpf` inside `.rpf` is opened recursively (depth limit 4).
 
-## RSC7 (todo arquivo compilado: ytd, yft, ydr, ydd, ycd, ybn, ymap, ytyp...)
+## RSC7 (every compiled file: ytd, yft, ydr, ydd, ycd, ybn, ymap, ytyp...)
 
-- Cabeçalho: `RSC7`, versão (u32), flags de sistema (u32), flags de gráficos (u32). O resto é
-  deflate cru da seção de sistema seguida da seção de gráficos.
-- Versões: ytd `13`, ydr `165`, yft `162`, ydd `165`. Conferir a versão antes de interpretar.
-- Ponteiros: `0x5XXXXXXX` = offset na seção de sistema, `0x6XXXXXXX` = offset na de gráficos.
-- **Tamanho das seções pelas flags** (base `0x200 << (flags & 0xF)`):
+- Header: `RSC7`, version (u32), system flags (u32), graphics flags (u32). The rest is raw
+  deflate of the system section followed by the graphics section.
+- Versions: ytd `13`, ydr `165`, yft `162`, ydd `165`. Check the version before interpreting.
+- Pointers: `0x5XXXXXXX` = offset in the system section, `0x6XXXXXXX` = offset in the
+  graphics one.
+- **Section size from the flags** (base `0x200 << (flags & 0xF)`):
   ```
-  páginas = bit27 + bit26*2 + bit25*4 + bit24*8 + (bits17..23)*16 + (bits11..16)*32
-          + (bits7..10)*64 + (bits5..6)*128 + bit4*256      (em unidades da base)
+  pages = bit27 + bit26*2 + bit25*4 + bit24*8 + (bits17..23)*16 + (bits11..16)*32
+        + (bits7..10)*64 + (bits5..6)*128 + bit4*256      (in base units)
   ```
-  Equivalente em páginas reais (base `0x2000 << shift`): até 127 páginas de 1x, 63 de 2x, 15 de
-  4x, 3 de 8x e 1 de 16x (bits 17, 11, 7, 5, 4), mais 4 páginas de cauda de 1/2, 1/4, 1/8 e
-  1/16 (bits 24 a 27). Os 4 bits de cima de cada flag são parte da versão: preservar.
-- Memória que o jogo reserva = tamanho das páginas, não o tamanho dos dados. FiveM avisa acima
-  de 16 MiB por seção (o `optimize.rs` marca como crítico).
-- **Tabela de páginas** (`ResourcePagesInfo`, ponteiro em `0x08` da raiz): u32, u32, u8 páginas
-  de sistema, u8 páginas de gráficos, u16, u32, e depois 8 bytes por página (zerados no arquivo,
-  o jogo preenche). Nos arquivos reais ela é colada no bloco seguinte (padding `0xCD`): **não
-  dá para aumentar a quantidade de páginas** sem mover a tabela.
-- **Empacotar páginas** (regra dos editores, reimplementada em `ytd::pack`): blocos do maior
-  para o menor; a página maior é a menor potência de 2 da base que cabe o maior bloco; cada
-  bloco vai na primeira página com espaço (alinhamento 16), senão abre página nova do menor
-  tamanho que cabe; se estourar os limites de contagem, dobra a base e tenta de novo. Objetos
-  nunca atravessam páginas.
+  Equivalent in real pages (base `0x2000 << shift`): up to 127 pages of 1x, 63 of 2x, 15 of
+  4x, 3 of 8x and 1 of 16x (bits 17, 11, 7, 5, 4), plus 4 tail pages of 1/2, 1/4, 1/8 and
+  1/16 (bits 24 to 27). The top 4 bits of each flag are part of the version: preserve them.
+- Memory the game reserves = page size, not data size. FiveM warns above 16 MiB per section
+  (`optimize.rs` marks it critical).
+- **Page table** (`ResourcePagesInfo`, pointer at `0x08` of the root): u32, u32, u8 system
+  pages, u8 graphics pages, u16, u32, then 8 bytes per page (zeroed in the file, the game
+  fills them). In real files it is glued to the next block (`0xCD` padding): **the page count
+  can't grow** without moving the table.
+- **Packing pages** (the editors' rule, reimplemented in `ytd::pack`): blocks from largest to
+  smallest; the largest page is the smallest power of 2 of the base that fits the largest
+  block; each block goes into the first page with room (16-byte alignment), otherwise opens a
+  new page of the smallest size that fits; if the count limits overflow, double the base and
+  retry. Objects never cross pages.
 
-## Dicionário de texturas (`.ytd`, versão 13)
+## Texture dictionary (`.ytd`, version 13)
 
-Raiz (sistema, offset 0):
-| Offset | Campo |
+Root (system, offset 0):
+| Offset | Field |
 | --- | --- |
-| `0x08` | ponteiro da tabela de páginas |
-| `0x20` / `0x28` | lista de hashes dos nomes (ponteiro u64, contagem u16) |
-| `0x30` / `0x38` | lista de ponteiros das texturas (ponteiro u64, contagem u16) |
+| `0x08` | page table pointer |
+| `0x20` / `0x28` | name hash list (u64 pointer, u16 count) |
+| `0x30` / `0x38` | texture pointer list (u64 pointer, u16 count) |
 
-Textura (`0x90` bytes, na seção de sistema):
-| Offset | Campo |
+Texture (`0x90` bytes, in the system section):
+| Offset | Field |
 | --- | --- |
-| `0x28` | ponteiro do nome (string terminada em 0) |
-| `0x50` / `0x52` / `0x54` | largura, altura, profundidade (u16) |
+| `0x28` | name pointer (null-terminated string) |
+| `0x50` / `0x52` / `0x54` | width, height, depth (u16) |
 | `0x56` | stride (u16) |
-| `0x58` | formato (u32) |
-| `0x5D` | níveis de mip (u8) |
-| `0x70` | ponteiro dos pixels (seção de gráficos) |
+| `0x58` | format (u32) |
+| `0x5D` | mip levels (u8) |
+| `0x70` | pixel pointer (graphics section) |
 
-- Formatos: `21` A8R8G8B8 (memória B,G,R,A), `22` X8R8G8B8, `32` A8B8G8R8 (R,G,B,A), `28` A8,
-  `50` L8, FourCC `DXT1`, `DXT3`, `DXT5`, `ATI1`, `ATI2`, `BC7 ` (com espaço).
-- **Stride como os arquivos guardam**: bytes por linha de pixel, não por linha de bloco. DXT1 =
-  largura/2, DXT3/DXT5 = largura, 32 bits = largura*4.
-- Tamanho dos dados: `stride * altura`, somando um quarto a menos por mip. Bate com o real
-  enquanto o mip tem pelo menos 4x4 e múltiplo de 4; por isso o otimizador para os mips em 4x4.
-- Num ytd, a seção de gráficos só tem pixels: os ponteiros `0x70` são os únicos para ela.
-- Os outros campos da textura (`0x00`-`0x4F`, uso, flags) ficam como estão.
+- Formats: `21` A8R8G8B8 (memory B,G,R,A), `22` X8R8G8B8, `32` A8B8G8R8 (R,G,B,A), `28` A8,
+  `50` L8, FourCC `DXT1`, `DXT3`, `DXT5`, `ATI1`, `ATI2`, `BC7 ` (with a space).
+- **Stride as files store it**: bytes per pixel row, not per block row. DXT1 = width/2,
+  DXT3/DXT5 = width, 32 bits = width*4.
+- Data size: `stride * height`, adding a quarter less per mip. Matches reality while the mip
+  is at least 4x4 and a multiple of 4; that's why the optimizer stops mips at 4x4.
+- In a ytd, the graphics section only holds pixels: the `0x70` pointers are the only ones
+  into it.
+- The other texture fields (`0x00`-`0x4F`, usage, flags) stay as they are.
 
-## Outros (ainda não implementados)
+## Others (not implemented yet)
 
-- `.yft` (fragment, carro): drawable com `ShaderGroup` que pode trazer um dicionário de
-  texturas embutido; a seção de gráficos tem também vertex e index buffers.
-- `.ydr` (drawable, prop), `.ydd` (dicionário de drawables, roupa), `.ycd` (clipes de
-  animação), `.ybn` (colisão), `.ymap`/`.ytyp` (mapa; meta em formato RSC7 binário).
-- `+hi.ytd` e `_hi.yft`: versões de alta resolução que o jogo carrega de perto.
+- `.yft` (fragment, car): drawable with a `ShaderGroup` that may carry an embedded texture
+  dictionary; the graphics section also holds vertex and index buffers.
+- `.ydr` (drawable, prop), `.ydd` (drawable dictionary, clothing), `.ycd` (animation clips),
+  `.ybn` (collision), `.ymap`/`.ytyp` (map; meta in binary RSC7 format).
+- `+hi.ytd` and `_hi.yft`: high resolution versions the game loads up close.

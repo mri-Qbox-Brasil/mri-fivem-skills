@@ -1,18 +1,18 @@
 /**
- * Print de uma página com game-glass no Chrome headless, em tempo real (o --virtual-time-budget
- * quase não roda requestAnimationFrame e o fence do blur nunca libera).
+ * Screenshot of a page with game glass in headless Chrome, in real time (--virtual-time-budget
+ * barely runs requestAnimationFrame and the blur fence never releases).
  *
- * Uso: node shot.mjs <url> <saida.png> [espera-ms] [js-pra-avaliar]
+ * Usage: node shot.mjs <url> <out.png> [wait-ms] [js-to-evaluate]
  * Ex.: node shot.mjs "http://localhost:6016/iframe.html?id=lib-gameglass--showcase&viewMode=story" ./glass.png 10000
  *
- * Pra NUI de resource, passe fallbackImage no startGameGlass (fora do jogo não há frame do GTA).
- * Precisa do Google Chrome (caminho em CHROME ou o padrão do SO).
+ * For a resource NUI, pass fallbackImage to startGameGlass (outside the game there is no GTA frame).
+ * Needs Google Chrome (path in CHROME or the OS default).
  */
 import { openBrowser, sleep } from './cdp.mjs';
 
 const [url, out = './shot.png', waitArg = '2500', expr] = process.argv.slice(2);
 if (!url) {
-  console.error('uso: node shot.mjs <url> <saida.png> [espera-ms] [js-pra-avaliar]');
+  console.error('usage: node shot.mjs <url> <out.png> [wait-ms] [js-to-evaluate]');
   process.exit(1);
 }
 
@@ -23,7 +23,7 @@ const browser = await openBrowser({
 });
 try {
   browser.on('Runtime.consoleAPICalled', (p) => console.log('[console]', p.args.map((a) => a.value ?? a.description).join(' ')));
-  browser.on('Runtime.exceptionThrown', (p) => console.log('[erro]', p.exceptionDetails.exception?.description));
+  browser.on('Runtime.exceptionThrown', (p) => console.log('[error]', p.exceptionDetails.exception?.description));
   await browser.send('Page.navigate', { url });
   await sleep(Number(waitArg));
   if (expr) console.log(JSON.stringify(await browser.evaluate(expr, { awaitPromise: true })));

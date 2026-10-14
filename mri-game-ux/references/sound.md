@@ -1,83 +1,86 @@
-# Som
+# Sound
 
-## Trilha em fases
+## Music in phases
 
-Divida o fluxo em fases e dê uma faixa a cada uma. No multichar:
+Split the flow into phases and give each a track. In the multichar:
 
-| Fase | Quando começa | Quando acaba |
+| Phase | Starts when | Ends when |
 |---|---|---|
-| menu | NUI abre (título, landing, seleção) | criação abre, ou jogador entra no jogo |
-| criação | overlay dos capítulos monta | NUI fecha indo pro editor |
-| editor | `close` com `keepMusic` | cena de chegada começa |
-| chegada | `arrivalStart` | `arrivalEnd` / `musicEnd` (fade de saída) |
+| menu | NUI opens (title, landing, selection) | creation opens, or the player enters the game |
+| creation | the chapters overlay mounts | NUI closes going to the editor |
+| editor | `close` with `keepMusic` | arrival scene starts |
+| arrival | `arrivalStart` | `arrivalEnd` / `musicEnd` (fade out) |
 
-- Fase sem faixa configurada segue a da fase anterior (resolva andando a ordem das fases
-  e pegando a última faixa definida até a atual).
-- Cancelar a criação volta pra fase do menu.
-- Entrar no jogo sem criação: fade de saída (2 a 3 s), não corte.
-- O Lua avisa o fim do fluxo mesmo quando a cena não toca (chegada sem destino): mande
-  `musicEnd` depois do `Arrival.play`, em qualquer caminho.
+- A phase without a configured track keeps the previous phase's (resolve by walking the
+  phase order and taking the last track defined up to the current one).
+- Cancelling creation returns to the menu phase.
+- Entering the game without creation: fade out (2 to 3 s), not a cut.
+- Lua announces the end of the flow even when the scene doesn't play (arrival without a
+  destination): send `musicEnd` after `Arrival.play`, on every path.
 
-## Crossfade com dois decks
+## Crossfade with two decks
 
-- Cada faixa é um deck (YouTube IFrame API ou `Audio` pra arquivo em `sounds/`) com
-  `setVolume`, `play`, `pause`, `destroy` e um `gain` de 0 a 1.
-- Volume efetivo = volume escolhido x nível da fase (abaixar pra efeitos) x gain.
-- Troca: cria o deck novo com gain 0, dá play, e anima os gains (novo -> 1, antigos -> 0)
-  por ~2,2 s com ease-in-out. Deck que chega a 0 é destruído.
-- Sem faixa: um marcador vazio vira o "atual" e todos descem a 0.
-- O CEF só deixa YouTube tocar sozinho mudo: `mute()`, `playVideo()`, e `unMute()` +
-  `setVolume` ~700 ms depois.
-- Jogador pausou: troca de fase não volta a tocar sozinha.
-- Referência: `web/src/components/MusicPlayer.tsx` do multichar.
+- Each track is a deck (YouTube IFrame API or `Audio` for a file in `sounds/`) with
+  `setVolume`, `play`, `pause`, `destroy` and a `gain` from 0 to 1.
+- Effective volume = chosen volume x phase level (lowered for effects) x gain.
+- Switch: create the new deck with gain 0, play it, and animate the gains (new -> 1, old -> 0)
+  over ~2.2 s with ease-in-out. A deck that reaches 0 is destroyed.
+- No track: an empty marker becomes the "current" and all go down to 0.
+- CEF only lets YouTube autoplay muted: `mute()`, `playVideo()`, and `unMute()` +
+  `setVolume` ~700 ms later.
+- Player paused: a phase change doesn't resume playback by itself.
+- Reference: the multichar's `web/src/components/MusicPlayer.tsx`.
 
-## A música atravessa a NUI fechada
+## Music survives a closed NUI
 
-A página da NUI continua carregada com o foco solto, e o áudio segue tocando. O que mata a
-música é o React desmontar o player. Mantenha o player na mesma posição da árvore em todos
-os ramos do App (fragment com o player de primeiro filho, com `key` fixa), aberto ou
-fechado, e só esconda o ticker.
+The NUI page stays loaded with focus released, and audio keeps playing. What kills the music
+is React unmounting the player. Keep the player in the same tree position in every App branch
+(fragment with the player as first child, with a fixed `key`), open or closed, and only hide
+the ticker.
 
-## Níveis e efeitos
+## Levels and effects
 
-- Abaixe a música (~0.35) durante os capítulos pra efeitos e voz aparecerem, suba no
-  momento final (swell) e volte.
-- Vibração do controle em confirmar e errar (`SetPadShake`), só se não for teclado.
+- Lower the music (~0.35) during chapters so effects and voice come through, raise it at the
+  final moment (swell) and back.
+- Gamepad vibration on confirm and error (`SetPadShake`), only when not on keyboard.
 
-## Sons de interface
+## Interface sounds
 
-Toda tela de jogo tem som de interface: sem ele, a navegação parece site. Use os sons
-nativos do GTA (`PlaySoundFrontend(-1, nome, soundset, true)`), nunca arquivo nem Web
-Audio sintetizado (soa "jogo barato de navegador").
+Every game screen has interface sounds: without them, navigation feels like a website. Use
+GTA's native sounds (`PlaySoundFrontend(-1, name, soundset, true)`), never a file or
+synthesized Web Audio (it sounds like a cheap browser game).
 
-- A NUI manda só o momento (`fetch` pra um callback `uiSound` com `{ kind }`); o Lua
-  resolve o nome num `data/sounds.json` do resource (`{ "navigate": { "name", "set" } }`,
-  `enabled: false` desliga). O json é a lista permitida: a NUI não toca som arbitrário.
-- Momentos e padrão (`HUD_FRONTEND_DEFAULT_SOUNDSET`, existe sem carregar banco):
+- The NUI only sends the moment (`fetch` to a `uiSound` callback with `{ kind }`); Lua
+  resolves the name in the resource's `data/sounds.json` (`{ "navigate": { "name", "set" } }`,
+  `enabled: false` turns it off). The json is the allow list: the NUI can't play arbitrary
+  sounds.
+- Moments and defaults (`HUD_FRONTEND_DEFAULT_SOUNDSET`, exists without loading a bank):
 
-| Momento | Som |
+| Moment | Sound |
 |---|---|
-| abrir a tela | `CHARACTER_SELECT` |
-| fechar, voltar uma camada (Esc) | `BACK` |
-| trocar item (←/→, scroll de rotação) | `NAV_LEFT_RIGHT` |
-| trocar aba (Q/E) | `NAV_UP_DOWN` |
-| abrir painel, busca, gaveta | `SELECT` |
-| confirmar ação | `SELECT` |
-| deu certo | `YES` |
-| erro, ação bloqueada (ghost em local ruim) | `ERROR` |
+| open the screen | `CHARACTER_SELECT` |
+| close, go back one layer (Esc) | `BACK` |
+| change item (←/→, rotation scroll) | `NAV_LEFT_RIGHT` |
+| change tab (Q/E) | `NAV_UP_DOWN` |
+| open panel, search, drawer | `SELECT` |
+| confirm action | `SELECT` |
+| success | `YES` |
+| error, blocked action (ghost in a bad spot) | `ERROR` |
 
-- Som só quando muda algo (trocar pro mesmo item não toca) e no mesmo frame da ação.
-- Antes de escolher outro som, procure no dump (`soundNames.json` do
-  [DurtyFree/gta-v-data-dumps](https://github.com/DurtyFree/gta-v-data-dumps)); soundset de DLC pode precisar de banco carregado.
-- Referência: `data/sounds.json`, `utils.uiSound` e `web/src/lib/uiSound.ts` do mri_Qgarage.
+- Sound only when something changes (switching to the same item stays silent) and on the
+  same frame as the action.
+- Before picking another sound, search the dump (`soundNames.json` in
+  [DurtyFree/gta-v-data-dumps](https://github.com/DurtyFree/gta-v-data-dumps)); a DLC
+  soundset may need a loaded bank.
+- Reference: `data/sounds.json`, `utils.uiSound` and `web/src/lib/uiSound.ts` in mri_Qgarage.
 
 ## Cutscenes
 
-- Cutscene nativa do GTA pode trazer música própria (`TriggerMusicEvent`). Decida entre
-  ela e a faixa da fase: tocar as duas embola.
-- Faixa livre com crédito é o padrão seguro pra vir configurada. Confira se o vídeo
-  permite embed antes de usar:
-  `https://www.youtube.com/oembed?url=<link>&format=json` responde 200 quando permite.
-- Ticker mostra faixa e artista limpos: tire "(Official Audio)", "// Copyright Safe" e,
-  quando o lado do artista é descrição ("2 Hour Synthwave MIX", "Royalty Free ..."), use
-  o nome do canal.
+- A native GTA cutscene may bring its own music (`TriggerMusicEvent`). Choose between it and
+  the phase track: playing both is a mess.
+- A free track with credit is the safe default to ship configured. Check that the video
+  allows embedding before using it:
+  `https://www.youtube.com/oembed?url=<link>&format=json` answers 200 when it does.
+- The ticker shows clean track and artist: drop "(Official Audio)", "// Copyright Safe" and,
+  when the artist side is a description ("2 Hour Synthwave MIX", "Royalty Free ..."), use the
+  channel name.

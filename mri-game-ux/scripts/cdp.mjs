@@ -17,7 +17,7 @@ export function findChrome() {
     '/usr/bin/chromium',
   ]
   const found = candidates.find((p) => p && fs.existsSync(p))
-  if (!found) throw new Error('Chrome nao encontrado (defina CHROME com o caminho)')
+  if (!found) throw new Error('Chrome not found (set CHROME to its path)')
   return found
 }
 

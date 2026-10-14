@@ -1,73 +1,82 @@
-# Menus e fluxos
+# Menus and flows
 
-## Tela de título
+## Title screen
 
-Conectar e cair direto na lista de personagens não parece jogo. Antes dela:
+Connecting and landing straight on the character list doesn't feel like a game. Before it:
 
-- planos lentos pela cidade (câmera andando pra frente ~7 m em 8 s, fade entre planos),
-  marca no centro, "Pressione Enter", letterbox e vinheta;
-- Enter, espaço ou clique continuam; a câmera desce do alto até o palco e o menu entra;
-- planos capturados no jogo por um painel admin (câmera livre, scroll = zoom, Enter salva)
-  e um "Testar" que toca a sequência sem reconectar;
-- só na conexão. Voltar pros personagens (logout) abre direto neles.
+- slow shots over the city (camera moving forward ~7 m in 8 s, fade between shots), logo in
+  the center, "Press Enter", letterbox and vignette;
+- Enter, space or click continue; the camera descends from above to the stage and the menu
+  enters;
+- shots captured in game by an admin panel (free camera, scroll = zoom, Enter saves) and a
+  "Test" that plays the sequence without reconnecting;
+- only on connect. Going back to characters (logout) opens them directly.
 
 ## Landing
 
-- Marca no terço inferior esquerdo, menu textual vertical, sem caixas.
-- "Continuar" com o nome do último personagem embaixo; "Personagens" abre a lista;
-  "Configurações" só se houver algo a configurar.
-- Conta vazia: só "Criar personagem", que abre a criação no primeiro slot livre;
-  cancelar cai na seleção com esse slot focado.
-- Não dá pra continuar (último deletado): o item some.
+- Logo in the lower left third, vertical text menu, no boxes.
+- "Continue" with the last character's name below; "Characters" opens the list; "Settings"
+  only if there is something to set.
+- Empty account: only "Create character", which opens creation on the first free slot;
+  cancelling lands on the selection with that slot focused.
+- Can't continue (last one deleted): the item disappears.
 
-## Seleção
+## Selection
 
-- Trilho de slots (ocupados e livres) com setas, a câmera vai pra posição de cada um.
-- Entrar é segurar (E ou mouse) com anel de progresso, não clique simples.
-- Slot livre: E abre a criação direto.
+- Slot rail (taken and free) with arrows; the camera goes to each one's position.
+- Entering is holding (E or mouse) with a progress ring, not a simple click.
+- Free slot: E opens creation directly.
 
-## Confirmação destrutiva
+## Destructive confirmation
 
-Nada de modal preto aparecendo do nada:
+No black modal out of nowhere:
 
-- a barra de ações vira a confirmação: vinheta vermelha nas bordas, anel vermelho
-  "Segure pra deletar · NOME · não tem volta";
-- segurar mouse ou Delete enche o anel (~1,3 s); Esc/Backspace cancela;
-- controle: A dispara um clique sem mouse (`e.detail === 0`) que enche o anel sozinho,
-  B cancela;
-- confirmado, o anel gira ("Apagando...") até a lista voltar; a cena tira o ped com fade.
-- trocar a seleção cancela a confirmação; durante o "apagando" a seleção trava.
+- the action bar becomes the confirmation: red vignette on the edges, red ring
+  "Hold to delete · NAME · no way back";
+- holding mouse or Delete fills the ring (~1.3 s); Esc/Backspace cancels;
+- gamepad: A fires a click without mouse (`e.detail === 0`) that fills the ring by itself,
+  B cancels;
+- once confirmed, the ring spins ("Deleting...") until the list comes back; the scene fades
+  the ped out;
+- changing the selection cancels the confirmation; while deleting, the selection locks.
 
-## Criação em capítulos
+## Creation in chapters
 
-- Um capítulo por tela (gênero, nome, origem, nascimento, chegada), cada um com plano de
-  câmera próprio e o ped reagindo (gesto ao confirmar, olhar pra câmera).
-- O último capítulo ("como você chegou") vira uma cena de chegada depois do editor.
-- Final: pose, a câmera vai até o plano do editor de aparência, cartão com o nome, e o
-  editor abre ali, sem fade nem teleporte.
+- One chapter per screen (gender, name, origin, birth, arrival), each with its own camera
+  shot and the ped reacting (gesture on confirm, looking at the camera).
+- The last chapter ("how you arrived") becomes an arrival scene after the editor.
+- Ending: pose, the camera moves to the appearance editor's shot, a card with the name, and
+  the editor opens right there, without fade or teleport.
 
-## Controle
+## Gamepad
 
-Toda tela navegável por controle: foco visível (anel na cor de destaque), dicas de botão
-no topo (✛ navegar, A selecionar, B voltar) e B sempre volta um nível.
+Every screen navigable by gamepad: visible focus (ring in the accent color), button hints at
+the top (✛ navigate, A select, B back) and B always goes back one level.
 
-## Textos
+## Texts
 
-Rótulo curto, verbo ou destino ("Continuar", "Personagens", "Criar personagem"). Evite
-pares ambíguos como "Jogar" e "Continuar" na mesma tela.
+Short label, verb or destination ("Continue", "Characters", "Create character"). Avoid
+ambiguous pairs like "Play" and "Continue" on the same screen.
 
-## Prompt de interação no mundo
+## World interaction prompt
 
-- Pode apertar, aparece. Prompt não some por tempo com o alvo ainda na mira.
-- Camadas: longe só marcador; perto e mirando, tecla + texto; olhou pra fora, volta a marcador.
-- Parado muito tempo no alvo: recolher (só a tecla, menor e apagada), não sumir. Tecla ou mirar de novo traz de volta.
-- Esconder por intenção: mirando arma, combate, sprint, veículo acima de X km/h, NUI em foco. Prompt, marcadores e ponto somem juntos, com fade e folga (~400 ms) pra não piscar.
-- Referência: `mri_Qinteract` (`client/render.lua`: `dormant`, `inAction`).
+- If it can be pressed, it shows. A prompt doesn't time out while the target is still aimed.
+- Layers: far, only a marker; near and aiming, key + text; looked away, back to marker.
+- Standing on the target for long: collapse (only the key, smaller and dimmed), never vanish.
+  The key or aiming again brings it back.
+- Hide by intent: aiming a weapon, combat, sprint, vehicle above X km/h, NUI focused. Prompt,
+  markers and dot vanish together, with fade and slack (~400 ms) so they don't flicker.
+- Reference: `mri_Qinteract` (`client/render.lua`: `dormant`, `inAction`).
 
-## Pausa própria e mapa do GTA
+## Own pause menu and the GTA map
 
-- ESC e P/Start são 200 e 199: desligar os dois todo frame (grupos 0 e 1) e abrir a sua tela.
-- Mapa direto: `ActivateFrontendMenu('FE_MENU_VERSION_MP_PAUSE')`, esperar `IsPauseMenuActive`, `PauseMenuceptionGoDeeper(0)` + `PauseMenuceptionTheKick()`.
-- Isso fica um nível abaixo da barra de abas: o ESC volta pro pause do GTA. Vigiar e fechar com `SetFrontendActive(false)` no cancelar (`IsControlJustPressed(2, 202)`, chega ~200 ms antes da barra aparecer) ou quando `IsNavigatingMenuContent()` cair pra 0.
-- `IsNavigatingMenuContent()` devolve 0/1, e 0 é verdadeiro em Lua: comparar `== 1`. Native tipado `Any` costuma voltar número.
-- Referência: `mri_Qpausemenu` (`client/frontend.lua`).
+- ESC and P/Start are 200 and 199: disable both every frame (groups 0 and 1) and open your
+  screen.
+- Map directly: `ActivateFrontendMenu('FE_MENU_VERSION_MP_PAUSE')`, wait for
+  `IsPauseMenuActive`, `PauseMenuceptionGoDeeper(0)` + `PauseMenuceptionTheKick()`.
+- That sits one level below the tab bar: ESC goes back to the GTA pause. Watch and close with
+  `SetFrontendActive(false)` on cancel (`IsControlJustPressed(2, 202)`, arrives ~200 ms
+  before the bar shows) or when `IsNavigatingMenuContent()` drops to 0.
+- `IsNavigatingMenuContent()` returns 0/1, and 0 is truthy in Lua: compare `== 1`. Natives
+  typed `Any` usually return a number.
+- Reference: `mri_Qpausemenu` (`client/frontend.lua`).

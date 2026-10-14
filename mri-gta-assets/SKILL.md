@@ -1,47 +1,49 @@
 ---
 name: mri-gta-assets
-description: Arquivos 3D e de stream do GTA V/FiveM (carros, roupas, peds, armas, animações, mapas) - formatos RPF7 e RSC7 (.ytd, .yft, .ydr, .ydd, .ycd, .ymap, .ytyp), metas (vehicles.meta, carcols, peds.meta, shop_ped_apparel), conversão de mod single player para resource FiveM, otimização de texturas (DXT, memória de vídeo, páginas) e como ler e gravar esses arquivos sem OpenIV/CodeWalker. Use quando pedirem "otimiza esse carro", "converte esse mod pra FiveM", "por que esse carro/mapa pesa tanto", "lê/grava ytd", "textura sem compressão", "instalar roupa/ped/arma/mapa de mod", ou ao escrever código que lê ou grava esses formatos.
+description: GTA V/FiveM 3D and stream files (cars, clothes, peds, weapons, animations, maps) - RPF7 and RSC7 formats (.ytd, .yft, .ydr, .ydd, .ycd, .ymap, .ytyp), metas (vehicles.meta, carcols, peds.meta, shop_ped_apparel), converting a single player mod into a FiveM resource, texture optimization (DXT, video memory, pages) and how to read and write these files without OpenIV/CodeWalker. Use when asked to "optimize this car", "convert this mod to FiveM", "why is this car/map so heavy", "read/write ytd", "uncompressed texture", "install a clothing/ped/weapon/map mod" (pt-BR: "otimiza esse carro", "converte esse mod pra FiveM", "por que pesa tanto"), or when writing code that reads or writes these formats.
 ---
 
-# Assets do GTA V (modelagem, texturas, mods)
+# GTA V assets (models, textures, mods)
 
-Conhecimento validado na prática sobre os arquivos que o jogo usa para carros, roupas, peds,
-armas, animações e mapas. Os nomes de módulo citados (`rpf.rs`, `ytd.rs`, `textures.rs`,
-`gtamods.rs`, `optimize.rs`) são da implementação de referência em Rust, no instalador da MRI.
+Knowledge validated in practice about the files the game uses for cars, clothes, peds,
+weapons, animations and maps. Module names cited (`rpf.rs`, `ytd.rs`, `textures.rs`,
+`gtamods.rs`, `optimize.rs`) belong to the reference implementation in Rust, in the MRI
+installer.
 
-| Assunto | Referência |
+| Subject | Reference |
 | --- | --- |
-| RPF7, RSC7, páginas, dicionário de texturas, outros formatos | [formats.md](formats.md) |
-| Peso de textura, compressão DXT, reduzir, backup e desfazer | [textures.md](textures.md) |
-| Mod single player para resource FiveM, `data_file` por meta | [mods.md](mods.md) |
+| RPF7, RSC7, pages, texture dictionary, other formats | [formats.md](formats.md) |
+| Texture weight, DXT compression, downsizing, backup and undo | [textures.md](textures.md) |
+| Single player mod to FiveM resource, `data_file` per meta | [mods.md](mods.md) |
 
-## Regras que valem sempre
+## Rules that always apply
 
-- **Código do CodeWalker não entra.** O fonte é publicado "for educational purposes only",
-  sem licença aberta. Ler para entender o formato pode; copiar código ou embutir a DLL, não.
-- **Gravar arquivo de stream sempre por arquivo temporário + rename**, nunca por cima. O
-  FXServer liga os arquivos de `stream` no próprio cache (`cache/files/<resource>/stream_cache`)
-  por hard link: escrever por cima muda o cache também, com o hash antigo.
-- **Backup antes de mexer** em arquivo do servidor, fora de `resources` (o FiveM tenta carregar
-  o que estiver em `stream`). Padrão: `<servidor>/backup_optimize/<resource>/<caminho>`.
-- **Validar relendo** o arquivo gerado antes de trocar o original.
-- O teste de verdade é no jogo: `restart <resource>` e spawnar (`/car <modelo>`). Arquivo
-  errado crasha o cliente, não dá erro no servidor.
+- **No CodeWalker code.** Its source is published "for educational purposes only", without an
+  open license. Reading it to understand a format is fine; copying code or bundling the DLL is
+  not.
+- **Always write stream files through a temporary file + rename**, never in place. FXServer
+  links `stream` files into its own cache (`cache/files/<resource>/stream_cache`) by hard link:
+  writing in place changes the cache too, with the old hash.
+- **Back up before touching** a server file, outside `resources` (FiveM tries to load whatever
+  is in `stream`). Default: `<server>/backup_optimize/<resource>/<path>`.
+- **Validate by re-reading** the generated file before replacing the original.
+- The real test is in game: `restart <resource>` and spawn it (`/car <model>`). A broken file
+  crashes the client, it doesn't error on the server.
 
-## Ainda não resolvido (por ordem de valor)
+## Not solved yet (by value)
 
-1. Texturas embutidas no `.yft`/`.ydr` (o modelo carrega um dicionário próprio). Exige achar o
-   dicionário dentro da estrutura do drawable e remontar o graphics junto com vertex/index
-   buffers, que também moram lá.
-2. Reduzir textura DXT grande que não tem mips menores (precisa decodificar, redimensionar e
-   recodificar; o `texpresso` decodifica BC1-BC5).
-3. Recuperar a folga de páginas: o arquivo novo mantém a contagem de páginas do original (a
-   tabela não tem espaço para crescer), perdendo uns 10 MB num carro grande. Saída: mover a
-   tabela de páginas para o fim da seção de sistema quando houver espaço.
-4. Roupas aparecerem na loja, áudio de carro (`.awc`, `dlctext`), Menyoo, animações (`.ycd`),
-   mapas (`.ymap`/`.ytyp`, colisão `.ybn`).
+1. Textures embedded in `.yft`/`.ydr` (the model carries its own dictionary). Requires
+   finding the dictionary inside the drawable structure and rebuilding the graphics section
+   together with the vertex/index buffers that live there too.
+2. Downsizing a large DXT texture without smaller mips (needs decode, resize and re-encode;
+   `texpresso` decodes BC1-BC5).
+3. Recovering page slack: the new file keeps the original page count (the table has no room
+   to grow), wasting about 10 MB on a large car. Way out: move the page table to the end of
+   the system section when there is room.
+4. Clothes showing in the shop, car audio (`.awc`, `dlctext`), Menyoo, animations (`.ycd`),
+   maps (`.ymap`/`.ytyp`, `.ybn` collision).
 
-## Manutenção
+## Maintenance
 
-Formato confirmado, pegadinha nova ou recurso entregue: atualizar a referência certa (uma ou
-duas linhas). Offsets só entram depois de validados em arquivo real.
+A confirmed format, a new pitfall or a delivered feature: update the right reference (one or
+two lines). Offsets only go in after being validated on a real file.

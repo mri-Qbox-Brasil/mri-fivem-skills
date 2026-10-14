@@ -14,7 +14,7 @@ function parseArgs(argv) {
     const key = argv[i];
     const next = () => {
       const value = argv[++i];
-      if (value === undefined) throw new Error(`faltou valor para ${key}`);
+      if (value === undefined) throw new Error(`missing value for ${key}`);
       return value;
     };
     switch (key) {
@@ -35,7 +35,7 @@ async function login(cfg) {
     body: JSON.stringify({ username: cfg.username, password: cfg.password }),
   });
   const body = await res.json().catch(() => ({}));
-  if (!res.ok || !body.csrfToken) throw new Error(`login falhou (${res.status}): ${JSON.stringify(body)}`);
+  if (!res.ok || !body.csrfToken) throw new Error(`login failed (${res.status}): ${JSON.stringify(body)}`);
   const cookie = (res.headers.getSetCookie?.() ?? [res.headers.get('set-cookie')])
     .filter(Boolean)
     .map((c) => c.split(';')[0])
@@ -68,12 +68,12 @@ async function command(cfg, session, action, parameter) {
   });
   const body = await res.json().catch(() => ({}));
   if (res.status === 401 || res.status === 403 || body.logout) {
-    const err = new Error('sessão expirada');
+    const err = new Error('session expired');
     err.expired = true;
     throw err;
   }
   if (!res.ok || body.type === 'danger' || body.type === 'error') {
-    throw new Error(`comando falhou (${res.status}): ${JSON.stringify(body)}`);
+    throw new Error(`command failed (${res.status}): ${JSON.stringify(body)}`);
   }
   return body;
 }
@@ -94,7 +94,7 @@ async function readFrom(path, offset) {
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
   const raw = await readFile(join(root, 'config.json'), 'utf8').catch(() => null);
-  if (!raw) throw new Error('falta o config.json: copie o config.example.json e preencha');
+  if (!raw) throw new Error('missing config.json: copy config.example.json and fill it in');
   const cfg = JSON.parse(raw);
   if (opts.url) cfg.url = opts.url;
   if (opts.base) cfg.base = opts.base;
@@ -102,11 +102,11 @@ async function main() {
 
   const [action, ...rest] = opts.positional;
   if (!ACTIONS.includes(action)) {
-    throw new Error(`uso: node scripts/tx.mjs <${ACTIONS.join('|')}> [resource | mensagem]`);
+    throw new Error(`usage: node scripts/tx.mjs <${ACTIONS.join('|')}> [resource | message]`);
   }
   // say takes one message; resource actions take one or more resources, all on the same login.
   const parameters = action === 'say' ? [rest.join(' ')] : action === 'refresh' ? [''] : rest;
-  if (action !== 'refresh' && !parameters.filter(Boolean).length) throw new Error(`${action} precisa de ${action === 'say' ? 'mensagem' : 'resource'}`);
+  if (action !== 'refresh' && !parameters.filter(Boolean).length) throw new Error(`${action} needs a ${action === 'say' ? 'message' : 'resource'}`);
 
   const txAction = action === 'say' ? 'admin_broadcast' : `${action}_res`;
   const logPath = join(cfg.base, 'txData', cfg.profile, 'logs', 'fxserver.log');
@@ -130,7 +130,7 @@ async function main() {
   if (opts.noLog || offset === null) return;
   await new Promise((resolve) => setTimeout(resolve, LOG_WAIT_MS));
   const lines = (await readFrom(logPath, offset)).split(/\r?\n/).filter(Boolean);
-  console.log(`--- fxserver.log (${lines.length} linhas novas) ---`);
+  console.log(`--- fxserver.log (${lines.length} new lines) ---`);
   for (const line of lines.slice(-60)) console.log(line);
 }
 

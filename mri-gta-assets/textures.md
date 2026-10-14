@@ -1,53 +1,54 @@
-# Otimização de texturas
+# Texture optimization
 
-## Onde está o peso
+## Where the weight is
 
-Em carro de mod o problema quase nunca é textura gigante: é **textura sem compressão**
-(A8R8G8B8, 4 bytes por pixel). Medido em carros de mod:
+In mod cars the problem is almost never a giant texture: it is an **uncompressed texture**
+(A8R8G8B8, 4 bytes per pixel). Measured on mod cars:
 
-| Carro | Disco | Textura crua | Já comprimida | Depois |
+| Car | Disk | Raw textures | Already compressed | After |
 | --- | --- | --- | --- | --- |
-| m2trg (BMW M2) | 20.9 MB | 130 MB | 16 MB | memória 147.5 -> 42 MB, disco 8.3 MB |
-| elegyrh7 | 3.5 MB | 4.5 MB | 7.9 MB | pouco ganho |
-| 93sultan, rossati | pequenos | quase nada | | nada |
+| m2trg (BMW M2) | 20.9 MB | 130 MB | 16 MB | memory 147.5 -> 42 MB, disk 8.3 MB |
+| elegyrh7 | 3.5 MB | 4.5 MB | 7.9 MB | little gain |
+| 93sultan, rossati | small | almost none | | nothing |
 
-DXT1 (sem alpha) = 1/8 do cru; DXT5 (com alpha) = 1/4. Também há marca d'água do autor como
-textura (ex.: "Created By TRG WORKS", 1920x1080).
+DXT1 (no alpha) = 1/8 of raw; DXT5 (with alpha) = 1/4. There is also the author's watermark as
+a texture (e.g. "Created By TRG WORKS", 1920x1080).
 
-## O que o `ytd.rs` faz
+## What `ytd.rs` does
 
-- **Textura crua** (21, 22, 32): vira DXT1 se todo pixel tem alpha 255 (X8 sempre), senão DXT5.
-  Usa os mips que o arquivo já tem; quando faltam, gera por média 2x2. Encoder `texpresso`
-  (Rust puro, MIT), ClusterFit; pesos uniformes em normal map (`_n`, `_nm`, `_nrm`, `normal`),
-  perceptuais no resto; com alpha, pondera cor pelo alpha.
-- **Textura acima de `max_size`** (padrão 2048): cai os mips de cima. Em DXT só funciona se o
-  arquivo já tiver os mips menores (não decodifica).
-- Fica de fora: dimensão não múltipla de 4, textura 3D, BC7, A8/L8, o que já está comprimido
-  e dentro do tamanho.
-- Mantém nome, resolução (se não passou do limite) e o resto da struct; troca largura, altura,
-  stride, formato, níveis e ponteiro dos pixels; reempacota as páginas de gráficos; atualiza a
-  contagem de páginas na tabela; deflate `best`.
-- **Limite de páginas**: nunca passa da contagem original mais o espaço livre (zerado e fora de
-  blocos conhecidos) depois da tabela. Na prática não há espaço, então mantém a contagem e o
-  empacotador usa páginas maiores. Custa uns 10 MB a mais que o ótimo num carro grande.
-- `estimate` lê só a seção de sistema (rápido, para varrer a base). Como não vê o alpha, conta
-  toda textura com alpha como DXT5: o real só pode sair menor. Para X8 e DXT bate exato (há
-  teste).
+- **Raw texture** (21, 22, 32): becomes DXT1 if every pixel has alpha 255 (X8 always),
+  otherwise DXT5. Uses the mips the file already has; when missing, generates them by 2x2
+  average. `texpresso` encoder (pure Rust, MIT), ClusterFit; uniform weights on normal maps
+  (`_n`, `_nm`, `_nrm`, `normal`), perceptual on the rest; with alpha, weights color by alpha.
+- **Texture above `max_size`** (default 2048): drops the top mips. In DXT it only works if the
+  file already has the smaller mips (it doesn't decode).
+- Left out: dimension not a multiple of 4, 3D texture, BC7, A8/L8, anything already
+  compressed and within size.
+- Keeps name, resolution (if under the limit) and the rest of the struct; changes width,
+  height, stride, format, levels and pixel pointer; repacks the graphics pages; updates the
+  page count in the table; deflate `best`.
+- **Page limit**: never exceeds the original count plus the free space (zeroed and outside
+  known blocks) after the table. In practice there is no room, so it keeps the count and the
+  packer uses bigger pages. Costs about 10 MB over optimal on a large car.
+- `estimate` reads only the system section (fast, for scanning a server). Since it doesn't see
+  alpha, it counts every texture with alpha as DXT5: the real result can only be smaller. For
+  X8 and DXT it is exact (there is a test).
 
-## O que o `textures.rs` faz
+## What `textures.rs` does
 
-- `scan`: todo `.ytd` dentro de `stream` de cada resource, `estimate`, lista do maior ganho
-  para o menor. Resource com backup aparece mesmo sem nada a fazer (para desfazer).
-- `apply`: otimiza cada ytd, relê com `inspect` (mesma contagem de texturas), guarda o original
-  em `backup_optimize/<resource>/<caminho>` (só o primeiro backup: uma segunda rodada não
-  sobrescreve o original), troca por temporário + rename.
-- `restore`: devolve os originais (temporário + rename) e apaga o backup.
-- A tela manda `restart <resource>` depois (sem servidor rodando, só avisa).
+- `scan`: every `.ytd` inside each resource's `stream`, `estimate`, list from biggest gain to
+  smallest. A resource with a backup shows even with nothing to do (to undo).
+- `apply`: optimizes each ytd, re-reads it with `inspect` (same texture count), keeps the
+  original in `backup_optimize/<resource>/<path>` (only the first backup: a second run doesn't
+  overwrite the original), swaps through temporary + rename.
+- `restore`: puts the originals back (temporary + rename) and deletes the backup.
+- Send `restart <resource>` afterwards (with no server running, just warn).
 
-## Ideias para depois
+## Ideas for later
 
-- Texturas embutidas no `.yft`/`.ydr` (maior ganho que falta).
-- Reduzir DXT grande sem mips (decodificar com `texpresso`, reduzir, recodificar).
-- Mover a tabela de páginas para recuperar a folga.
-- Remover textura duplicada entre `.yft` e `.ytd` e marca d'água (só com escolha do usuário).
-- Otimizar já na instalação do mod (fluxo do GTA5-Mods).
+- Textures embedded in `.yft`/`.ydr` (the biggest gain left).
+- Downsize large DXT without mips (decode with `texpresso`, shrink, re-encode).
+- Move the page table to recover the slack.
+- Remove textures duplicated between `.yft` and `.ytd` and watermarks (only on the user's
+  choice).
+- Optimize right at mod install time.

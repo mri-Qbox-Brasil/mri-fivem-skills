@@ -1,76 +1,77 @@
-# Transições
+# Transitions
 
-A regra: nenhuma passagem é um corte seco, a não ser que seja um corte de cinema de
-propósito (pelo preto, com tempo). Toda troca tem três camadas que precisam andar juntas:
-interface (NUI), câmera e peds.
+The rule: no passage is a hard cut, unless it is a deliberate film cut (through black, with
+time). Every switch has three layers that must move together: interface (NUI), camera and
+peds.
 
-## Glide x corte
+## Glide vs cut
 
-- Glide: interpolação temporizada da pose atual (posição e ponto de mira) até a nova,
-  com ease-in-out. Guarde `glideStart`, `target`, `glideAt`, `glideDur` e calcule por
-  frame no thread de render.
-- Corte: `DoScreenFadeOut(out)`, espere `IsScreenFadedOut()`, faça o snap da câmera,
-  `SetFocusPosAndVel` no destino, espere colisão (`RequestCollisionAtCoord` +
-  `HasCollisionLoadedAroundEntity`, com teto), `DoScreenFadeIn(in)`.
-- Escolha pela distância: acima de `cutDistance` (18 m é um bom padrão) corta, abaixo
-  desliza. Câmera voando longe atravessa área sem stream e mostra o vazio.
-- Tempos: troca rápida entre personagens vizinhos 0,75 s de glide; corte de navegação
-  200/240 ms; corte dramático (entrar numa fase nova) 700/1100 ms. O mesmo corte com
-  tempos curtos numa passagem importante parece bug.
-- Se um corte já está rodando e chega outro pedido, só atualize o alvo pendente. O corte
-  em andamento aplica o último.
+- Glide: timed interpolation from the current pose (position and aim point) to the new one,
+  with ease-in-out. Keep `glideStart`, `target`, `glideAt`, `glideDur` and compute per frame
+  in the render thread.
+- Cut: `DoScreenFadeOut(out)`, wait for `IsScreenFadedOut()`, snap the camera,
+  `SetFocusPosAndVel` on the destination, wait for collision (`RequestCollisionAtCoord` +
+  `HasCollisionLoadedAroundEntity`, with a cap), `DoScreenFadeIn(in)`.
+- Choose by distance: above `cutDistance` (18 m is a good default) cut, below it glide. A
+  camera flying far crosses unstreamed area and shows the void.
+- Times: quick switch between neighbor characters 0.75 s glide; navigation cut 200/240 ms;
+  dramatic cut (entering a new phase) 700/1100 ms. The same cut with short times on an
+  important passage looks like a bug.
+- If a cut is running and another request arrives, only update the pending target. The
+  running cut applies the last one.
 
-## Arco (grua)
+## Arc (crane)
 
-Pra entrar numa fase nova, a câmera sobe no meio do caminho em vez de ir reta:
+To enter a new phase, the camera rises midway instead of going straight:
 
 ```lua
 cur.z = glideStart.z + (target.z - glideStart.z) * e + glideArc * math.sin(math.pi * e)
 ```
 
-`e` é o progresso com easing. 1 a 1,5 m de arco em 2,4 a 2,8 s dá sensação de filmagem.
-Referência: `beginGlide(target, duration, arc)` no `client/showroom.lua` do multichar.
+`e` is the eased progress. A 1 to 1.5 m arc over 2.4 to 2.8 s feels like a film shot.
+Reference: `beginGlide(target, duration, arc)` in the multichar's `client/showroom.lua`.
 
-## Peds entrando e saindo
+## Peds entering and leaving
 
-- Nunca `SetEntityVisible(false)` direto na frente da câmera. Faça fade de alpha
-  (`SetEntityAlpha` por frame, 600 a 700 ms), depois esconda e `ResetEntityAlpha`.
-- Ped novo entra com alpha de 0 a 255 (300 ms numa troca, 900 ms na primeira aparição).
-- Troca de modelo ao vivo (ex.: gênero): crossfade, o novo sobe enquanto o velho desce, e
-  o velho é deletado no fim.
-- Espere o palco esvaziar antes de pôr o ped novo no mesmo ponto.
-- Cancelamento no meio de um fade: o thread do fade precisa checar se o estado ainda é
-  o mesmo e parar. Senão ele briga com o fade de volta.
-- Personagem removido (deletar): some com fade, os seguintes andam uma posição (fade
-  curto, reposiciona, fade de volta). Sem remontar a cena.
+- Never `SetEntityVisible(false)` straight in front of the camera. Fade alpha
+  (`SetEntityAlpha` per frame, 600 to 700 ms), then hide and `ResetEntityAlpha`.
+- A new ped enters with alpha 0 to 255 (300 ms on a switch, 900 ms on the first appearance).
+- Live model swap (e.g. gender): crossfade, the new one rises while the old one fades, and the
+  old one is deleted at the end.
+- Wait for the stage to be empty before putting the new ped on the same spot.
+- Cancel in the middle of a fade: the fade thread must check that the state is still the
+  same and stop. Otherwise it fights the fade back.
+- Removed character (delete): fades out, the following ones move one position (short fade,
+  reposition, fade back). Without rebuilding the scene.
 
-## Interface acompanhando a câmera
+## Interface following the camera
 
-Sequência que funciona pra entrar numa fase (ex.: seleção para criação):
+Sequence that works to enter a phase (e.g. selection to creation):
 
-1. t=0: a tela atual sai (`opacity 1 -> 0`, `translateY(8px) scale(.985)`, `blur(4px)`,
-   650 ms), sem pointer events. A câmera já começa o arco e os peds o fade.
-2. A tela antiga fica montada durante a saída (estado `leaving` com timeout igual à
-   animação) e só então desmonta.
-3. A tela nova monta em t=0 (pra disparar os callbacks do Lua), mas entra com atraso:
-   `animation: in .95s ease .7s both` com `opacity`, `translateY(12px)` e `blur(6px)`.
+1. t=0: the current screen leaves (`opacity 1 -> 0`, `translateY(8px) scale(.985)`,
+   `blur(4px)`, 650 ms), without pointer events. The camera already starts the arc and the
+   peds the fade.
+2. The old screen stays mounted during the exit (a `leaving` state with a timeout equal to
+   the animation) and only then unmounts.
+3. The new screen mounts at t=0 (to fire the Lua callbacks), but enters with a delay:
+   `animation: in .95s ease .7s both` with `opacity`, `translateY(12px)` and `blur(6px)`.
 
-Saindo da landing (em vez da seleção), faça a landing sair igual e troque a rota só depois
-do timeout, senão a seleção pisca no meio.
+Leaving the landing (instead of the selection): make the landing leave the same way and
+switch the route only after the timeout, or the selection flickers in the middle.
 
-Tela sobre o mundo (garagem, loja, vitrine):
+Screen over the world (garage, shop, showcase):
 
-- Vinheta e escurecimento entram junto com o glide da câmera (`opacity 0 -> 1` na duração
-  do glide), nunca prontos no frame em que a NUI monta: escurecer de uma vez parece bug.
-- As peças entram em cascata depois do atraso de entrada (topo, informações, contador,
-  lista, comandos, ~90 ms entre elas); itens da lista sobem do selecionado pra fora.
-- Medidores e barras começam em 0 e enchem na tela (valor aplicado depois do atraso).
-- A cascata é só da primeira entrada: trocar de item anima rápido (~260 ms), sem atraso,
-  senão o painel some a cada troca.
+- Vignette and dimming enter together with the camera glide (`opacity 0 -> 1` over the glide
+  duration), never ready on the frame the NUI mounts: dimming at once looks like a bug.
+- Pieces enter in cascade after the entrance delay (top, info, counter, list, controls,
+  ~90 ms apart); list items rise from the selected one outward.
+- Meters and bars start at 0 and fill on screen (value applied after the delay).
+- The cascade is only for the first entrance: changing items animates fast (~260 ms), no
+  delay, or the panel vanishes on every change.
 
-## Chegada e fim de fluxo
+## Arrival and end of flow
 
-- Última cena: nome como crédito, câmera desliza pra câmera do jogo
-  (`RenderScriptCams(false, true, ms)`), controle volta.
-- Tela escura entre fases longas (editor fechou, cena de chegada carregando) é aceitável
-  se for fade, nunca frame de mundo cru.
+- Last scene: name as credit, the camera glides into the game camera
+  (`RenderScriptCams(false, true, ms)`), control returns.
+- A dark screen between long phases (editor closed, arrival scene loading) is acceptable if
+  it is a fade, never a frame of raw world.
