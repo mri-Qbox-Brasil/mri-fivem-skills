@@ -45,6 +45,12 @@ recorded (an approved pattern, a new pitfall, a missing step) and edits the skil
 - a new capability goes into the `description` in the same commit;
 - never secrets, passwords, personal paths or private server data.
 
+## Contributing
+
+New skills are welcome through pull requests: see [CONTRIBUTING.md](CONTRIBUTING.md). Every PR
+runs a check (frontmatter, README listing, self-contained scripts, no secrets) and is reviewed
+before merging.
+
 ## License
 
 [MIT](LICENSE).

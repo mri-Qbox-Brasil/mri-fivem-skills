@@ -1,0 +1,22 @@
+name: Validate skills
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node .github/scripts/validate-skills.mjs
+      - name: Syntax of skill scripts
+        run: |
+          git ls-files '*/scripts/*.mjs' '*/scripts/*.js' | while read -r file; do node --check "$file"; done
