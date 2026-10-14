@@ -1,0 +1,32 @@
+{
+  "pt-br": {
+    "rail": {
+      "place_title": "Posicionar",
+      "route_title": "Marcar rota",
+      "count": "{count} paradas",
+      "mark": "Marcar parada",
+      "undo": "Desfazer",
+      "finish": "Concluir",
+      "cancel": "Cancelar",
+      "rotate": "Girar",
+      "place": "Colocar aqui",
+      "place_hint": "Mire onde deve ficar.",
+      "route_hint": "Mire e marque cada parada; a linha mostra o caminho. A primeira é o ponto de partida."
+    }
+  },
+  "en": {
+    "rail": {
+      "place_title": "Place",
+      "route_title": "Mark route",
+      "count": "{count} stops",
+      "mark": "Mark stop",
+      "undo": "Undo",
+      "finish": "Finish",
+      "cancel": "Cancel",
+      "rotate": "Rotate",
+      "place": "Place here",
+      "place_hint": "Aim where it should stand.",
+      "route_hint": "Aim and mark each stop; the line shows the path. The first one is the starting point."
+    }
+  }
+}
