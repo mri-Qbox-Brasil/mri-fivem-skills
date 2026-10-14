@@ -69,9 +69,8 @@ synthesized Web Audio (it sounds like a cheap browser game).
 
 - Sound only when something changes (switching to the same item stays silent) and on the
   same frame as the action.
-- Before picking another sound, search the dump (`soundNames.json` in
-  [DurtyFree/gta-v-data-dumps](https://github.com/DurtyFree/gta-v-data-dumps)); a DLC
-  soundset may need a loaded bank.
+- Before picking another sound, search the real names (`node scripts/gta-data.mjs sounds
+  <words>` in the `mri-gta-assets` skill); a DLC soundset may need a loaded bank.
 - Reference: `data/sounds.json`, `utils.uiSound` and `web/src/lib/uiSound.ts` in mri_Qgarage.
 
 ## Cutscenes

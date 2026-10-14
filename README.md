@@ -11,9 +11,9 @@ resources and the NUI's Chromium version. They come from day-to-day work at
 | [`mri-game-ux`](mri-game-ux) | AAA-feeling screens and scenes: scripted camera, transitions without hard cuts, music in phases, menus, NPC conversations |
 | [`mri-world-placement`](mri-world-placement) | Place NPCs, objects and zones and record routes in the world, with a ready Lua module and key rail, no flickering markers |
 | [`mri-nui-glass`](mri-nui-glass) | Real liquid glass on the NUI: the blurred game behind the panel, which CEF's `backdrop-filter` can't do |
-| [`mri-gta-assets`](mri-gta-assets) | GTA V formats (RPF7, RSC7, ytd), texture optimization, single player mods to FiveM resources |
+| [`mri-gta-assets`](mri-gta-assets) | GTA V formats (RPF7, RSC7, ytd), texture optimization, single player mods to FiveM resources, real names of sounds, animations, props and more |
 | [`mri-txadmin`](mri-txadmin) | `ensure`, `restart`, `start` and `stop` through the local txAdmin API, no rcon, with the server log |
-| [`mri-resource-check`](mri-resource-check) | Check a resource before calling it done: Lua parser with CfxLua syntax, manifest pitfalls, reload order, which log shows what |
+| [`mri-resource-check`](mri-resource-check) | Check a resource before calling it done: Lua parser with CfxLua syntax, natives that don't exist or run on the wrong side, native lookup, manifest pitfalls, reload order, which log shows what |
 | [`mri-upstream-wrap`](mri-upstream-wrap) | Change third-party resources without editing them: wrapper folder, hooks, keybinds, `provide` with a compat layer for exports |
 | [`mri-nui-cef`](mri-nui-cef) | NUI on FiveM's Chromium: CEF 103 limits, what CEF 144 breaks and opens up, a scanner for the breaking changes |
 

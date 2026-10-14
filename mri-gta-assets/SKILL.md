@@ -1,6 +1,6 @@
 ---
 name: mri-gta-assets
-description: "GTA V/FiveM 3D and stream files (cars, clothes, peds, weapons, animations, maps) - RPF7 and RSC7 formats (.ytd, .yft, .ydr, .ydd, .ycd, .ymap, .ytyp), metas (vehicles.meta, carcols, peds.meta, shop_ped_apparel), converting a single player mod into a FiveM resource, texture optimization (DXT, video memory, pages) and how to read and write these files without OpenIV/CodeWalker. Use when asked to \"optimize this car\", \"convert this mod to FiveM\", \"why is this car/map so heavy\", \"read/write ytd\", \"uncompressed texture\", \"install a clothing/ped/weapon/map mod\" (pt-BR: \"otimiza esse carro\", \"converte esse mod pra FiveM\", \"por que pesa tanto\"), or when writing code that reads or writes these formats."
+description: "GTA V/FiveM 3D and stream files (cars, clothes, peds, weapons, animations, maps) - RPF7 and RSC7 formats (.ytd, .yft, .ydr, .ydd, .ycd, .ymap, .ytyp), metas (vehicles.meta, carcols, peds.meta, shop_ped_apparel), converting a single player mod into a FiveM resource, texture optimization (DXT, video memory, pages), how to read and write these files without OpenIV/CodeWalker, and a lookup of real game names (sounds and soundsets, animation dictionaries and clips, scenarios, props, peds, vehicles, weapons, particles, walk styles, timecycles) so none is guessed. Use when asked to \"optimize this car\", \"convert this mod to FiveM\", \"why is this car/map so heavy\", \"read/write ytd\", \"uncompressed texture\", \"install a clothing/ped/weapon/map mod\", \"which sound/animation/prop\" (pt-BR: \"otimiza esse carro\", \"converte esse mod pra FiveM\", \"por que pesa tanto\", \"qual som/animação usar\"), or when writing code that reads or writes these formats or uses a sound, animation or model name."
 ---
 
 # GTA V assets (models, textures, mods)
@@ -15,6 +15,25 @@ installer.
 | RPF7, RSC7, pages, texture dictionary, other formats | [formats.md](formats.md) |
 | Texture weight, DXT compression, downsizing, backup and undo | [textures.md](textures.md) |
 | Single player mod to FiveM resource, `data_file` per meta | [mods.md](mods.md) |
+
+## Real game names (look up, never guess)
+
+Before writing a sound, animation, scenario, prop, ped, vehicle, weapon, particle, walk style
+or timecycle name, search the real one. Names from memory are often wrong or don't exist.
+
+```bash
+node scripts/gta-data.mjs list                       # categories
+node scripts/gta-data.mjs sounds zip                 # UNZIP  FBI_01_SOUNDS (name, soundset)
+node scripts/gta-data.mjs anims sit chair            # dictionary and matching clips
+node scripts/gta-data.mjs props chair office
+```
+
+- Data from [DurtyFree/gta-v-data-dumps](https://github.com/DurtyFree/gta-v-data-dumps),
+  downloaded on first use and cached for a month in the system temp folder. Data only.
+- Several words narrow the search (all must match); `--all` lists past 40 results.
+- A name existing is not enough: a DLC soundset may need its bank loaded, an animation
+  clip may be a pose or a facial track (`_facial`). Check in game.
+- Natives are looked up with `mri-resource-check` (`scripts/natives.mjs`).
 
 ## Rules that always apply
 
