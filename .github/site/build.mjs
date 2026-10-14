@@ -28,13 +28,16 @@ const escape = (text) => String(text).replace(/[&<>"']/g, (c) => ({ '&': '&amp;'
 // English goes in the HTML; the script at the end swaps it for the visitor's language.
 const tr = (key, tag = 'span', attrs = '') => `<${tag} data-i18n="${key}"${attrs}>${t(key)}</${tag}>`
 
+// Descriptions are double-quoted YAML (a JSON string is valid YAML); plain values pass through.
+const unquote = (value) => (value.startsWith('"') ? JSON.parse(value) : value)
+
 function parse(file) {
   const text = readFileSync(file, 'utf8').replace(/\r/g, '')
   const match = text.match(/^---\n([\s\S]*?)\n---\n/)
   const fields = {}
   for (const line of (match ? match[1] : '').split('\n')) {
     const field = line.match(/^([a-z_-]+):\s*(.*)$/i)
-    if (field) fields[field[1]] = field[2].trim()
+    if (field) fields[field[1]] = unquote(field[2].trim())
   }
   return { fields, body: match ? text.slice(match[0].length) : text }
 }

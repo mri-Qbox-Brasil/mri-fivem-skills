@@ -1,6 +1,6 @@
 ---
 name: mri-txadmin
-description: Runs ensure, restart, start or stop on a resource of a local FiveM server through the txAdmin API (no rcon) and shows what fxserver.log recorded. Use when asked to "ensure X", "restart the resource", "restart the script", "stop/start the resource" (pt-BR: "dá ensure no X", "reinicia o resource", "para/sobe o resource"), or when a change needs reloading on the server to be tested.
+description: "Runs ensure, restart, start or stop on a resource of a local FiveM server through the txAdmin API (no rcon) and shows what fxserver.log recorded. Use when asked to \"ensure X\", \"restart the resource\", \"restart the script\", \"stop/start the resource\" (pt-BR: \"dá ensure no X\", \"reinicia o resource\", \"para/sobe o resource\"), or when a change needs reloading on the server to be tested."
 ---
 
 # Server commands through txAdmin

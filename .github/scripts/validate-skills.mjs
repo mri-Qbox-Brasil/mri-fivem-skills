@@ -36,7 +36,20 @@ function frontmatter(text) {
   const fields = {}
   for (const line of match[1].split('\n')) {
     const field = line.match(/^([a-z_-]+):\s*(.*)$/i)
-    if (field) fields[field[1]] = field[2].trim()
+    if (!field) continue
+    const value = field[2].trim()
+    if (value.startsWith('"')) {
+      try {
+        fields[field[1]] = JSON.parse(value)
+      } catch {
+        fields[field[1]] = value
+        fields.yamlError = `${field[1]}: broken double-quoted string (escape " and \\ inside)`
+      }
+    } else {
+      fields[field[1]] = value
+      // Strict YAML (GitHub, skill uploads) reads ": " or " #" in a plain value as a new key or a comment.
+      if (/: | #/.test(value)) fields.yamlError = `${field[1]}: wrap the value in double quotes, it has ": " or " #"`
+    }
   }
   return fields
 }
@@ -58,6 +71,7 @@ for (const skill of skills) {
   const fields = frontmatter(text)
   if (!fields) fail(skillFile, 'missing frontmatter (--- name / description ---)')
   else {
+    if (fields.yamlError) fail(skillFile, fields.yamlError)
     if (fields.name !== skill) fail(skillFile, `name "${fields.name}" must match the folder "${skill}"`)
     if (!NAME.test(skill) || skill.length > MAX_NAME) fail(dir, `folder name must be lowercase kebab-case, up to ${MAX_NAME} characters`)
     if (!fields.description) fail(skillFile, 'missing description')
