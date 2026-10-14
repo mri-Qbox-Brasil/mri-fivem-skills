@@ -256,20 +256,25 @@ for (const s of skills) {
         .map((f) => `<li><a href="${REPO_URL}/blob/main/${s.name}/${f}">${escape(f)}</a></li>`)
         .join('')}</ul></aside>`
     : ''
+  // The SKILL.md title becomes the page heading, so the article doesn't repeat it.
+  const titleMatch = s.body.match(/^\s*# (.+)\n/)
+  const heading = titleMatch ? titleMatch[1].trim() : s.name
+  const body = titleMatch ? s.body.slice(titleMatch[0].length) : s.body
   const html = page({
     title: `${s.name} · mri-fivem-skills`,
     description: summary(s.description),
     depth: 1,
     main: `<main class="wrap doc">
   <a class="back" href="../#skills" data-i18n="doc.back">${t('doc.back')}</a>
-  <p class="eyebrow">${escape(s.name)}</p>
+  <p class="eyebrow doc-name">${escape(s.name)}</p>
+  <h1 class="doc-title" lang="en">${escape(heading)}</h1>
   <p class="lead">${escape(summary(s.description))}</p>
   <div class="links">
     <a class="btn primary" href="../downloads/${s.name}.zip" download data-i18n="doc.zip">${t('doc.zip')}</a>
     <a class="btn" href="${REPO_URL}/tree/main/${s.name}" data-i18n="doc.source">${t('doc.source')}</a>
   </div>
   <p class="note" data-lang-only hidden data-i18n="doc.note">${t('doc.note')}</p>
-  <article class="md" lang="en">${absolutize(marked.parse(s.body), s.name)}</article>
+  <article class="md" lang="en">${absolutize(marked.parse(body), s.name)}</article>
   ${extra}
 </main>`,
   })
