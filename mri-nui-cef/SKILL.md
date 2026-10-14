@@ -1,6 +1,6 @@
 ---
 name: mri-nui-cef
-description: "Building and fixing FiveM NUI pages for the Chromium that FiveM actually runs - CEF 103 today and the CEF 144 upgrade (Canary in October 2026, then every channel), what breaks (alert/confirm gone, clipboard copy needs focus, old fx_version loses secure context, CSS zoom, mutation events, request throttling), what becomes possible (WebAssembly, modern CSS, Tailwind 4) and how to support both while players are split; plus the dev mock in the browser, focus and ESC, no infinite animations, packaging files the Lua reads, and where NUI logs go. Scanner script for a whole resources folder and a clipboard helper. Use when building or debugging a NUI, when asked \"does this work in FiveM's CEF?\", \"what breaks with CEF 144?\", \"copy to clipboard doesn't work\", \"popover opens in the corner\", \"can I use WebGPU/WASM/Tailwind 4?\", \"the NUI lags\", \"works in the browser but not in game\" (pt-BR: \"o CEF novo quebra o quê?\", \"copiar não funciona na NUI\", \"a NUI tá travando\", \"no navegador funciona e no jogo não\")."
+description: "FiveM NUI pages on the Chromium FiveM actually runs: CEF 103 limits and the CEF 144 upgrade (what breaks: alert/confirm, clipboard focus, old fx_version, CSS zoom, mutation events, throttling; what opens up: WASM, modern CSS, Tailwind 4), supporting both, the browser dev mock, focus and ESC, no infinite animations, packaging files the Lua reads, uploading video/music/image from the NUI to the server in HTTP parts with list and delete, loadscreen video compression, and NUI logs. Scanner script, clipboard helper, upload templates. Use when building or debugging a NUI, or asked \"does this work in FiveM's CEF?\", \"what breaks with CEF 144?\", \"copy doesn't work\", \"popover opens in the corner\", \"the NUI lags\", \"works in the browser but not in game\", \"upload a video from the panel\", \"the uploaded file is empty\" (pt-BR: \"o CEF novo quebra o quê?\", \"copiar não funciona na NUI\", \"a NUI tá travando\", \"no navegador funciona e no jogo não\", \"subir vídeo pelo painel\")."
 ---
 
 # NUI on FiveM's CEF
@@ -79,6 +79,20 @@ node scripts/cef-scan.mjs <resources folder> --src-only
 - **Tabs that load a list per tab** (React): store the list with the tab id
   (`{ tab, entries }`) and only render it when the id matches; the effect that clears runs
   after the render and the new tab draws once with the old list.
+
+## Uploading files from the NUI
+
+Admin panel that takes a video, music or image and saves it in the resource: read
+`references/file-upload.md` and copy `templates/upload-*.lua`, `upload-files.js`, `upload.js`.
+The traps it covers:
+
+- FXServer's HTTP drops a body over **5 MiB**: post straight to `SetHttpHandler` in 4 MiB
+  parts, never through a net event.
+- `SaveResourceFile(res, path, data, #data)`: with `-1` a binary file is saved empty.
+- The NUI only reaches `http://127.0.0.1:<port>` or the `web_baseUrl` proxy; no duplicate
+  `Access-Control-Allow-Origin` through the proxy.
+- Players only get the file after the resource restarts, and a resource can't restart itself.
+- Don't re-encode a video that came from YouTube (already ~1 Mbps): it only gets jagged.
 
 ## Testing in the browser
 

@@ -15,7 +15,7 @@ resources and the NUI's Chromium version. They come from day-to-day work at
 | [`mri-txadmin`](mri-txadmin) | `ensure`, `restart`, `start` and `stop` through the local txAdmin API, no rcon, with the server log |
 | [`mri-resource-check`](mri-resource-check) | Check a resource before calling it done: Lua parser with CfxLua syntax, natives that don't exist or run on the wrong side, native lookup, manifest pitfalls, reload order, which log shows what |
 | [`mri-upstream-wrap`](mri-upstream-wrap) | Change third-party resources without editing them: wrapper folder, hooks, keybinds, `provide` with a compat layer for exports |
-| [`mri-nui-cef`](mri-nui-cef) | NUI on FiveM's Chromium: CEF 103 limits, what CEF 144 breaks and opens up, a scanner for the breaking changes |
+| [`mri-nui-cef`](mri-nui-cef) | NUI on FiveM's Chromium: CEF 103 limits, what CEF 144 breaks and opens up, a scanner for the breaking changes, file upload from the NUI |
 
 The skills are written in English; the agent still answers in the user's language, and each
 `description` also lists Brazilian Portuguese trigger phrases.
