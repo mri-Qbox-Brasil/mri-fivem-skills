@@ -1,62 +1,62 @@
-# Verificação
+# Verification
 
-O navegador mostra a NUI; câmera, peds e som do jogo só o jogo mostra. Diga ao usuário o
-que foi verificado onde.
+The browser shows the NUI; camera, peds and game sound only the game shows. Tell the user
+what was verified where.
 
-## Prints e medições no Chrome headless
+## Screenshots and measurements in headless Chrome
 
-`scripts/nui-probe.mjs` abre a NUI do vite dev num Chrome headless com
-`window.invokeNative` injetado (o mock de dev passa a responder), manda mensagens como o
-Lua mandaria e tira prints ou mede algo por quadro. O Chrome vem do `scripts/cdp.mjs` (Chrome headless
-por CDP, perfil temporário, sem dependências).
+`scripts/nui-probe.mjs` opens the vite dev NUI in a headless Chrome with
+`window.invokeNative` injected (the dev mock starts answering), sends messages as Lua would
+and takes screenshots or measures something per frame. Chrome comes from `scripts/cdp.mjs`
+(headless Chrome over CDP, temporary profile, no dependencies).
 
 ```bash
 node scripts/nui-probe.mjs http://localhost:5173/ ./shots steps.json
 ```
 
-`steps.json` é uma lista de passos:
+`steps.json` is a list of steps:
 
 ```json
 [
   { "post": { "action": "open", "characters": [], "amount": 4 }, "wait": 1500 },
-  { "click": "Criar personagem", "wait": 300, "shot": "enter-300" },
+  { "click": "Create character", "wait": 300, "shot": "enter-300" },
   { "wait": 600, "shot": "enter-900" },
-  { "measure": ".cine-scrim", "click": "Personagens", "ms": 450 },
+  { "measure": ".cine-scrim", "click": "Characters", "ms": 450 },
   { "eval": "document.querySelectorAll('iframe').length", "wait": 0 }
 ]
 ```
 
-- `post`: `window.postMessage` (o que o Lua faria com `SendNUIMessage`).
-- `click`: botão pelo texto; `key`: `keydown` na janela.
-- `shot`: print com esse nome; `eval`: imprime o valor de uma expressão.
-- `measure` + `ms`: opacidade efetiva (produto das opacidades dos ancestrais) de cada
-  elemento do seletor em cada quadro, a partir do clique. Pra piscada, o esperado é 1.00
-  do começo ao fim.
+- `post`: `window.postMessage` (what Lua would do with `SendNUIMessage`).
+- `click`: button by text; `key`: `keydown` on the window.
+- `shot`: screenshot with that name; `eval`: prints the value of an expression.
+- `measure` + `ms`: effective opacity (product of the ancestors' opacities) of each element
+  matching the selector on each frame, from the click. For flicker, 1.00 from start to end is
+  expected.
 
-Dicas:
+Tips:
 
-- Fundo do `#root` escuro (gradiente imitando céu e chão) pra ver scrims e textos
-  claros; o body do dev é claro.
-- Pra comparar antes e depois, `git stash` só dos arquivos da NUI, meça, `git stash pop`.
-- Dev server 504 no console = ainda otimizando dependências: rode de novo.
+- Dark `#root` background (gradient imitating sky and ground) to see scrims and light text;
+  the dev body is light.
+- To compare before and after, `git stash` only the NUI files, measure, `git stash pop`.
+- Dev server 504 in the console = still optimizing dependencies: run again.
 
-## Trilha
+## Music
 
-Com a NUI aberta no headless, os iframes do YouTube mostram qual faixa está tocando:
+With the NUI open in headless, the YouTube iframes show which track is playing:
 `[...document.querySelectorAll('iframe')].map(f => f.src.split('embed/')[1]?.split('?')[0])`.
-Ande pelas fases mandando as mensagens (open, abrir criação, close com keepMusic,
-arrivalStart, musicEnd) e confira: dois ids durante o crossfade, um depois, nenhum no fim.
+Walk the phases sending the messages (open, open creation, close with keepMusic,
+arrivalStart, musicEnd) and check: two ids during the crossfade, one after, none at the end.
 
 ## Lua
 
-- Rode um parser (ex.: `luaparse`, trocando os hashes com crase por `0`) em todo `.lua`
-  editado. Teste o parser antes com um arquivo propositalmente quebrado.
-- No servidor, confira o console depois do `ensure`.
+- Run a parser (e.g. `luaparse`, replacing backtick hashes with `0`) on every edited `.lua`.
+  Test the parser first with a deliberately broken file.
+- On the server, check the console after `ensure`.
 
-## Bug que só aparece no jogo
+## Game-only bug
 
-Não chute. Instrumente com log legível e prefixo fácil de filtrar (`[SHOWROOM] [DIAG]`),
-no momento certo (ao montar, no fim do voo), com o estado que decide a causa:
-`IsPedActiveInScenario`, clip tocando, `GetScriptTaskStatus`, congelado, pedidos de
-stream pendentes, fps. Peça ao usuário pra reproduzir e leia o log do cliente
-(`FiveM.app\logs` na pasta do FiveM). Corrija pela causa e remova os logs temporários.
+Don't guess. Instrument with a readable log and an easy-to-filter prefix
+(`[SHOWROOM] [DIAG]`), at the right moment (on mount, at the end of the flight), with the
+state that decides the cause: `IsPedActiveInScenario`, playing clip, `GetScriptTaskStatus`,
+frozen, pending stream requests, fps. Ask the user to reproduce and read the client log
+(`FiveM.app\logs` in the FiveM folder). Fix the cause and remove the temporary logs.

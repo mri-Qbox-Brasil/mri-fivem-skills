@@ -1,91 +1,96 @@
 ---
 name: mri-world-placement
-description: Padrão de posicionamento no mundo para painéis de criação de resources FiveM - colocar NPC, objeto, ponto ou zona mirando com prévia (fantasma), marcar rota ou caminho parada a parada com linha no chão, barra de teclas na NUI no lugar do textUI, e NPC andando na rota sem travar. Traz o módulo Lua pronto (WorldPlacer.point e WorldPlacer.path), a barra React (PlaceRail) e as regras que evitam marcador piscando, tecla perdida e campo de coordenada. Use quando pedirem "posicionar no mundo", "marcar rota", "colocar o NPC/objeto/zona pelo jogo", "criador in-game", "o marcador tá piscando", "não quero digitar coordenada", ou ao criar qualquer painel admin que grava posição, heading, zona ou caminho.
+description: World placement standard for FiveM resource creation panels - place an NPC, object, point or zone by aiming with a preview (ghost), record a route or path stop by stop with a line on the ground, a key rail on the NUI instead of a textUI, and NPCs walking the route without stalling. Ships the ready Lua module (WorldPlacer.point and WorldPlacer.path), the React rail (PlaceRail) and the rules that prevent flickering markers, missed keys and coordinate fields. Use when asked to "place in the world", "record a route", "place the NPC/object/zone in game", "in-game creator", "the marker flickers", "I don't want to type coordinates" (pt-BR: "posicionar no mundo", "marcar rota", "o marcador tá piscando", "não quero digitar coordenada"), or when building any admin panel that stores a position, heading, zone or path.
 ---
 
-# Posicionamento no mundo
+# World placement
 
-Painel de criação **configura, não programa**. Posição, direção, tamanho e caminho são
-marcados no mundo, vendo a prévia; nunca campo de número, coordenada ou nome digitado.
+A creation panel **configures, it doesn't program**. Position, heading, size and path are
+marked in the world, with a preview; never a number field, a coordinate or a typed name.
 
-## Ferramentas
+## Tools
 
-| Ferramenta | Para | Módulo |
+| Tool | For | Module |
 | --- | --- | --- |
-| Ponto com fantasma | NPC, objeto, ponto de interação: cópia translúcida segue a mira | `WorldPlacer.point` |
-| Caminho | rota de NPC, trajeto, cerca: paradas com linha no chão | `WorldPlacer.path` |
-| Zona no jogador | elevador, área: caixa desenhada em volta de quem anda | referência `mri_Qelevators` (`client/placement.lua`) |
+| Point with ghost | NPC, object, interaction point: a see-through copy follows the aim | `WorldPlacer.point` |
+| Path | NPC route, trail, fence: stops with a line on the ground | `WorldPlacer.path` |
+| Zone at the player | elevator, area: a box drawn around whoever walks | reference `mri_Qelevators` (`client/placement.lua`) |
 
-### Teclas (iguais em todo resource)
+### Keys (the same in every resource)
 
-| Tecla | Ponto | Caminho | Zona |
+| Key | Point | Path | Zone |
 | --- | --- | --- | --- |
-| Mira / andar | move o fantasma | prévia da próxima parada | a caixa vai junto |
-| `E` | confirma | marca parada | marca |
-| `←` `→`, roda | gira | | roda: tamanho; `Shift` + roda: altura |
-| `Backspace` | cancela | desfaz a última | volta um passo |
-| `Enter` | | conclui (sem parada = cancela) | conclui |
-| `Esc` | cancela | cancela | cancela |
+| Aim / walk | moves the ghost | previews the next stop | the box follows |
+| `E` | confirm | mark stop | mark |
+| `←` `→`, wheel | rotate | | wheel: size; `Shift` + wheel: height |
+| `Backspace` | cancel | undo the last one | one step back |
+| `Enter` | | finish (no stop = cancel) | finish |
+| `Esc` | cancel | cancel | cancel |
 
-O `mri_Qelevators` ainda conclui a zona no `Backspace` (anterior a este padrão).
-Cancelar sempre devolve o que havia antes. Som: `SELECT` ao marcar, `BACK` ao desfazer ou
-cancelar (`HUD_FRONTEND_DEFAULT_SOUNDSET`).
+`mri_Qelevators` still finishes a zone on `Backspace` (it predates this standard).
+Cancelling always gives back what was there before. Sound: `SELECT` on mark, `BACK` on undo
+or cancel (`HUD_FRONTEND_DEFAULT_SOUNDSET`).
 
-## Montar num resource
+## Wiring into a resource
 
-1. `templates/placement.lua` em `client/` (renomear o global). Antes dos arquivos que usam
-   no `fxmanifest.lua`; arquivo novo no manifest pede `refresh` antes do `ensure`.
-2. `templates/panel.lua`: callbacks `place` e `recordRoute` com o `inWorld` (esconde o painel,
-   roda a ferramenta, volta com o resultado; dentro do mri_Qadmin fecha e reabre a aba).
-3. NUI: `templates/PlaceRail.tsx` e as chaves de `templates/rail.locales.json`. Store com
-   `hud` alimentado pela mensagem `placeHud` (`false` limpa). A barra aparece com o painel
-   escondido, na ui_page do próprio resource; dentro do iframe do Qadmin não renderiza
-   (o iframe está escondido).
-4. No painel, o resultado vira **resumo**, não número: "3 paradas · 29 m · ida e volta",
-   "Posição marcada". Botão "Marcar de novo" refaz do zero.
+1. `templates/placement.lua` into `client/` (rename the global). Before the files that use
+   it in `fxmanifest.lua`; a new file in the manifest needs `refresh` before `ensure`.
+2. `templates/panel.lua`: `place` and `recordRoute` callbacks with `inWorld` (hides the
+   panel, runs the tool, comes back with the result; inside mri_Qadmin it closes and reopens
+   the tab).
+3. NUI: `templates/PlaceRail.tsx` and the keys from `templates/rail.locales.json`. A store
+   with `hud` fed by the `placeHud` message (`false` clears it). The rail shows with the panel
+   hidden, on the resource's own ui_page; inside the Qadmin iframe it doesn't render (the
+   iframe is hidden).
+4. On the panel the result becomes a **summary**, not numbers: "3 stops · 29 m · there and
+   back", "Position marked". A "Mark again" button starts over.
 
-## Regras de frame (sem piscar, sem perder tecla)
+## Frame rules (no flicker, no missed keys)
 
-- `DrawMarker`, `DrawLine` e `DisableControlAction` valem por um frame: chamar todo frame,
-  num loop que só tem `Wait(0)`.
-- Nada que espera dentro desse loop: `lib.raycast.fromCamera` dá `Wait(0)` por dentro, e no
-  mesmo loop o desenho sai em frame sim, frame não (pisca) e o `JustPressed` se perde. A mira
-  roda numa thread própria (`trackAim`) e o loop só lê `aim.coords`. Vale para
-  `lib.requestModel`, `lib.callback.await` e qualquer `Wait(n)`.
-- Tecla bloqueada (Esc 200, Enter 191, roda 14/15) só responde por
+- `DrawMarker`, `DrawLine` and `DisableControlAction` last one frame: call them every frame,
+  in a loop that only has `Wait(0)`.
+- Nothing that waits inside that loop: `lib.raycast.fromCamera` does a `Wait(0)` inside, and
+  in the same loop the drawing shows every other frame (flicker) and `JustPressed` gets lost.
+  The aim runs on its own thread (`trackAim`) and the loop only reads `aim.coords`. The same
+  goes for `lib.requestModel`, `lib.callback.await` and any `Wait(n)`.
+- A blocked key (Esc 200, Enter 191, wheel 14/15) only answers through
   `IsDisabledControlJustPressed`.
-- Fantasma: alpha 170, sem colisão, congelado, `SetBlockingOfNonTemporaryEvents`. Só mover
-  quando a mira mudou. Modelo aceita hash numérico (`tonumber(model) or joaat(model)`).
-- Raycast `1 | 16` (mundo e objetos), ignorando o próprio ped.
-- Sem `lib.showTextUI`, menu do ox_lib ou `DrawText` de instrução: a barra é da NUI.
+- Ghost: alpha 170, no collision, frozen, `SetBlockingOfNonTemporaryEvents`. Only move it
+  when the aim changed. The model accepts a numeric hash (`tonumber(model) or joaat(model)`).
+- Raycast `1 | 16` (world and objects), ignoring the player's own ped.
+- No `lib.showTextUI`, ox_lib menu or instruction `DrawText`: the rail belongs to the NUI.
 
-## O que o sistema decide sozinho
+## What the system decides by itself
 
-- Tempo vira escolha pronta ("passa direto", "para um pouco", "fica um tempo"), nunca `+`/`-`.
-- O que dá pra deduzir não vira opção: rota que termina a menos de 8 m do início dá a volta,
-  senão vai e volta.
-- Ligar uma coisa a outra (qual NPC liberar, qual andar) é escolher numa lista com nome.
+- Time is a ready choice ("passes by", "stops a bit", "stays a while"), never `+`/`-`.
+- What can be deduced doesn't become an option: a route ending less than 8 m from the start
+  loops, otherwise it goes there and back.
+- Linking one thing to another (which NPC to release, which floor) is picking from a list of
+  names.
 
-## NPC andando na rota
+## NPC walking the route
 
-Referência: `mri_Qnpc` (`client/route.lua`).
+Reference: `mri_Qnpc` (`client/route.lua`).
 
-- Relógio comum (`GetCloudTimeAsInt()`): cada cliente calcula o mesmo trecho, todos veem o NPC
-  no mesmo lugar. Tempo do trecho = distância x 1.15 / velocidade (andando 1.3 m/s, correndo
+- Shared clock (`GetCloudTimeAsInt()`): every client computes the same leg, everyone sees the
+  NPC in the same place. Leg time = distance x 1.15 / speed (walking 1.3 m/s, running
   3.2 m/s).
-- `TaskFollowNavMeshToCoord` até a parada. Parada sem espera passa a próxima antes de chegar
-  (2 m andando, 3.5 m correndo): esperar chegar faz o ped frear em todo ponto.
-- Não chamar `ClearPedTasksImmediately` entre trechos: zera a passada e ele estaca. Limpar só
-  depois de uma animação de parada.
-- Parado 3 s sem sair do lugar (sem navmesh: interior, chão de prop): `TaskGoStraightToCoord`.
-  Só teleporta para a parada se o prazo do trecho estourar.
-- Na parada com espera: `TaskAchieveHeading` para a direção salva, depois a animação.
-- Conversando com o jogador: `ClearPedTasks`, espera a conversa acabar e retoma o trecho.
-- Ponto de spawn no centro da rota com raio = distância de spawn + alcance da rota.
+- `TaskFollowNavMeshToCoord` to the stop. A stop without a wait hands over to the next one
+  before arriving (2 m walking, 3.5 m running): waiting to arrive makes the ped brake at
+  every point.
+- Don't call `ClearPedTasksImmediately` between legs: it resets the stride and the ped stops
+  dead. Clear only after a stop animation.
+- Standing still for 3 s (no navmesh: interior, prop floor): `TaskGoStraightToCoord`. Only
+  teleport to the stop if the leg's deadline runs out.
+- At a stop with a wait: `TaskAchieveHeading` to the saved heading, then the animation.
+- Talking to the player: `ClearPedTasks`, wait for the conversation to end and resume the
+  leg.
+- Spawn point at the route center with radius = spawn distance + route reach.
 
-## Verificar
+## Verify
 
-- Navegador: mandar `placeHud` pelo mock de dev e conferir a barra (pt-br e en, tela estreita).
-- Jogo (só ele mostra): marcadores firmes enquanto a câmera gira, E pega na primeira vez,
-  Esc não abre o pause, cancelar e concluir sem parada mantêm o valor anterior, painel volta
-  no mesmo NPC.
+- Browser: send `placeHud` through the dev mock and check the rail (pt-BR and English,
+  narrow screen).
+- Game (only it shows): markers steady while the camera turns, E takes on the first press,
+  Esc doesn't open the pause menu, cancelling and finishing without stops keep the previous
+  value, the panel comes back on the same item.

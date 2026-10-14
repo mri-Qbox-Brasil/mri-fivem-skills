@@ -1,68 +1,68 @@
 ---
 name: mri-txadmin
-description: Dá ensure, restart, start ou stop em resource de um servidor FiveM local pela API do txAdmin (sem rcon) e mostra o que o fxserver.log registrou. Use quando pedirem "dá ensure no X", "reinicia o resource", "restart no script", "para/sobe o resource", ou quando uma mudança precisar ser recarregada no servidor pra testar.
+description: Runs ensure, restart, start or stop on a resource of a local FiveM server through the txAdmin API (no rcon) and shows what fxserver.log recorded. Use when asked to "ensure X", "restart the resource", "restart the script", "stop/start the resource" (pt-BR: "dá ensure no X", "reinicia o resource", "para/sobe o resource"), or when a change needs reloading on the server to be tested.
 ---
 
-# Comandos no servidor pelo txAdmin
+# Server commands through txAdmin
 
-Sem rcon: o txAdmin roda local e o painel dele tem uma API. O script faz login, manda o
-comando e imprime as linhas novas do `fxserver.log`.
+No rcon: txAdmin runs locally and its panel has an API. The script logs in, sends the
+command and prints the new lines of `fxserver.log`.
 
-**Configurar uma vez:** copiar `config.example.json` para `config.json` (fica fora do git) e
-preencher a URL, o login do txAdmin, a pasta do servidor (`base`, onde fica o `txData`) e o
-perfil.
+**Set up once:** copy `config.example.json` to `config.json` (kept out of git) and fill in
+the URL, the txAdmin login, the server folder (`base`, where `txData` lives) and the profile.
 
-Rodar da pasta da skill, Node 18+:
+Run from the skill folder, Node 18+:
 
 ```bash
 node scripts/tx.mjs ensure rpemotes-reborn
-node scripts/tx.mjs restart mri_Qemotes
-node scripts/tx.mjs stop nome_do_resource
-node scripts/tx.mjs ensure job_a job_b job_c   # vários de uma vez, no mesmo login
-node scripts/tx.mjs refresh            # relê a lista de resources (resource novo na pasta)
+node scripts/tx.mjs restart my_resource
+node scripts/tx.mjs stop my_resource
+node scripts/tx.mjs ensure job_a job_b job_c   # several at once, on the same login
+node scripts/tx.mjs refresh                    # rescan resources (new folder)
 ```
 
-| Ação | O que faz |
+| Action | What it does |
 | --- | --- |
-| `ensure <res>` | Sobe, ou reinicia se já estiver rodando. Padrão pra recarregar mudança. |
-| `restart <res>` | Reinicia (falha se estiver parado). |
-| `start <res>` / `stop <res>` | Sobe / para. |
-| `refresh` | `refresh` do servidor, pra enxergar resource novo ou `fxmanifest.lua` mudado (arquivo novo em `client_scripts`): sem ele o `ensure` sobe com o manifest antigo e o cliente dá `attempt to index a nil value` no global do arquivo que faltou. |
-| `say <mensagem>` | Anúncio do txAdmin pra todos os jogadores. Só se pedirem. |
+| `ensure <res>` | Starts it, or restarts if running. The default to reload a change. |
+| `restart <res>` | Restarts (fails if stopped). |
+| `start <res>` / `stop <res>` | Starts / stops. |
+| `refresh` | Server `refresh`, to see a new resource or a changed `fxmanifest.lua` (new file in `client_scripts`): without it `ensure` starts with the old manifest and the client gets `attempt to index a nil value` on the missing file's global. |
+| `say <message>` | txAdmin announcement to every player. Only when asked. |
 
-**Login:** o txAdmin bloqueia o login por 15 minutos depois de umas 10 tentativas seguidas (erro 429).
-O script guarda a sessão em `%TEMP%mri-txadmin-<url>.json` e só loga de novo quando ela expira.
-Pra vários resources, passar todos no mesmo comando em vez de um loop de chamadas. Se vier o 429,
-esperar os 15 minutos: tentar de novo não adianta.
+**Login:** txAdmin blocks login for 15 minutes after about 10 attempts in a row (error 429).
+The script keeps the session in `%TEMP%\mri-txadmin-<url>.json` and only logs in again when it
+expires. For several resources, pass them all in one command instead of looping calls. On a
+429, wait the 15 minutes: retrying doesn't help.
 
-Flags: `--base <pasta>` e `--profile <perfil>` (padrão no `config.json`), `--url` se o txAdmin não estiver na porta 40120, `--no-log` pra não ler o log.
+Flags: `--base <folder>` and `--profile <profile>` (defaults in `config.json`), `--url` if
+txAdmin isn't on port 40120, `--no-log` to skip reading the log.
 
-## Depois do comando
+## After the command
 
-- Conferir na saída que o resource subiu (`Started resource <res>`) e que não veio
-  `SCRIPT ERROR` ou `Couldn't start resource`.
-- **Restart reinicia só aquele resource.** Quem depende dele (ex.: o `mri_Qemotes` em cima do
-  `rpemotes-reborn`) continua com o estado da instância antiga e pode parar de funcionar no
-  cliente. Reiniciou um motor/base: reinicie também quem usa ele.
-- Quem declara o resource em `dependencies` é **parado** junto e não volta sozinho (ex.:
-  `ensure sd-phone` derruba `sd-tablet` e os apps). Ler os `Stopping resource` no log e dar
-  `ensure` em cada um.
-- Resource grande (ex.: `sd-phone`, 22 MB): no cliente conectado os dependentes podem subir
-  antes dele terminar de baixar, e ele fica montado sem rodar (`No such export` nos apps).
-  Conferir `Creating script environments for <res>` no log do FiveM; sem a linha, o jogador
-  precisa reconectar.
-- Resource novo ou `dependencies` mudado: nada de resource só de servidor (ex.: `qbx_vehicles`)
-  no `dependencies`. O cliente não acha, recusa o resource e o FiveM derruba o jogador
-  ("Could not find dependency ... Killing network"). Conferir o log do FiveM depois do `ensure`.
-- Resource com `stream/` ou `data_file` de modelo: perguntar antes. Remontar no cliente
-  conectado derruba o jogo.
-- O lado do cliente aparece no log do FiveM (`FiveM.app\logs\CitizenFX_log_*.log`, na pasta
-  do FiveM), não no `fxserver.log`.
-- O script não mexe no `server.cfg`.
+- Check in the output that the resource started (`Started resource <res>`) and that no
+  `SCRIPT ERROR` or `Couldn't start resource` came up.
+- **Restart only restarts that resource.** Whoever depends on it (e.g. an emote menu on top
+  of `rpemotes-reborn`) keeps the old instance's state and may stop working on the client.
+  Restarted an engine/base resource: also restart those that use it.
+- Resources that list it in `dependencies` are **stopped** with it and don't come back by
+  themselves (e.g. `ensure sd-phone` takes down `sd-tablet` and the apps). Read the
+  `Stopping resource` lines in the log and `ensure` each one.
+- Large resource (e.g. `sd-phone`, 22 MB): on a connected client the dependents may start
+  before it finishes downloading, and it stays mounted without running (`No such export` in
+  the apps). Check `Creating script environments for <res>` in the FiveM log; without that
+  line, the player needs to reconnect.
+- New resource or changed `dependencies`: no server-only resource (e.g. `qbx_vehicles`) in
+  `dependencies`. The client can't find it, refuses the resource and FiveM drops the player
+  ("Could not find dependency ... Killing network"). Check the FiveM log after `ensure`.
+- Resource with `stream/` or a model `data_file`: ask first. Remounting it on a connected
+  client crashes the game.
+- The client side shows in the FiveM log (`FiveM.app\logs\CitizenFX_log_*.log`, in the FiveM
+  folder), not in `fxserver.log`.
+- The script never touches `server.cfg`.
 
-## Erros
+## Errors
 
-- `login falhou`: txAdmin fora do ar ou senha trocada. Conferir o `config.json`.
-- `comando falhou`: a mensagem do txAdmin vem junto (ex.: resource não existe).
-- Comando de console arbitrário não passa por essa API (o Live Console usa websocket): pra
-  isso, usar o console do txAdmin.
+- `login failed`: txAdmin down or password changed. Check `config.json`.
+- `command failed`: txAdmin's message comes along (e.g. the resource doesn't exist).
+- Arbitrary console commands don't go through this API (the Live Console uses a websocket):
+  use the txAdmin console for that.

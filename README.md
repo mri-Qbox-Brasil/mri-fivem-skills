@@ -1,24 +1,25 @@
 # mri-fivem-skills
 
-Skills de agente (Claude Code, Codex e outros que leem `SKILL.md`) para desenvolver resources
-FiveM: telas com cara de jogo, vidro na NUI, arquivos do GTA, posicionamento no mundo e
-comandos no servidor pelo txAdmin. Saíram do dia a dia da [MRI Brasil](https://github.com/mri-Qbox-Brasil)
-em servidores Qbox.
+Agent skills (Claude Code, Codex and any agent that reads `SKILL.md`) for FiveM resource
+development: screens that feel like a real game, glass on the NUI, GTA asset files, world
+placement tools and server commands through txAdmin. They come from day-to-day work at
+[MRI Brasil](https://github.com/mri-Qbox-Brasil) on Qbox servers.
 
-*Agent skills for FiveM resource development (in Brazilian Portuguese).*
-
-| Skill | Para quê |
+| Skill | What for |
 | --- | --- |
-| [`mri-game-ux`](mri-game-ux) | Telas e cenas com cara de jogo AAA: câmera scriptada, transições sem corte seco, trilha em fases, menus, conversa com NPC |
-| [`mri-world-placement`](mri-world-placement) | Posicionar NPC, objeto e zona e marcar rota no mundo, com módulo Lua e barra de teclas prontos, sem marcador piscando |
-| [`mri-nui-glass`](mri-nui-glass) | Liquid glass de verdade na NUI: o jogo desfocado atrás do painel, que o `backdrop-filter` do CEF não faz |
-| [`mri-gta-assets`](mri-gta-assets) | Formatos do GTA V (RPF7, RSC7, ytd), otimização de texturas, mod single player para resource FiveM |
-| [`mri-txadmin`](mri-txadmin) | `ensure`, `restart`, `start` e `stop` pela API local do txAdmin, sem rcon, com o log do servidor |
+| [`mri-game-ux`](mri-game-ux) | AAA-feeling screens and scenes: scripted camera, transitions without hard cuts, music in phases, menus, NPC conversations |
+| [`mri-world-placement`](mri-world-placement) | Place NPCs, objects and zones and record routes in the world, with a ready Lua module and key rail, no flickering markers |
+| [`mri-nui-glass`](mri-nui-glass) | Real liquid glass on the NUI: the blurred game behind the panel, which CEF's `backdrop-filter` can't do |
+| [`mri-gta-assets`](mri-gta-assets) | GTA V formats (RPF7, RSC7, ytd), texture optimization, single player mods to FiveM resources |
+| [`mri-txadmin`](mri-txadmin) | `ensure`, `restart`, `start` and `stop` through the local txAdmin API, no rcon, with the server log |
 
-## Instalar
+The skills are written in English; the agent still answers in the user's language, and each
+`description` also lists Brazilian Portuguese trigger phrases.
 
-Clone e ligue cada pasta na pasta de skills do agente (link, não cópia, para o `git pull`
-atualizar):
+## Install
+
+Clone and link each folder into the agent's skills folder (a link, not a copy, so `git pull`
+updates it):
 
 ```powershell
 git clone https://github.com/mur4i/mri-fivem-skills C:\Github\mri-fivem-skills
@@ -29,21 +30,21 @@ foreach ($s in Get-ChildItem C:\Github\mri-fivem-skills -Directory) {
 }
 ```
 
-No Linux/macOS: `ln -s` de cada pasta em `~/.claude/skills/`. Codex: `~/.codex/skills`.
+Linux/macOS: `ln -s` each folder into `~/.claude/skills/`. Codex: `~/.codex/skills`.
 
-O `mri-txadmin` precisa de um `config.json` (copie o `config.example.json`); ele fica fora do git.
+`mri-txadmin` needs a `config.json` (copy `config.example.json`); it stays out of git.
 
-## Manutenção
+## Maintenance
 
-Cada skill melhora com o uso. Ao terminar uma tarefa, o agente avalia se algo deve ficar
-registrado (padrão aprovado, pegadinha nova, passo que fez falta) e edita a skill:
+Each skill improves with use. When a task ends, the agent checks whether something should be
+recorded (an approved pattern, a new pitfall, a missing step) and edits the skill:
 
-- só o que é geral e confirmado, como regra curta no imperativo, não história;
-- editar o que já existe antes de acrescentar; regra nova que contradiz uma antiga a substitui;
-- `SKILL.md` com até ~150 linhas, detalhe em `references/`;
-- capacidade nova entra na `description` no mesmo commit;
-- nada de segredo, senha, caminho pessoal ou dado de servidor privado.
+- only what is general and confirmed, as a short imperative rule, not a story;
+- edit what exists before adding; a new rule that contradicts an old one replaces it;
+- `SKILL.md` up to ~150 lines, details in `references/`;
+- a new capability goes into the `description` in the same commit;
+- never secrets, passwords, personal paths or private server data.
 
-## Licença
+## License
 
 [MIT](LICENSE).

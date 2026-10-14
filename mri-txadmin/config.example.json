@@ -2,6 +2,6 @@
   "url": "http://127.0.0.1:40120",
   "username": "admin",
   "password": "",
-  "base": "C:\FXServer\server-data",
+  "base": "C:/FXServer/server-data",
   "profile": "default"
 }

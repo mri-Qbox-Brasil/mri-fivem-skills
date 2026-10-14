@@ -1,76 +1,75 @@
-# Armadilhas de NUI
+# NUI pitfalls
 
-## Piscada na troca de tela
+## Flicker on screen switch
 
-Sintoma: a parte de baixo (ou a tela toda) clareia e escurece de novo ao trocar de tela.
+Symptom: the lower part (or the whole screen) brightens and darkens again on a switch.
 
-Causa típica: o escurecido (scrim) mora dentro de cada tela. A tela velha desmonta na
-hora, a nova entra com fade a partir de `opacity: 0` levando o scrim junto.
+Typical cause: the dim layer (scrim) lives inside each screen. The old screen unmounts at
+once, the new one fades in from `opacity: 0` taking the scrim with it.
 
-Correção: um scrim só, fora das telas, montado enquanto qualquer uma das telas que o usa
-está ativa. Posicione antes das views no DOM com `z-index: 0` pra ficar atrás delas.
-Confirme medindo a opacidade efetiva do scrim quadro a quadro durante a troca
-(`verification.md`): deve ficar em 1.00 o tempo todo.
+Fix: a single scrim, outside the screens, mounted while any screen that uses it is active.
+Place it before the views in the DOM with `z-index: 0` so it stays behind them. Confirm by
+measuring the scrim's effective opacity frame by frame during the switch
+(`verification.md`): it must stay at 1.00 the whole time.
 
-Se a piscada for preta, não é a NUI: é um corte de câmera com fade no Lua.
+If the flicker is black, it's not the NUI: it's a camera cut with a fade in Lua.
 
-## Música que para ou reinicia
+## Music that stops or restarts
 
-Player desmontado por `if (!isOpen) return ...` ou por trocar a árvore. Ver `sound.md`:
-o player fica na mesma posição da árvore em todos os ramos.
+Player unmounted by `if (!isOpen) return ...` or by swapping the tree. See `sound.md`: the
+player stays in the same tree position in every branch.
 
-Objeto de config novo a cada refresh também reinicia o player se o efeito depender da
-identidade do objeto. Compare por valor (JSON) antes de trocar o estado, ou dependa só
-dos campos que importam (url resolvida, loop).
+A new config object on every refresh also restarts the player if the effect depends on the
+object's identity. Compare by value (JSON) before changing state, or depend only on the
+fields that matter (resolved url, loop).
 
-## Animação sobrescrevendo transform
+## Animation overriding transform
 
-Keyframe com `transform` apaga o `translate(-50%)` que centraliza o elemento. Centralize
-de outro jeito (`left: 0; right: 0; margin: auto; width: max-content`) ou anime num
-wrapper.
+A keyframe with `transform` wipes the `translate(-50%)` that centers the element. Center it
+another way (`left: 0; right: 0; margin: auto; width: max-content`) or animate a wrapper.
 
-`transform`/`filter` numa raiz `fixed` cria bloco de contenção pros filhos `fixed`. Com a
-raiz `inset: 0` não muda nada; fora disso, confira.
+`transform`/`filter` on a `fixed` root creates a containing block for `fixed` children. With
+an `inset: 0` root nothing changes; otherwise, check.
 
 ## Loadscreen
 
-- Fundo de tela cheia não usa `bg-background` do ui-kit: ele multiplica pela opacidade do
-  `/uiconfig` (glass 0.8) e a tela do GTA vaza por baixo. Use `bg-[hsl(var(--background))]`
-  e pinte `html`/`body` da página.
-- Spinner de "carregando" no canto inferior direito é do GTA, não da NUI. Some com
-  `SetConvarReplicated('sv_showBusySpinnerOnLoadingScreen', 'false')` no server do resource
-  (testado no jogo no mri_Qloadscreen), sem mexer no `server.cfg`.
-- Nunca `invokeNative('quit')` pra fechar: isso fecha o FiveM. Quem fecha é
-  `ShutdownLoadingScreenNui` no client.
+- A full-screen background doesn't use the ui-kit's `bg-background`: it multiplies by the
+  `/uiconfig` opacity (glass 0.8) and the GTA screen leaks below. Use
+  `bg-[hsl(var(--background))]` and paint the page's `html`/`body`.
+- The "loading" spinner in the lower right corner is GTA's, not the NUI's. Remove it with
+  `SetConvarReplicated('sv_showBusySpinnerOnLoadingScreen', 'false')` in the resource's server
+  side (tested in game), without touching `server.cfg`.
+- Never `invokeNative('quit')` to close: that closes FiveM. Closing is
+  `ShutdownLoadingScreenNui` on the client.
 
-## CEF 103 (Chromium do FiveM)
+## CEF 103 (FiveM's Chromium)
 
-- Popover com floating-ui cai no canto: o CEF 103 não tem `containerType` moderno.
-- Sem `:has()` confiável, sem `@container` novo. Teste no jogo o que for CSS recente.
-- Log da NUI fica em `FiveM.app\logs` (cliente), na pasta de instalação do FiveM.
+- A floating-ui popover falls into the corner: CEF 103 lacks modern `containerType`.
+- No reliable `:has()`, no new `@container`. Test recent CSS in game.
+- NUI logs are in `FiveM.app\logs` (client), in the FiveM install folder.
 
-## fetchNui no navegador
+## fetchNui in the browser
 
-Fora do jogo, `fetchNui` costuma responder `{ success: true }` fixo quando
-`window.invokeNative` não existe, e o mock de dev não roda. Pra testar com o mock,
-injete `window.invokeNative = function () {}` antes da página carregar
+Outside the game, `fetchNui` usually answers a fixed `{ success: true }` when
+`window.invokeNative` doesn't exist, and the dev mock doesn't run. To test with the mock,
+inject `window.invokeNative = function () {}` before the page loads
 (`Page.addScriptToEvaluateOnNewDocument`).
 
-## Foco e teclado
+## Focus and keyboard
 
-- `SetNuiFocus(true, true)` só enquanto há interface interativa. Durante cutscene e
-  editor de outro resource, solte.
-- Listener de teclado por tela, desligado quando outra camada (confirmação, criação,
-  configurações) está por cima.
+- `SetNuiFocus(true, true)` only while there is an interactive interface. During a cutscene
+  and another resource's editor, release it.
+- One keyboard listener per screen, off when another layer (confirmation, creation,
+  settings) is on top.
 
-## Tela sobre o mundo: legibilidade
+## Screen over the world: legibility
 
-- Escurecimento (vinheta, degradê atrás de texto) em preto fixo (`rgba(0,0,0,x)`), nunca
-  `bg-background/x` do ui-kit: o preset multiplica o alpha pelo `--ui-opacity` do
-  `/uiconfig`, e no tema glass o degradê some sobre cena clara.
-- Texto sobre superfície invertida (card branco de foco): `text-black`, não
-  `text-background` (sai apagado pelo mesmo motivo).
-- Conferir no navegador sobre recorte de print real do jogo (dia e noite), com
-  `data-theme="glass"` e `--ui-opacity` baixo. Fundo pintado engana.
-- Lista embaixo de um carro/ped em 3D não repete a foto dele: card de texto (marca, nome,
-  placa, status). Foto faltando vira quadrado vazio.
+- Dimming (vignette, gradient behind text) in fixed black (`rgba(0,0,0,x)`), never the
+  ui-kit's `bg-background/x`: the preset multiplies alpha by the `/uiconfig` `--ui-opacity`,
+  and on the glass theme the gradient disappears over a bright scene.
+- Text on an inverted surface (white focus card): `text-black`, not `text-background` (it
+  comes out faded for the same reason).
+- Check in the browser over a crop of a real game screenshot (day and night), with
+  `data-theme="glass"` and a low `--ui-opacity`. A painted background deceives.
+- A list under a 3D car/ped doesn't repeat its photo: text card (brand, name, plate,
+  status). A missing photo becomes an empty square.

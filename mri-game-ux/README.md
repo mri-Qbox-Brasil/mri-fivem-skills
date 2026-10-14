@@ -1,32 +1,31 @@
 # mri-game-ux
 
-Skill do Claude Code pra deixar telas e cenas de resources FiveM com cara de jogo AAA:
-menus que dizem pra onde levam, transições de câmera e interface sem corte seco, desfoque
-e câmera na mão, trilha em fases com crossfade, barras de cinema e confirmação destrutiva
-sem modal.
+Agent skill that makes FiveM resource screens and scenes feel like an AAA game: menus that
+say where they lead, camera and interface transitions without hard cuts, depth of field and
+handheld camera, music in phases with crossfade, cinema bars and destructive confirmation
+without a modal.
 
-Os padrões saíram do `mri_Qmultichar` (abertura, showroom, criação de personagem e
-chegada na cidade), que é o exemplo de referência.
+The patterns come from `mri_Qmultichar` (title screen, showroom, character creation and city
+arrival), the reference example.
 
-## Instalar
+## Install
 
-Ver o `README.md` da raiz do repo.
+See the repo root `README.md`.
 
-## Usar
+## Use
 
-Numa sessão aberta na base ou no repo do resource:
+In a session opened on the server folder or the resource repo:
 
 ```
 /mri-game-ux mri_Qspawn
 ```
 
-ou em texto: "a entrada do spawn tá muito repentina, deixa mais cinematográfico".
+or in plain words: "the spawn entrance is too sudden, make it more cinematic".
 
-## Conteúdo
+## Contents
 
-- `SKILL.md`: fluxo (levantamento, proposta, aplicar, verificar, documentar), princípios
-  e regras.
-- `references/`: transições, câmera e cena, som, menus, armadilhas de NUI e verificação.
-  O agente lê só a do assunto.
-- `scripts/nui-probe.mjs`: roda passos numa NUI em modo browser via Chrome headless
-  (mensagens do Lua, cliques, prints e opacidade por quadro).
+- `SKILL.md`: flow (survey, proposal, apply, verify, document), principles and rules.
+- `references/`: transitions, camera and scene, sound, menus, NUI pitfalls and verification.
+  The agent reads only the one for the subject.
+- `scripts/nui-probe.mjs`: runs steps on a NUI in browser mode through headless Chrome (Lua
+  messages, clicks, screenshots and per-frame opacity).

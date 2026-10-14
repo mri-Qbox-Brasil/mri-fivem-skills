@@ -1,68 +1,68 @@
 ---
 name: mri-game-ux
-description: Deixa telas e cenas de um resource FiveM (multichar, criação de personagem, spawn, appearance, loading, cutscenes) com cara de jogo AAA - menus que dizem pra onde levam, transições de câmera e interface sem corte seco, desfoque e câmera na mão, trilha em fases com crossfade, barras de cinema, confirmação destrutiva sem modal. Use quando pedirem "cara de triple A", "mais cinematográfico", "tá repentino", "tá piscando", "a música para", ou quando for desenhar ou revisar um fluxo de tela in-game com câmera scriptada e NUI.
+description: Makes FiveM resource screens and scenes (multichar, character creation, spawn, appearance, loading, cutscenes, NPC conversation) feel like an AAA game - menus that say where they lead, camera and interface transitions without hard cuts, depth of field and handheld camera, music in phases with crossfade, cinema bars, destructive confirmation without a modal. Use when asked for "AAA feel", "more cinematic", "too sudden", "it flickers", "the music stops" (pt-BR: "cara de triple A", "mais cinematográfico", "tá repentino", "tá piscando", "a música para"), or when designing or reviewing an in-game screen flow with a scripted camera and NUI.
 ---
 
-# UX de jogo AAA em resources FiveM
+# AAA game UX in FiveM resources
 
-Objetivo: o jogador não percebe a costura entre NUI, câmera scriptada e mundo. Tela entra
-e sai de propósito, câmera se move como filmagem, som acompanha a fase, nada aparece ou
-some seco.
+Goal: the player never sees the seam between NUI, scripted camera and world. Screens enter
+and leave on purpose, the camera moves like a film shot, sound follows the phase, nothing
+pops in or out.
 
-Referência: `mri_Qmultichar` da MRI (abertura, showroom, criação, chegada).
+Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
 
-## Fluxo
+## Flow
 
-1. **Levantamento** (antes de propor):
-   - mapear o fluxo real tela a tela, evento a evento (NUI message, callback, troca de
-     câmera, fade, `SetNuiFocus`), seguindo o código;
-   - em cada passagem, anotar o que aparece: corte, fade, glide, pop;
-   - achar o que desmonta na troca (componente condicional, `if (!isOpen) return`): causa
-     de piscada e de música que para.
-2. **Proposta curta**: problema visto, causa no código, correção com os números (ms,
-   metros). Recomendar uma opção.
-3. **Aplicar** pela reference do assunto. Tempos e distâncias vão pro painel do resource
-   (`data/*.json`), não soltos no código.
-4. **Verificar** (`references/verification.md`): o que o navegador mostra e o que só o jogo
-   mostra. Bug só no jogo: log legível antes de corrigir.
-5. **Documentar** no README do resource o comportamento novo e onde se ajusta.
+1. **Survey** (before proposing):
+   - map the real flow screen by screen, event by event (NUI message, callback, camera
+     switch, fade, `SetNuiFocus`), following the code;
+   - at each passage, note what shows: cut, fade, glide, pop;
+   - find what unmounts on the switch (conditional component, `if (!isOpen) return`): the
+     cause of flicker and of music that stops.
+2. **Short proposal**: problem seen, cause in the code, fix with numbers (ms, meters).
+   Recommend one option.
+3. **Apply** following the subject's reference. Times and distances go to the resource's
+   config (`data/*.json`), not loose in code.
+4. **Verify** (`references/verification.md`): what the browser shows and what only the game
+   shows. Game-only bug: readable log before fixing.
+5. **Document** the new behavior in the resource README and where to tune it.
 
-## Princípios
+## Principles
 
-- **Item de menu diz pra onde leva.** "Continuar" com o nome do personagem embaixo,
-  "Personagens" pra lista. Conta vazia: só o possível ("Criar personagem"). Item inútil
-  some, não fica desabilitado.
-- **Nada seco.** Ped entra e sai com alpha; tela sai com fade e desfoque; a próxima entra
-  depois que a câmera começou a andar.
-- **Deslizar perto, cortar longe.** Voo longo atravessa mundo sem stream. Acima de um
-  limite (18 m no multichar) corta pelo preto; abaixo, glide.
-- **Interface espera a cena.** Primeiro câmera, depois texto.
-- **Destrutivo é segurar, não modal.** Confirmação na própria barra de ações (anel que
-  enche segurando mouse ou tecla), Esc sai.
-- **Som é trilha, não player.** Uma faixa por fase, crossfade na troca, atravessa telas
-  fechadas (editor, cutscene) até o fim do fluxo.
-- **Cena é cena.** Cutscene e chegada com barras de cinema, crédito com o nome, "pular"
-  discreto.
-- **Configurável.** Faixas, planos de câmera e tempos no painel, com padrão bom.
+- **A menu item says where it leads.** "Continue" with the character name below,
+  "Characters" for the list. Empty account: only what is possible ("Create character").
+  A useless item disappears instead of being disabled.
+- **Nothing pops.** Peds enter and leave with alpha; a screen leaves with fade and blur; the
+  next one enters after the camera started moving.
+- **Glide near, cut far.** A long flight crosses unstreamed world. Above a threshold (18 m in
+  the multichar) cut through black; below it, glide.
+- **The interface waits for the scene.** Camera first, then text.
+- **Destructive means hold, not modal.** Confirmation on the action bar itself (a ring that
+  fills while holding mouse or key), Esc leaves.
+- **Sound is a score, not a player.** One track per phase, crossfade on change, survives
+  closed screens (editor, cutscene) until the end of the flow.
+- **A scene is a scene.** Cutscene and arrival with cinema bars, name as credit, discreet
+  "skip".
+- **Configurable.** Tracks, camera shots and times in the config, with good defaults.
 
-## References (ler só a do assunto)
+## References (read only the one for the subject)
 
-| Arquivo | Quando |
+| File | When |
 |---|---|
-| `references/transitions.md` | entrada e saída de telas, glide x corte, fade de ped, arco de câmera |
-| `references/camera-scene.md` | câmera scriptada, desfoque, câmera na mão, stream de área, hora e clima, texto 3D |
-| `references/sound.md` | trilha em fases, crossfade, música com a NUI fechada, efeitos, cutscenes |
-| `references/menus.md` | título, landing, seleção, confirmação destrutiva, controle |
-| `references/nui-pitfalls.md` | piscada na troca, player que reinicia, CEF 103, animação x transform |
-| `references/verification.md` | prints e medições no Chrome headless, parser Lua, logs de diagnóstico |
+| `references/transitions.md` | screens entering and leaving, glide vs cut, ped fade, camera arc |
+| `references/camera-scene.md` | scripted camera, depth of field, handheld camera, area streaming, time and weather, 3D text, NPC conversation |
+| `references/sound.md` | music in phases, crossfade, music with the NUI closed, effects, cutscenes |
+| `references/menus.md` | title, landing, selection, destructive confirmation, gamepad, world prompts |
+| `references/nui-pitfalls.md` | flicker on switch, player that restarts, CEF 103, animation vs transform |
+| `references/verification.md` | screenshots and measurements in headless Chrome, Lua parser, diagnostic logs |
 
-## Regras
+## Rules
 
-- Integrar pelo contrato público do outro resource (eventos, exports, statebags do
-  upstream), sem depender de API nova dele.
-- Sem fallback escondendo bug. Animação não toca: descobrir por quê.
+- Integrate through the other resource's public contract (events, exports, upstream
+  statebags), never depending on a new API of it.
+- No fallback hiding a bug. An animation doesn't play: find out why.
 
-## Manutenção (auto aprimoramento)
+## Maintenance
 
-Ao fim de cada uso, seguir a "Manutenção" do `README.md` da raiz. Padrão novo aprovado vai
-na reference do assunto.
+At the end of each use, follow "Maintenance" in the repo root `README.md`. A new approved
+pattern goes into the subject's reference.
