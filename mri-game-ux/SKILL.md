@@ -53,8 +53,8 @@ Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
 | `references/camera-scene.md` | scripted camera, depth of field, handheld camera, area streaming, time and weather, 3D text, NPC conversation |
 | `references/sound.md` | music in phases, crossfade, music with the NUI closed, effects, cutscenes |
 | `references/menus.md` | title, landing, selection, destructive confirmation, gamepad, world prompts |
-| `references/nui-pitfalls.md` | flicker on switch, player that restarts, CEF 103, animation vs transform |
-| `references/verification.md` | screenshots and measurements in headless Chrome, Lua parser, diagnostic logs |
+| `references/nui-pitfalls.md` | flicker on switch, player that restarts, animation vs transform, loadscreen, legibility over the world |
+| `references/verification.md` | screenshots and measurements in headless Chrome, music check, diagnostic logs |
 
 ## Rules
 

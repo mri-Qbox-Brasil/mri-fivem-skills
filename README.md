@@ -2,7 +2,8 @@
 
 Agent skills (Claude Code, Codex and any agent that reads `SKILL.md`) for FiveM resource
 development: screens that feel like a real game, glass on the NUI, GTA asset files, world
-placement tools and server commands through txAdmin. They come from day-to-day work at
+placement tools, server commands through txAdmin, checking resources, wrapping third-party
+resources and the NUI's Chromium version. They come from day-to-day work at
 [MRI Brasil](https://github.com/mri-Qbox-Brasil) on Qbox servers.
 
 | Skill | What for |
@@ -12,6 +13,9 @@ placement tools and server commands through txAdmin. They come from day-to-day w
 | [`mri-nui-glass`](mri-nui-glass) | Real liquid glass on the NUI: the blurred game behind the panel, which CEF's `backdrop-filter` can't do |
 | [`mri-gta-assets`](mri-gta-assets) | GTA V formats (RPF7, RSC7, ytd), texture optimization, single player mods to FiveM resources |
 | [`mri-txadmin`](mri-txadmin) | `ensure`, `restart`, `start` and `stop` through the local txAdmin API, no rcon, with the server log |
+| [`mri-resource-check`](mri-resource-check) | Check a resource before calling it done: Lua parser with CfxLua syntax, manifest pitfalls, reload order, which log shows what |
+| [`mri-upstream-wrap`](mri-upstream-wrap) | Change third-party resources without editing them: wrapper folder, hooks, keybinds, `provide` with a compat layer for exports |
+| [`mri-nui-cef`](mri-nui-cef) | NUI on FiveM's Chromium: CEF 103 limits, what CEF 144 breaks and opens up, a scanner for the breaking changes |
 
 The skills are written in English; the agent still answers in the user's language, and each
 `description` also lists Brazilian Portuguese trigger phrases.

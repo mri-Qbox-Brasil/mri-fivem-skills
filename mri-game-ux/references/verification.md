@@ -49,9 +49,8 @@ arrivalStart, musicEnd) and check: two ids during the crossfade, one after, none
 
 ## Lua
 
-- Run a parser (e.g. `luaparse`, replacing backtick hashes with `0`) on every edited `.lua`.
-  Test the parser first with a deliberately broken file.
-- On the server, check the console after `ensure`.
+Parser, reload order and logs: see the `mri-resource-check` skill
+(`node scripts/check.mjs <resource>`).
 
 ## Game-only bug
 
