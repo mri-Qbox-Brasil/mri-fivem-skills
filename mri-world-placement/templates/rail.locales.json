@@ -11,7 +11,14 @@
       "rotate": "Girar",
       "place": "Colocar aqui",
       "place_hint": "Mire onde deve ficar.",
-      "route_hint": "Mire e marque cada parada; a linha mostra o caminho. A primeira é o ponto de partida."
+      "route_hint": "Mire e marque cada parada; a linha mostra o caminho. A primeira é o ponto de partida.",
+      "zone_title": "Marcar zona",
+      "zone_count": "{count} marcadas",
+      "walk": "ande até o ponto",
+      "size": "tamanho",
+      "height": "altura",
+      "zone_hint": "A caixa amarela é a zona e a seta é a direção. As verdes são as já marcadas.",
+      "zone_mark": "Marcar zona"
     }
   },
   "en": {
@@ -26,7 +33,14 @@
       "rotate": "Rotate",
       "place": "Place here",
       "place_hint": "Aim where it should stand.",
-      "route_hint": "Aim and mark each stop; the line shows the path. The first one is the starting point."
+      "route_hint": "Aim and mark each stop; the line shows the path. The first one is the starting point.",
+      "zone_title": "Mark zone",
+      "zone_count": "{count} marked",
+      "walk": "walk to the spot",
+      "size": "size",
+      "height": "height",
+      "zone_hint": "The yellow box is the zone and the arrow its heading. Green ones are already marked.",
+      "zone_mark": "Mark zone"
     }
   }
 }

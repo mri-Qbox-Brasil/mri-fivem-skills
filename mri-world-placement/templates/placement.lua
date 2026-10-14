@@ -11,6 +11,9 @@ local BLOCKED_CONTROLS = { 14, 15, 16, 17, 24, 25, 37, 44, 140, 141, 142, 200 }
 local KEY = { mark = 38, undo = 177, finish = 191, cancel = 200, left = 174, right = 175, wheelUp = 15, wheelDown = 14 }
 local START_COLOR = { 0, 230, 153 }
 local STOP_COLOR = { 255, 255, 255 }
+local ZONE_COLOR = { 255, 210, 0 }
+local ZONE_MIN, ZONE_MAX, ZONE_STEP = 0.5, 50.0, 0.5
+local SHIFT = 21
 
 local active = false
 
@@ -53,6 +56,55 @@ end
 
 local function drawStop(point, color)
 	DrawMarker(1, point.x, point.y, point.z - 0.02, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6, 0.6, 0.35, color[1], color[2], color[3], 170, false, false, 2, false, nil, nil, false)
+end
+
+-- Box centered on `c`, turned by `heading`, `size` = { x, y, z } full lengths.
+local function drawBox(c, size, heading, color, alpha)
+	local rad = math.rad(heading)
+	local cos, sin = math.cos(rad), math.sin(rad)
+	local hx, hy, hz = size.x / 2, size.y / 2, size.z / 2
+	local corners = {}
+	for i, offset in ipairs({ { -hx, -hy }, { hx, -hy }, { hx, hy }, { -hx, hy } }) do
+		local rx, ry = offset[1] * cos - offset[2] * sin, offset[1] * sin + offset[2] * cos
+		corners[i] = { c.x + rx, c.y + ry }
+	end
+	local r, g, b, a = color[1], color[2], color[3], alpha or 255
+	for i = 1, 4 do
+		local p, n = corners[i], corners[i % 4 + 1]
+		DrawLine(p[1], p[2], c.z - hz, n[1], n[2], c.z - hz, r, g, b, a)
+		DrawLine(p[1], p[2], c.z + hz, n[1], n[2], c.z + hz, r, g, b, a)
+		DrawLine(p[1], p[2], c.z - hz, p[1], p[2], c.z + hz, r, g, b, a)
+	end
+end
+
+-- Arrow on the floor of the box pointing where `heading` faces.
+local function drawArrow(c, heading, color)
+	local rad = math.rad(heading)
+	local length, tip = 2.0, 0.3
+	local ex, ey = c.x - math.sin(rad) * length, c.y + math.cos(rad) * length
+	local z = c.z + 0.5
+	DrawLine(c.x, c.y, z, ex, ey, z, color[1], color[2], color[3], 255)
+	for _, side in ipairs({ 150, -150 }) do
+		local a = rad + math.rad(side)
+		DrawLine(ex, ey, z, ex - math.sin(a) * tip, ey + math.cos(a) * tip, z, color[1], color[2], color[3], 255)
+	end
+end
+
+local function drawLabel(c, text)
+	local onScreen, x, y = World3dToScreen2d(c.x, c.y, c.z)
+	if not onScreen then return end
+	SetTextScale(0.35, 0.35)
+	SetTextFont(4)
+	SetTextColour(255, 255, 255, 215)
+	SetTextOutline()
+	SetTextCentre(true)
+	BeginTextCommandDisplayText('STRING')
+	AddTextComponentSubstringPlayerName(text)
+	EndTextCommandDisplayText(x, y)
+end
+
+local function clampSize(value)
+	return math.min(ZONE_MAX, math.max(ZONE_MIN, value))
 end
 
 function WorldPlacer.isActive()
@@ -108,6 +160,82 @@ function WorldPlacer.point(opts)
 	active = false
 	hud(false)
 	DeleteEntity(ghost)
+	return result
+end
+
+---Box with heading around the player: walk to place it, the player's heading turns it, wheel sizes it,
+---Shift + wheel sets the height, E marks. With `multiple`, Backspace undoes and Enter finishes; otherwise
+---E returns at once and Backspace cancels. Esc always cancels. `refs` are zones already placed, drawn green.
+---@param opts { size?: { x: number, y: number, z: number }, multiple?: boolean, refs?: { coords: table, size: table, heading: number, label?: string }[] }
+---@return { coords: table, heading: number, size: table }|{ coords: table, heading: number, size: table }[]|nil
+function WorldPlacer.zone(opts)
+	if active then return nil end
+	local s = type(opts.size) == 'table' and opts.size or { x = 3.0, y = 3.0, z = 3.0 }
+	local size = { x = clampSize(tonumber(s.x) or 3.0), y = clampSize(tonumber(s.y) or 3.0), z = clampSize(tonumber(s.z) or 3.0) }
+	local refs = type(opts.refs) == 'table' and opts.refs or {}
+	local marks = {}
+
+	active = true
+	local function push() hud({ mode = 'zone', size = size, count = #marks, multiple = opts.multiple == true }) end
+	push()
+
+	local result
+	while active do
+		block()
+
+		for _, ref in ipairs(refs) do
+			drawBox(ref.coords, ref.size, ref.heading or 0.0, START_COLOR, 200)
+			if ref.label then drawLabel(vec3(ref.coords.x, ref.coords.y, ref.coords.z + ref.size.z / 2 + 0.2), ref.label) end
+		end
+		for _, mark in ipairs(marks) do drawBox(mark.coords, mark.size, mark.heading, START_COLOR, 200) end
+
+		local coords, heading = GetEntityCoords(cache.ped), GetEntityHeading(cache.ped)
+		drawBox(coords, size, heading, ZONE_COLOR)
+		drawArrow(coords, heading, ZONE_COLOR)
+		drawLabel(vec3(coords.x, coords.y, coords.z + size.z / 2 + 0.3), ('%.1f x %.1f x %.1f m'):format(size.x, size.y, size.z))
+
+		local step = (IsDisabledControlJustPressed(0, KEY.wheelUp) and 1 or 0) - (IsDisabledControlJustPressed(0, KEY.wheelDown) and 1 or 0)
+		if step ~= 0 then
+			if IsControlPressed(0, SHIFT) then
+				size.z = clampSize(size.z + step * ZONE_STEP)
+			else
+				size.x, size.y = clampSize(size.x + step * ZONE_STEP), clampSize(size.y + step * ZONE_STEP)
+			end
+			push()
+		end
+
+		if IsControlJustPressed(0, KEY.mark) then
+			local mark = {
+				coords = { x = coords.x, y = coords.y, z = coords.z },
+				heading = math.floor(heading * 100 + 0.5) / 100,
+				size = { x = size.x, y = size.y, z = size.z },
+			}
+			PlaySoundFrontend(-1, 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', true)
+			if not opts.multiple then
+				result = mark
+				break
+			end
+			marks[#marks + 1] = mark
+			push()
+		elseif IsControlJustPressed(0, KEY.undo) then
+			PlaySoundFrontend(-1, 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', true)
+			if not opts.multiple then break end
+			if #marks > 0 then
+				marks[#marks] = nil
+				push()
+			end
+		elseif opts.multiple and IsDisabledControlJustPressed(0, KEY.finish) then
+			result = #marks > 0 and marks or nil
+			break
+		elseif IsDisabledControlJustPressed(0, KEY.cancel) then
+			PlaySoundFrontend(-1, 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', true)
+			break
+		end
+		Wait(0)
+	end
+
+	active = false
+	hud(false)
 	return result
 end
 

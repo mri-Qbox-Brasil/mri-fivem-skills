@@ -34,3 +34,8 @@ end)
 RegisterNUICallback('recordRoute', function(draft, cb)
 	inWorld(draft, cb, function(d) return WorldPlacer.path({ start = d.coords }) end)
 end)
+
+-- `refs` are the zones the item already has, so the admin sees them while marking new ones.
+RegisterNUICallback('placeZone', function(draft, cb)
+	inWorld(draft, cb, function(d) return WorldPlacer.zone({ size = d.size, multiple = d.multiple, refs = d.refs }) end)
+end)
