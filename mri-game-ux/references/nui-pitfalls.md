@@ -42,11 +42,9 @@ an `inset: 0` root nothing changes; otherwise, check.
 - Never `invokeNative('quit')` to close: that closes FiveM. Closing is
   `ShutdownLoadingScreenNui` on the client.
 
-## CEF 103 (FiveM's Chromium)
+## CEF version (FiveM's Chromium)
 
-- A floating-ui popover falls into the corner: CEF 103 lacks modern `containerType`.
-- No reliable `:has()`, no new `@container`. Test recent CSS in game.
-- NUI logs are in `FiveM.app\logs` (client), in the FiveM install folder.
+CEF 103 limits, the CEF 144 upgrade and NUI logs: see the `mri-nui-cef` skill.
 
 ## fetchNui in the browser
 
