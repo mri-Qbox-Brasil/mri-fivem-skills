@@ -1,6 +1,6 @@
 ---
 name: mri-resource-check
-description: "Checks a FiveM resource before calling a change done - parses every .lua including CfxLua syntax (backtick hashes, ?. and ?[ safe navigation, +=, <const>), flags the `and false or x` trap, fxmanifest globs that match nothing, missing files and old fx_version, then the reload order (refresh, ensure, who to ask before restarting) and which log shows what (fxserver.log on the server, CitizenFX_log on the client). Ready script with luaparse bundled, no install. Use when finishing any change to a resource, when asked to \"check the resource\", \"validate the Lua\", \"did it load?\", \"why doesn't my file run?\", \"SCRIPT ERROR after ensure\", \"No such export\", \"works on the server but not for the player\" (pt-BR: \"confere o resource\", \"valida o lua\", \"carregou?\", \"o arquivo não roda\", \"deu erro depois do ensure\"), or when a bug only shows in game."
+description: "Checks a FiveM resource before calling a change done and looks up natives instead of guessing - parses every .lua including CfxLua syntax, flags natives that do not exist or run on the wrong side (client/server, from the official Cfx native lists), the `and false or x` trap, fxmanifest globs that match nothing, missing files and old fx_version, then the reload order (refresh, ensure, who to ask before restarting) and which log shows what (fxserver.log on the server, CitizenFX_log on the client). Node scripts, nothing to install. Use when finishing any change to a resource, when asked to \"check the resource\", \"validate the Lua\", \"did it load?\", \"why doesn't my file run?\", \"SCRIPT ERROR after ensure\", \"No such export\", \"works on the server but not for the player\", \"does this native exist?\", \"attempt to call a nil value\" (pt-BR: \"confere o resource\", \"valida o lua\", \"carregou?\", \"o arquivo não roda\", \"deu erro depois do ensure\"), or when a bug only shows in game."
 ---
 
 # Checking a resource
@@ -8,19 +8,40 @@ description: "Checks a FiveM resource before calling a change done - parses ever
 Nothing is "done" until it parsed, loaded and was read end to end. Say what was verified where
 (parser, server log, client log, browser, game) and what was not tested.
 
-## 1. Parser and pitfalls
+## 0. Natives: look up, never guess
+
+Before writing a native, confirm its name, parameters and side:
 
 ```bash
-node scripts/check.mjs <resource folder>        # or a list of .lua files
+node scripts/natives.mjs SetEntityHeading     # signature, client/server, docs link
+node scripts/natives.mjs vehicle door         # every native with these words
 ```
 
-- Parses every `.lua` (skips `node_modules`, `stream`, `web`, `html`, `ui`, `dist`, `build`)
-  with the bundled `luaparse` (Lua 5.3). CfxLua extensions are rewritten first, keeping line
-  and column: backtick hashes, `?.` / `?[` safe navigation, `+=` and the other compound
-  operators, `<const>` / `<close>`. Backticks inside comments are removed (luaparse reads
-  them as code).
+Data: the official Cfx lists (`static.cfx.re/natives/natives.json` and
+`natives_cfx.json`), downloaded on first use and cached for a week in the system temp folder.
+Data only, no code. Sounds, animations and model names: `mri-gta-assets` (`gta-data.mjs`).
+
+## 1. Parser, natives and pitfalls
+
+```bash
+node scripts/check.mjs <resource folder>        # or a list of .lua files; --no-natives offline
+```
+
+- Parses every `.lua` (skips `node_modules`, `stream`, `web`, `html`, `ui`, `dist`, `build`
+  and install snippet folders like `!INSTALLATION`) with the bundled `luaparse` (Lua 5.3).
+  CfxLua extensions are rewritten first, keeping line and column: backtick hashes, `?.` /
+  `?[` safe navigation, compound operators (`+=`, `..=`, `<<=`...), `<const>` / `<close>`,
+  `/* */` comments, set constructors (`{ .a, .b }`) and `local a, b in t`.
 - `FAIL` = syntax error with `[line:column]`. Exit code 1.
 - `WARN` lines:
+  - **Native on the wrong side**: a client-only native in a file that runs on the server, or
+    the reverse. The side comes from the manifest (`client_scripts`, `server_scripts`); files
+    it doesn't list go by a `client` / `server` folder name; shared files are skipped.
+  - **Unknown function**: a `PascalCase()` call that is not a native and is not defined in
+    the resource or in the files it imports with `@resource/file.lua`, with "did you mean"
+    for a near native name. Calls guarded by `if Name then` and test folders are skipped.
+    Usually a typo, a native that never existed, or a global from another resource that
+    isn't loaded (`exports` handlers don't create globals).
   - `cond and false or x` / `cond and nil or x`: always `x`. Use `if`/`else` (or
     `not cond and x or nil`).
   - `fx_version` other than `cerulean`. With a `ui_page`, the NUI may lose APIs that need a
@@ -28,9 +49,8 @@ node scripts/check.mjs <resource folder>        # or a list of .lua files
   - A single `*` in the middle of a manifest path (`modules/*/client.lua`) matches nothing
     and loads nothing, silently. Use `modules/**/client.lua`.
   - A file listed in the manifest that doesn't exist.
-- Other CfxLua extensions (`in` unpacking, set constructors) are not rewritten: a `FAIL` on
-  them is a false alarm.
-- Prove the parser runs before trusting an all-clear: a deliberately broken file must `FAIL`.
+- Prove the checker runs before trusting an all-clear: a deliberately broken file must
+  `FAIL`, a made-up native must `WARN`.
 
 ## 2. Read the flow
 
