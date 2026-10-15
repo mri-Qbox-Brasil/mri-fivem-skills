@@ -43,7 +43,9 @@ or cancel (`HUD_FRONTEND_DEFAULT_SOUNDSET`).
    it in `fxmanifest.lua`; a new file in the manifest needs `refresh` before `ensure`.
 2. `templates/panel.lua`: `place`, `recordRoute` and `placeZone` callbacks with `inWorld`
    (hides the panel, runs the tool, comes back with the result; inside mri_Qadmin it closes
-   and reopens the tab).
+   and reopens the tab). When the panel unmounts while hidden and asks for the result on
+   mount (a take-once callback), write the result to a module-level draft as soon as it
+   arrives: React StrictMode runs the mount effect twice in dev and the first run would eat it.
 3. NUI: `templates/PlaceRail.tsx` and the keys from `templates/rail.locales.json`. A store
    with `hud` fed by the `placeHud` message (`false` clears it). The rail shows with the panel
    hidden, on the resource's own ui_page; inside the Qadmin iframe it doesn't render (the

@@ -55,6 +55,7 @@ Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
 | `references/menus.md` | title, landing, selection, destructive confirmation, gamepad, world prompts |
 | `references/nui-pitfalls.md` | flicker on switch, player that restarts, animation vs transform, loadscreen, legibility over the world |
 | `references/verification.md` | screenshots and measurements in headless Chrome, music check, diagnostic logs |
+| `references/dev-mock.md` | browser dev mode for a NUI: stateful mock server, one scenario per screen, data read from the Lua config |
 
 ## Rules
 
