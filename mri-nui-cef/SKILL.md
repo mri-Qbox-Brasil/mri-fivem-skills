@@ -73,6 +73,10 @@ node scripts/cef-scan.mjs <resources folder> --src-only
   callback that calls `SetNuiFocus(false, false)`.
 - **Page embedded in another resource's iframe** (admin panels that host plugins): the
   iframe handles its own ESC and asks the host to close; the host can't see its keys.
+- **Local video (loadscreen, NUI) stays black:** an MP4 with the `moov` atom at the end plays
+  from a CDN link but never loads from the resource itself (`onloadeddata` never fires). Remux
+  it with the index first, no re-encode: `ffmpeg -i in.mp4 -c copy -movflags +faststart out.mp4`.
+  Check the order with `ffprobe -v trace in.mp4 2>&1 | grep -o "type:'\(moov\|mdat\)'"`.
 - **Packaging:** if the release ships only the built UI (`web/build`) without `web/`, files
   the Lua reads (`CreateRuntimeTextureFromImage` PNGs, json, sounds) must live outside
   `web/`, or they work on your server and vanish on everyone else's.
