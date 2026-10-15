@@ -50,6 +50,10 @@ or cancel (`HUD_FRONTEND_DEFAULT_SOUNDSET`).
    iframe is hidden).
 4. On the panel the result becomes a **summary**, not numbers: "3 stops · 29 m · there and
    back", "Position marked". A "Mark again" button starts over.
+   Every placed thing also gets **Go there** (server checks the admin, closes the panel, puts the
+   player on the nearest walkable spot with `GetSafeCoordForPed(x, y, z, false, 32)`, flag 32 =
+   flood fill from the point) and **Remove** when it is optional. No X/Y/Z anywhere, not even
+   behind an "edit manually" toggle.
 
 ## Frame rules (no flicker, no missed keys)
 
