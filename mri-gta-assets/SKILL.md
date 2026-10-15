@@ -1,6 +1,6 @@
 ---
 name: mri-gta-assets
-description: "GTA V/FiveM game files: RPF7/RSC7 (.ytd, .yft, .ydr, .ydd, .ycd, .ymap, .ytyp), metas (vehicles.meta, carcols, peds.meta), single player mod to FiveM resource, texture optimization (DXT, pages), reading/writing these without OpenIV, pulling an original file out of the encrypted game .rpf, editing a Scaleform .gfx menu or HUD movie (decompile, change AS2 classes, recompile with FFDec, stream it) and talking to a pause menu page from Lua, plus a lookup of real game names (sounds, animations, scenarios, props, peds, vehicles, weapons, particles, walk styles, timecycles). Use when asked to \"optimize this car\", \"convert this mod to FiveM\", \"why is it so heavy\", \"read/write ytd\", \"extract this file from the game\", \"edit this gfx/scaleform\", \"change the pause menu\", \"which sound/animation/prop\" (pt-BR: \"otimiza esse carro\", \"converte esse mod\", \"tira esse arquivo do jogo\", \"edita esse gfx\", \"mexe no pause menu\", \"qual som/animação usar\"), or when code reads these formats or uses a game name."
+description: "GTA V/FiveM game files: RPF7/RSC7 (.ytd, .yft, .ydr, .ydd, .ycd, .ymap, .ytyp), metas (vehicles.meta, carcols, peds.meta), single player mod to FiveM resource, texture optimization (DXT, pages), reading/writing these without OpenIV, pulling an original file out of the encrypted game .rpf, editing a Scaleform .gfx menu or HUD movie (decompile, change AS2 classes, recompile with FFDec, stream it) and talking to a pause menu page from Lua, plus a lookup of real game names (sounds, animations, scenarios, props, peds, vehicles, weapons, particles, walk styles, timecycles). Use when asked to \"optimize this car\", \"convert this mod to FiveM\", \"why is it so heavy\", \"read/write ytd\", \"extract this file from the game\", \"rename this prop/model\", \"recover a deleted stream file\", \"edit this gfx/scaleform\", \"change the pause menu\", \"which sound/animation/prop\" (pt-BR: \"otimiza esse carro\", \"converte esse mod\", \"tira esse arquivo do jogo\", \"renomeia esse prop\", \"edita esse gfx\", \"mexe no pause menu\", \"qual som/animação usar\"), or when code reads these formats or uses a game name."
 ---
 
 # GTA V assets (models, textures, mods)
@@ -12,7 +12,7 @@ installer.
 
 | Subject | Reference |
 | --- | --- |
-| RPF7, RSC7, pages, texture dictionary, other formats | [formats.md](formats.md) |
+| RPF7, RSC7, pages, texture dictionary, renaming a prop (`scripts/prop-rename.mjs`), other formats | [formats.md](formats.md) |
 | Texture weight, DXT compression, downsizing, backup and undo | [textures.md](textures.md) |
 | Single player mod to FiveM resource, `data_file` per meta | [mods.md](mods.md) |
 | Scaleform `.gfx`: original from the `.rpf`, decompile, recompile, pause menu channel | [scaleform.md](scaleform.md) |
@@ -61,7 +61,7 @@ node scripts/gta-data.mjs props chair office
    to grow), wasting about 10 MB on a large car. Way out: move the page table to the end of
    the system section when there is room.
 4. Clothes showing in the shop, car audio (`.awc`, `dlctext`), Menyoo, animations (`.ycd`),
-   maps (`.ymap`/`.ytyp`, `.ybn` collision).
+   maps (`.ymap`, `.ybn` collision; `.ytyp` only has the prop rename).
 
 ## Maintenance
 

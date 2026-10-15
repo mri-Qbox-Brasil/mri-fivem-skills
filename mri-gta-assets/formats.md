@@ -77,6 +77,22 @@ Texture (`0x90` bytes, in the system section):
   into it.
 - The other texture fields (`0x00`-`0x4F`, usage, flags) stay as they are.
 
+## Renaming a streamed prop (validated in game)
+
+- The model name lives only in the `.ytyp` (RSC7 version 2): archetype name, asset name and
+  texture dictionary are stored as joaat hashes (u32 little endian). The `.ydr` and `.ytd`
+  don't carry the name: renaming the file is enough for them.
+- `scripts/prop-rename.mjs` swaps the hashes in the inflated `.ytyp`, recompresses with the
+  same 16-byte header, re-reads to compare, writes through temp + rename and renames the
+  files. Without `--apply` it only prints the hits.
+- Check the output: every old name must have a hit count (usually 3 per model, 1 per txd
+  reference) and a dry run after applying must show no old hash left.
+- A PSO `.ymf` next to it (big endian) may hold none of the names; it can be renamed as is.
+- Update every script that spawns the model or loads the texture dictionary by name
+  (`CreateObject`, placement preview, `RequestStreamedTextureDict`).
+- Lost a stream file? FXServer keeps a hard link in `cache/files/<resource>/stream_cache`
+  (hashed names): find it by RSC7 version and the names inside before giving it up.
+
 ## Others (not implemented yet)
 
 - `.yft` (fragment, car): drawable with a `ShaderGroup` that may carry an embedded texture
