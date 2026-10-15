@@ -238,6 +238,9 @@ const warn = (where, message) => {
 }
 
 const hasLocales = existsSync(join(resourceDir, "locales"))
+const sides = readManifest(resourceDir)
+// Server events the framework fires with TriggerEvent; a net handler lets any client fake them.
+const LOCAL_SERVER_EVENTS = /^(QBCore:Server:(PlayerLoaded|OnPlayerUnload|OnJobUpdate|OnGangUpdate|SetDuty|OnMoneyChange|OnPermissionUpdate)|qbx_core:server:(playerLoggedOut|onJobUpdate|onGangUpdate|onGroupUpdate|onSetMetaData|characterDeleted)|esx:(playerLoaded|playerDropped|setJob))$/
 const codeByFile = new Map()
 for (const file of files) {
   const src = readFileSync(file, 'utf8')
@@ -271,6 +274,12 @@ for (const file of files) {
   // These events carry the new value, and qbx_core fires them before PlayerData is updated.
   for (const match of src.matchAll(/\b(?:RegisterNetEvent|AddEventHandler)\s*\(\s*['"](QBCore:Client:(?:OnJobUpdate|OnGangUpdate|SetDuty))['"]\s*,\s*function\s*\(\s*\)/g)) {
     warn(`${show(file)}:${lineAt(src, match.index)}`, `${match[1]} handler ignores the value it carries; PlayerData still has the old one when it runs`)
+  }
+  if (sideOf(sides, relative(resourceDir, file).replace(/\\/g, '/')) === 'server') {
+    for (const match of src.matchAll(/\bRegisterNetEvent\s*\(\s*['"]([^'"]+)['"]/g)) {
+      if (LOCAL_SERVER_EVENTS.test(match[1]))
+        warn(`${show(file)}:${lineAt(src, match.index)}`, `${match[1]} is fired by the framework on the server; RegisterNetEvent lets any client fake it, use AddEventHandler`)
+    }
   }
 }
 
