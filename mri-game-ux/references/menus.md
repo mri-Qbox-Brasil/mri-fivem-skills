@@ -39,6 +39,8 @@ No black modal out of nowhere:
 - once confirmed, the ring spins ("Deleting...") until the list comes back; the scene fades
   the ped out;
 - changing the selection cancels the confirmation; while deleting, the selection locks.
+- React: cancel the ring's animation frame only on unmount. A cleanup in an effect without deps runs
+  on every render, and the ring never fills.
 
 ## Creation in chapters
 
