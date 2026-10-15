@@ -83,21 +83,21 @@ The pause menu routes column calls from the frontend movie to the page component
   in `updateScroll`, which the game calls after every change.
 - The street name and the scale bar at the bottom left are `this.details` (`mapDetailsMC`, children
   `locationMC` and `zoomMC`); `SET_TITLE` toggles the children, so hiding the parent sticks.
-- Reference: `client/maplegend.lua` in mri_Qblips (command channel `mriq`).
+- Reference: `client/maplegend.lua` in mri_Qblips (marker `-5067337`, Int command codes).
 
-### Pause menu key bar ()
+### Pause menu key bar (`pause_menu_instructional_buttons.gfx`)
 
 One movie draws the key bar of every pause menu tab, so a change must tell the tabs apart.
 Lua cannot call it; the bar only gets what the game sends.
 
-- Class  (extends ). The game sends one
-   per key and then
-  . Seen in game on the map tab (keyboard): buttons are icon ids joined
-  by  ( zoom,  Tab),  is the input id (204 point of interest,
-  202 back, 201 waypoint) or -1 for keys that are not clickable (zoom, select).
-- Each stored entry is , with the control id last while  is on.
+- Class `PAUSE_MENU_INSTRUCTIONAL_BUTTONS` (extends `INSTRUCTIONAL_BUTTONS`). The game sends one
+  `SET_DATA_SLOT(slot, buttons, label, clickable, control)` per key, then
+  `DRAW_INSTRUCTIONAL_BUTTONS`. Seen in game on the map tab (keyboard): `buttons` are icon ids
+  joined by `%` (`b_1009%b_1010` zoom, `b_1002` Tab); `control` is the input id (204 point of
+  interest, 202 back, 201 waypoint) or -1 for keys that are not clickable (zoom, select).
+- Each key is stored in `itemList[slot]`, with the control id last while `CLICKABLE` is on.
 - To see what a tab sends, build a probe that appends the raw arguments to the label and take a
   screenshot of the bar.
-- Hiding: override , call , then set  from a
-  check on  (mri_Qblips: control 204 plus at least two -1 entries means the map). That
+- Hiding: override `DRAW_INSTRUCTIONAL_BUTTONS`, call `super`, then set `CONTENT._visible` from a
+  check on `itemList` (mri_Qblips: control 204 plus at least two -1 entries means the map). That
   check is waiting for its in-game test, gamepad included.
