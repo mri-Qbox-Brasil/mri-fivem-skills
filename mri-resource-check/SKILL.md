@@ -83,6 +83,11 @@ Lua traps the parser can't see:
   race that fails on a slow client. Use the value the event carries, or wait on the event or
   state that says it is ready. Framework events carry the new value: `OnJobUpdate(job)`,
   `OnGangUpdate(gang)`, `SetDuty(onDuty)`; `GetPlayerData()` inside them still has the old one.
+  On the server it is the other way round: qbx_core writes `PlayerData` first and then fires
+  `QBCore:Server:OnJobUpdate` / `SetDuty`, so a handler can read the player and stay idempotent.
+- Something that lasts a session (a shift, a timer) kept in the database: refresh its end
+  with a heartbeat and, on start, close what was left open at its last heartbeat. A crash or
+  an `ensure` then loses at most one interval instead of counting the downtime.
 
 ## 3. Reload
 
