@@ -39,6 +39,9 @@ Tips:
   the dev body is light.
 - To compare before and after, `git stash` only the NUI files, measure, `git stash pop`.
 - Dev server 504 in the console = still optimizing dependencies: run again.
+- Headless only advances `requestAnimationFrame` while a `measure` promise is awaited. To check
+  something driven by frames (hold ring, progress), fire it in an `eval` with no wait, then run a
+  `measure` step for the duration, then read the result.
 
 ## Music
 
