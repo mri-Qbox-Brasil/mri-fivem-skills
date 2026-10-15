@@ -18,13 +18,16 @@ async function pickBase(urls) {
   return null
 }
 
-export async function uploadFile(fetchNui, file, kind, onProgress) {
-  const start = await fetchNui('uploadStart', { kind, name: file.name, size: file.size })
-  if (!start?.ok) throw new Error(start?.error || 'upload refused')
+function toBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result).slice(String(reader.result).indexOf(',') + 1))
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(blob)
+  })
+}
 
-  const base = await pickBase(start.urls || [])
-  if (!base) throw new Error('server HTTP not reachable (port or web_baseUrl)')
-
+async function sendByHttp(file, start, base, onProgress) {
   const total = Math.max(1, Math.ceil(file.size / start.partBytes))
   let last = null
   for (let part = 1; part <= total; part++) {
@@ -35,5 +38,28 @@ export async function uploadFile(fetchNui, file, kind, onProgress) {
     if (!res.ok || !last?.ok) throw new Error(last?.error || `upload failed (${res.status})`)
     onProgress?.(part / total)
   }
+  return last
+}
+
+/** Through the game connection: slower, but works for a player who isn't on the server's PC. */
+async function sendByGame(fetchNui, file, start, onProgress) {
+  const size = start.eventPartBytes
+  const total = Math.max(1, Math.ceil(file.size / size))
+  let last = null
+  for (let part = 1; part <= total; part++) {
+    const data = await toBase64(file.slice((part - 1) * size, part * size))
+    last = await fetchNui('uploadPart', { token: start.token, part, total, data })
+    if (!last?.ok) throw new Error(last?.error || 'upload failed')
+    onProgress?.(part / total)
+  }
+  return last
+}
+
+export async function uploadFile(fetchNui, file, kind, onProgress) {
+  const start = await fetchNui('uploadStart', { kind, name: file.name, size: file.size })
+  if (!start?.ok) throw new Error(start?.error || 'upload refused')
+
+  const base = await pickBase(start.urls || [])
+  const last = base ? await sendByHttp(file, start, base, onProgress) : await sendByGame(fetchNui, file, start, onProgress)
   return last.name || start.name
 }

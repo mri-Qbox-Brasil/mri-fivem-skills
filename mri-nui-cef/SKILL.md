@@ -90,11 +90,11 @@ Admin panel that takes a video, music or image and saves it in the resource: rea
 `references/file-upload.md` and copy `templates/upload-*.lua`, `upload-files.js`, `upload.js`.
 The traps it covers:
 
-- FXServer's HTTP drops a body over **5 MiB**: post straight to `SetHttpHandler` in 4 MiB
-  parts, never through a net event.
+- FXServer's HTTP drops a body over **5 MiB**: post to `SetHttpHandler` in 4 MiB parts.
 - `SaveResourceFile(res, path, data, #data)`: with `-1` a binary file is saved empty.
-- The NUI only reaches `http://127.0.0.1:<port>` or the `web_baseUrl` proxy; no duplicate
-  `Access-Control-Allow-Origin` through the proxy.
+- The NUI (https) can't fetch a remote `http://ip:port`, and the `*.users.cfx.re` proxy is gone
+  (June 2026): HTTP only on the server's PC or behind a real certificate, otherwise latent
+  events, base64 decoded in JS and returned to Lua as an `ArrayBuffer`.
 - Players only get the file after the resource restarts, and a resource can't restart itself.
 - Don't re-encode a video that came from YouTube (already ~1 Mbps): it only gets jagged.
 

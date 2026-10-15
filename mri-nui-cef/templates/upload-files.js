@@ -4,6 +4,12 @@ const path = require('path');
 
 const root = GetResourcePath(GetCurrentResourceName());
 
+// Lua has no fast base64 decoder; an ArrayBuffer reaches Lua as a byte string (a Buffer arrives as a table).
+exports('decodeBase64', (data) => {
+  const buf = Buffer.from(String(data), 'base64');
+  return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.length);
+});
+
 exports('listUploadFolder', (folder) => {
   const dir = path.join(root, folder);
   if (!fs.existsSync(dir)) return [];

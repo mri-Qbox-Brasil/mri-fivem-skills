@@ -4,6 +4,8 @@
 local RESOURCE <const> = GetCurrentResourceName()
 -- FXServer drops an HTTP request whose body is over 5 MiB.
 local PART_BYTES <const> = 4 * 1024 * 1024
+-- Fallback through the game connection (latent net event, base64): smaller parts keep each event short.
+local EVENT_PART_BYTES <const> = 1024 * 1024
 local SLOT_TTL <const> = 60
 local MB <const> = 1024 * 1024
 
@@ -65,7 +67,7 @@ lib.callback.register(RESOURCE .. ':uploadStart', function(source, data)
 
     local token = newToken()
     slots[token] = { src = source, path = ('%s/%s'):format(kind.folder, name), name = name, size = size, parts = {}, received = 0, expires = os.time() + SLOT_TTL }
-    return true, { token = token, name = name, partBytes = PART_BYTES, webBase = GetConvar('web_baseUrl', '') }
+    return true, { token = token, name = name, partBytes = PART_BYTES, eventPartBytes = EVENT_PART_BYTES, webBase = GetConvar('web_baseUrl', '') }
 end)
 
 lib.callback.register(RESOURCE .. ':listFiles', function(source)
@@ -95,7 +97,7 @@ AddEventHandler('playerDropped', function()
     end
 end)
 
--- The Cfx.re proxy already sends Access-Control-Allow-Origin; a second one makes the browser block the answer.
+-- A reverse proxy in front (Cloudflare, nginx) may already send Access-Control-Allow-Origin; a second one makes the browser block it.
 local function viaProxy(req)
     for name, value in pairs(req.headers or {}) do
         local key = tostring(name):lower()
@@ -116,46 +118,78 @@ local function reply(req, res, status, body)
     res.send(json.encode(body))
 end
 
+---Slot for the next part in order; anything else closes the slot.
+local function takePart(token, part, total)
+    local slot = token and slots[token]
+    if not slot then return nil, 'upload expired' end
+
+    part, total = math.tointeger(tonumber(part)), math.tointeger(tonumber(total))
+    if not part or not total or part ~= #slot.parts + 1 or part > total or slot.busy or os.time() > slot.expires then
+        slots[token] = nil
+        return nil, 'part out of order'
+    end
+    return slot, part, total
+end
+
+---Keeps one part and saves the file on the last one; returns the status and the reply.
+local function storePart(token, slot, part, total, body)
+    if slots[token] ~= slot then return 403, { ok = false, error = 'upload expired' } end
+    if type(body) ~= 'string' or #body > PART_BYTES or slot.received + #body > slot.size then
+        slots[token] = nil
+        return 413, { ok = false, error = 'bigger than declared' }
+    end
+
+    slot.parts[part] = body
+    slot.received = slot.received + #body
+    slot.expires = os.time() + SLOT_TTL
+    if part < total then return 200, { ok = true } end
+
+    slots[token] = nil
+    if slot.received ~= slot.size then return 400, { ok = false, error = 'incomplete' } end
+
+    local data = table.concat(slot.parts)
+    -- Explicit length: -1 stops at the first zero byte and saves an empty file.
+    if not SaveResourceFile(RESOURCE, slot.path, data, #data) then
+        return 500, { ok = false, error = 'save failed' }
+    end
+    -- Players get the file only after this resource restarts, and it can't restart itself.
+    return 200, { ok = true, name = slot.name }
+end
+
 SetHttpHandler(function(req, res)
     if req.method == 'OPTIONS' then return reply(req, res, 204, {}) end
     if req.method == 'GET' and req.path == '/ping' then return reply(req, res, 200, { ok = true }) end
     if req.method ~= 'POST' then return reply(req, res, 404, { ok = false }) end
 
     local token, part, total = tostring(req.path):match('^/upload/(%x+)/(%d+)/(%d+)$')
-    local slot = token and slots[token]
-    if not slot then return reply(req, res, 403, { ok = false, error = 'upload expired' }) end
-
-    part, total = math.tointeger(tonumber(part)), math.tointeger(tonumber(total))
-    if not part or not total or part ~= #slot.parts + 1 or part > total or slot.busy or os.time() > slot.expires then
-        slots[token] = nil
-        return reply(req, res, 403, { ok = false, error = 'part out of order' })
-    end
+    local slot
+    slot, part, total = takePart(token, part, total)
+    if not slot then return reply(req, res, 403, { ok = false, error = part }) end
 
     slot.busy = true
     req.setDataHandler(function(body)
         slot.busy = false
-        if slots[token] ~= slot then return reply(req, res, 403, { ok = false, error = 'upload expired' }) end
-        if type(body) ~= 'string' or #body > PART_BYTES or slot.received + #body > slot.size then
-            slots[token] = nil
-            return reply(req, res, 413, { ok = false, error = 'bigger than declared' })
-        end
-
-        slot.parts[part] = body
-        slot.received = slot.received + #body
-        slot.expires = os.time() + SLOT_TTL
-        if part < total then return reply(req, res, 200, { ok = true }) end
-
-        slots[token] = nil
-        if slot.received ~= slot.size then return reply(req, res, 400, { ok = false, error = 'incomplete' }) end
-
-        local data = table.concat(slot.parts)
-        -- Explicit length: -1 stops at the first zero byte and saves an empty file.
-        if not SaveResourceFile(RESOURCE, slot.path, data, #data) then
-            return reply(req, res, 500, { ok = false, error = 'save failed' })
-        end
-        -- Players get the file only after this resource restarts, and it can't restart itself.
-        reply(req, res, 200, { ok = true, name = slot.name })
+        reply(req, res, storePart(token, slot, part, total, body))
     end, 'binary')
+end)
+
+-- Same parts through the game connection, for players not on the server's PC (the NUI can't reach a remote http).
+RegisterNetEvent(RESOURCE .. ':uploadPart', function(token, part, total, data)
+    local src = source
+    local result
+    if type(token) ~= 'string' or not slots[token] or slots[token].src ~= src or type(data) ~= 'string' then
+        result = { ok = false, error = 'upload expired' }
+    else
+        local slot
+        slot, part, total = takePart(token, part, total)
+        if not slot then
+            result = { ok = false, error = part }
+        else
+            local _
+            _, result = storePart(token, slot, part, total, exports[RESOURCE]:decodeBase64(data))
+        end
+    end
+    TriggerClientEvent(RESOURCE .. ':uploadPartResult', src, token, result)
 end)
 
 CreateThread(function()
