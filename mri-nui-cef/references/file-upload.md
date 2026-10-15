@@ -10,10 +10,14 @@ that echoed the byte count.
 1. The NUI asks Lua for an upload slot (NUI callback, then `lib.callback` to the server). The
    server checks permission, extension and size, picks a safe file name and returns a random
    token.
-2. The NUI posts the file in parts straight to the server's HTTP port, to
-   `/<resource>/upload/<token>/<part>/<total>`, served by `SetHttpHandler`. Never through a
-   net event: a latent event moves ~300 KB/s and a big payload stalls the client.
-3. On the last part the server joins the parts and saves the file.
+2. If an HTTP base answers (see "Where the NUI can reach"), the NUI posts the file in 4 MiB
+   parts to `/<resource>/upload/<token>/<part>/<total>`, served by `SetHttpHandler`. Fastest.
+3. Otherwise (player not on the server's PC, no certificate) the parts go through the game:
+   the NUI reads 1 MiB as base64 and calls the `uploadPart` NUI callback, the client sends it
+   with `TriggerLatentServerEvent(event, 5000000, ...)` and waits for the server's answer
+   before the next part. Same route screencapture uses with `protocol 'nui'`.
+4. On the last part the server joins the parts and saves the file. Both routes share the same
+   slot, order check and save (`takePart` / `storePart` in the template).
 
 Templates: `templates/upload-server.lua`, `templates/upload-files.js`,
 `templates/upload-client.lua`, `templates/upload.js`.
@@ -26,15 +30,21 @@ Templates: `templates/upload-server.lua`, `templates/upload-files.js`,
   grows the file by a third and keeps it twice in memory.
 - **`SaveResourceFile(res, path, data, #data)`**, never `-1`: with `-1` the length is taken
   as a C string and a binary file is saved empty (or cut) at its first zero byte.
-- **Where the NUI can reach:** the page is https and CEF only lets `fetch` go to https or to
-  localhost. Candidates, in order: `http://127.0.0.1:<port>/<resource>` (port from
+- **Where the NUI can reach:** the page is https, so a `fetch` to a remote `http://ip:port` is
+  blocked (mixed content); only localhost may be http. The `*.users.cfx.re` proxy that gave
+  every server https was shut down in June 2026 ([announcement](https://forum.cfx.re/t/nucleus-reverse-proxy-deprecation/5387399));
+  `web_baseUrl` may still hold the dead `deprecated-<id>.users.cfx.re` name or the plain
+  endpoint. Candidates, in order: `http://127.0.0.1:<port>/<resource>` (port from
   `GetCurrentServerEndpoint()`, works when the server runs on the same PC) and
-  `https://<web_baseUrl>/<resource>` (the Cfx.re proxy, `GetConvar('web_baseUrl')`, set only
-  after the server authenticates with Cfx.re). Ping each with a 1 s timeout and use the first
-  that answers.
-- **CORS:** answer `OPTIONS` and send `Access-Control-Allow-Origin: *`, except through the
-  proxy (`Host` ending in `users.cfx.re`, or `X-Forwarded-For` / `X-Cfx-Source-Ip` present):
-  the proxy already adds it, and two values make the browser block the answer.
+  `https://<web_baseUrl>/<resource>` (answers only if the owner put a real certificate in
+  front, or `server-tls.crt`/`.key`, which FXServer serves on the same port). Ping each with a
+  1 s timeout; none answers: latent events.
+- **Base64 to bytes on the server:** decode in a server `.js` and return an `ArrayBuffer`
+  (`buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.length)`): Lua gets a byte string.
+  A `Buffer` or `Uint8Array` reaches Lua as a table of numbers.
+- **CORS:** answer `OPTIONS` and send `Access-Control-Allow-Origin: *`, except behind a reverse
+  proxy that already adds it (`X-Forwarded-For` present): two values make the browser block
+  the answer.
 - **File name** comes from the server, never from the client as is: lowercase, only
   `[a-z0-9_-]`, extension from an allow list, and a suffix (`-2`) instead of overwriting.
   The delete route accepts only names of that same shape, so no `..` or `/` reaches the disk.
