@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const ACTIONS = ['ensure', 'restart', 'start', 'stop', 'refresh', 'say'];
+const ACTIONS = ['ensure', 'restart', 'start', 'stop', 'refresh', 'say', 'console'];
 const LOG_WAIT_MS = 4000;
 
 function parseArgs(argv) {
@@ -78,6 +78,28 @@ async function command(cfg, session, action, parameter) {
   return body;
 }
 
+// The Live Console has no REST route: it is a socket.io room. Polling transport takes the session cookie with fetch.
+async function consoleCommand(cfg, session, text) {
+  const base = `${cfg.url}/socket.io/?EIO=4&transport=polling&rooms=liveconsole`;
+  const headers = { Cookie: session.cookie, 'x-txadmin-csrftoken': session.csrf };
+  const post = (url, body) => fetch(url, { method: 'POST', headers: { ...headers, 'Content-Type': 'text/plain;charset=UTF-8' }, body });
+
+  const open = await (await fetch(base, { headers })).text();
+  if (!open.startsWith('0')) {
+    const err = new Error('session expired');
+    err.expired = true;
+    throw err;
+  }
+  const url = `${base}&sid=${JSON.parse(open.slice(1)).sid}`;
+  await post(url, '40');
+  const joined = await (await fetch(url, { headers })).text();
+  if (!joined.includes('40{')) throw new Error(`live console refused the session: ${joined.slice(0, 120)}`);
+  const sent = await post(url, '42' + JSON.stringify(['consoleCommand', text]));
+  if (!sent.ok) throw new Error(`console command failed (${sent.status})`);
+  await post(url, '41').catch(() => {});
+  return { msg: `console: ${text}` };
+}
+
 async function readFrom(path, offset) {
   const handle = await open(path, 'r');
   try {
@@ -104,11 +126,15 @@ async function main() {
   if (!ACTIONS.includes(action)) {
     throw new Error(`usage: node scripts/tx.mjs <${ACTIONS.join('|')}> [resource | message]`);
   }
-  // say takes one message; resource actions take one or more resources, all on the same login.
-  const parameters = action === 'say' ? [rest.join(' ')] : action === 'refresh' ? [''] : rest;
-  if (action !== 'refresh' && !parameters.filter(Boolean).length) throw new Error(`${action} needs a ${action === 'say' ? 'message' : 'resource'}`);
+  // say and console take one text; resource actions take one or more resources, all on the same login.
+  const single = action === 'say' || action === 'console';
+  const parameters = single ? [rest.join(' ')] : action === 'refresh' ? [''] : rest;
+  if (action !== 'refresh' && !parameters.filter(Boolean).length) throw new Error(`${action} needs a ${single ? 'text' : 'resource'}`);
 
   const txAction = action === 'say' ? 'admin_broadcast' : `${action}_res`;
+  const send = (session, parameter) => action === 'console'
+    ? consoleCommand(cfg, session, parameter)
+    : command(cfg, session, txAction, parameter);
   const logPath = join(cfg.base, 'txData', cfg.profile, 'logs', 'fxserver.log');
   const offset = await stat(logPath).then((s) => s.size).catch(() => null);
 
@@ -116,12 +142,12 @@ async function main() {
   for (const parameter of parameters) {
     let result;
     try {
-      result = await command(cfg, session, txAction, parameter);
+      result = await send(session, parameter);
     } catch (err) {
       if (!err.expired) throw err;
       session = await login(cfg);
       await writeFile(sessionFile(cfg), JSON.stringify(session)).catch(() => {});
-      result = await command(cfg, session, txAction, parameter);
+      result = await send(session, parameter);
     }
     console.log(`txAdmin: ${result.msg ?? JSON.stringify(result)}`);
     if (parameters.length > 1) await new Promise((resolve) => setTimeout(resolve, 1500));

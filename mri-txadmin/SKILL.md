@@ -1,6 +1,6 @@
 ---
 name: mri-txadmin
-description: "Runs ensure, restart, start or stop on a resource of a local FiveM server through the txAdmin API (no rcon) and shows what fxserver.log recorded. Use when asked to \"ensure X\", \"restart the resource\", \"restart the script\", \"stop/start the resource\" (pt-BR: \"dá ensure no X\", \"reinicia o resource\", \"para/sobe o resource\"), or when a change needs reloading on the server to be tested."
+description: "Runs ensure, restart, start or stop on a resource of a local FiveM server, or any server console command, through the txAdmin API (no rcon) and shows what fxserver.log recorded. Use when asked to \"ensure X\", \"restart the resource\", \"restart the script\", \"stop/start the resource\" (pt-BR: \"dá ensure no X\", \"reinicia o resource\", \"para/sobe o resource\"), or when a change needs reloading on the server to be tested, or to run a server console command (pt-BR: \"roda no console\", \"manda esse comando no servidor\")."
 ---
 
 # Server commands through txAdmin
@@ -19,6 +19,7 @@ node scripts/tx.mjs restart my_resource
 node scripts/tx.mjs stop my_resource
 node scripts/tx.mjs ensure job_a job_b job_c   # several at once, on the same login
 node scripts/tx.mjs refresh                    # rescan resources (new folder)
+node scripts/tx.mjs console "mri_inventory get items water"   # any server console command
 ```
 
 | Action | What it does |
@@ -28,6 +29,7 @@ node scripts/tx.mjs refresh                    # rescan resources (new folder)
 | `start <res>` / `stop <res>` | Starts / stops. |
 | `refresh` | Server `refresh`, to see a new resource or a changed `fxmanifest.lua` (new file in `client_scripts` or `server_scripts`): without it `ensure` starts with the old manifest and the client or the server gets `attempt to index a nil value` on the missing file's global. Run it before the `ensure` whenever the manifest file lists changed. |
 | `say <message>` | txAdmin announcement to every player. Only when asked. |
+| `console <command>` | Runs one line in the server console, as the Live Console does (needs the `console.write` permission), and prints the log lines it caused. The answer only shows in the log, so commands meant for agents should print one parseable line. |
 
 **Login:** txAdmin blocks login for 15 minutes after about 10 attempts in a row (error 429).
 The script keeps the session in `%TEMP%\mri-txadmin-<url>.json` and only logs in again when it
@@ -64,5 +66,6 @@ txAdmin isn't on port 40120, `--no-log` to skip reading the log.
 
 - `login failed`: txAdmin down or password changed. Check `config.json`.
 - `command failed`: txAdmin's message comes along (e.g. the resource doesn't exist).
-- Arbitrary console commands don't go through this API (the Live Console uses a websocket):
-  use the txAdmin console for that.
+- `live console refused the session`: the txAdmin login lacks `console.write`. The Live
+  Console has no REST route: the script joins its socket.io room over the polling transport
+  (Node's WebSocket can't send the session cookie).
