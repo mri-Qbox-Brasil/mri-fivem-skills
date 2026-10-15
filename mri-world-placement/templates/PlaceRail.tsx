@@ -4,7 +4,7 @@ import { useT } from '@/lib/i18n'
 import { useStore } from '@/store'
 
 // Key rail shown while a world tool runs; the panel itself is hidden.
-// Store: `hud: { mode: 'place' | 'route' | 'zone'; count?: number; size?: { x: number; y: number; z: number }; multiple?: boolean } | null`,
+// Store: `hud: { mode: 'place' | 'spot' | 'route' | 'zone'; count?: number; size?: { x: number; y: number; z: number }; multiple?: boolean } | null`,
 // set by the `placeHud` NUI message.
 export function PlaceRail() {
   const t = useT()
@@ -63,6 +63,15 @@ export function PlaceRail() {
       </>
     )
     hint = t('rail.zone_hint')
+  } else if (hud.mode === 'spot') {
+    title = t('rail.place_title')
+    keys = (
+      <>
+        <MriKeyHint keys={<MriKbd variant="accent">E</MriKbd>} label={t('rail.place')} />
+        <MriKeyHint keys={<MriKbd>BACKSPACE</MriKbd>} label={t('rail.cancel')} />
+      </>
+    )
+    hint = t('rail.place_hint')
   } else {
     title = t('rail.place_title')
     keys = (

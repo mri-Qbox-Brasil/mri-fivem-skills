@@ -116,16 +116,20 @@ function WorldPlacer.cancel()
 end
 
 ---Ghost follows the aim; arrows and wheel rotate, E confirms, Backspace or Esc cancels.
----@param opts { model: string|number, heading?: number }
----@return { coords: { x: number, y: number, z: number }, heading: number }|nil
+---Without `model` (an interaction point) a marker follows the aim instead and there is no heading.
+---@param opts { model?: string|number, heading?: number }
+---@return { coords: { x: number, y: number, z: number }, heading?: number }|nil
 function WorldPlacer.point(opts)
 	if active then return nil end
 	local heading = tonumber(opts.heading) or GetEntityHeading(cache.ped)
-	local ghost = ghostPed(opts.model, heading)
-	if not ghost then return nil end
+	local ghost
+	if opts.model then
+		ghost = ghostPed(opts.model, heading)
+		if not ghost then return nil end
+	end
 
 	active = true
-	hud({ mode = 'place' })
+	hud({ mode = ghost and 'place' or 'spot' })
 	local aim = trackAim()
 
 	local result, last
@@ -136,19 +140,24 @@ function WorldPlacer.point(opts)
 		local coords = aim.coords
 		if coords and coords ~= last then
 			last = coords
-			SetEntityCoords(ghost, coords.x, coords.y, coords.z, false, false, false, false)
+			if ghost then SetEntityCoords(ghost, coords.x, coords.y, coords.z, false, false, false, false) end
 		end
 
-		if IsControlPressed(0, KEY.left) then heading = heading + ROTATE_SPEED * frame end
-		if IsControlPressed(0, KEY.right) then heading = heading - ROTATE_SPEED * frame end
-		if IsDisabledControlJustPressed(0, KEY.wheelUp) then heading = heading + WHEEL_STEP end
-		if IsDisabledControlJustPressed(0, KEY.wheelDown) then heading = heading - WHEEL_STEP end
-		heading = heading % 360
-		SetEntityHeading(ghost, heading)
+		if ghost then
+			if IsControlPressed(0, KEY.left) then heading = heading + ROTATE_SPEED * frame end
+			if IsControlPressed(0, KEY.right) then heading = heading - ROTATE_SPEED * frame end
+			if IsDisabledControlJustPressed(0, KEY.wheelUp) then heading = heading + WHEEL_STEP end
+			if IsDisabledControlJustPressed(0, KEY.wheelDown) then heading = heading - WHEEL_STEP end
+			heading = heading % 360
+			SetEntityHeading(ghost, heading)
+		elseif last then
+			drawStop(last, START_COLOR)
+		end
 
 		if IsControlJustPressed(0, KEY.mark) and last then
 			PlaySoundFrontend(-1, 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', true)
-			result = { coords = { x = last.x, y = last.y, z = last.z }, heading = math.floor(heading * 100 + 0.5) / 100 }
+			result = { coords = { x = last.x, y = last.y, z = last.z } }
+			if ghost then result.heading = math.floor(heading * 100 + 0.5) / 100 end
 			break
 		elseif IsDisabledControlJustPressed(0, KEY.cancel) or IsControlJustPressed(0, KEY.undo) then
 			PlaySoundFrontend(-1, 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', true)
@@ -159,7 +168,7 @@ function WorldPlacer.point(opts)
 
 	active = false
 	hud(false)
-	DeleteEntity(ghost)
+	if ghost then DeleteEntity(ghost) end
 	return result
 end
 
