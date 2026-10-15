@@ -54,6 +54,17 @@ local function ghostPed(model, heading)
 	return ped
 end
 
+-- Suite accent from the mri:color convar, like the mri_Qbox zone drawer.
+local function accent()
+	local hex = GetConvar('mri:color', '#00E699'):match('^#(%x%x%x%x%x%x)') or '00E699'
+	return { tonumber(hex:sub(1, 2), 16), tonumber(hex:sub(3, 4), 16), tonumber(hex:sub(5, 6), 16) }
+end
+
+-- Small sphere right on the aimed spot: the cursor of a point without a model.
+local function drawCursor(point, color)
+	DrawMarker(28, point.x, point.y, point.z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.25, 0.25, 0.25, color[1], color[2], color[3], 220, false, false, 2, false, nil, nil, false)
+end
+
 local function drawStop(point, color)
 	DrawMarker(1, point.x, point.y, point.z - 0.02, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6, 0.6, 0.35, color[1], color[2], color[3], 170, false, false, 2, false, nil, nil, false)
 end
@@ -116,7 +127,7 @@ function WorldPlacer.cancel()
 end
 
 ---Ghost follows the aim; arrows and wheel rotate, E confirms, Backspace or Esc cancels.
----Without `model` (an interaction point) a marker follows the aim instead and there is no heading.
+---Without `model` (an interaction point) a sphere in the suite accent follows the aim instead and there is no heading.
 ---@param opts { model?: string|number, heading?: number }
 ---@return { coords: { x: number, y: number, z: number }, heading?: number }|nil
 function WorldPlacer.point(opts)
@@ -131,6 +142,7 @@ function WorldPlacer.point(opts)
 	active = true
 	hud({ mode = ghost and 'place' or 'spot' })
 	local aim = trackAim()
+	local color = accent()
 
 	local result, last
 	while active do
@@ -151,7 +163,7 @@ function WorldPlacer.point(opts)
 			heading = heading % 360
 			SetEntityHeading(ghost, heading)
 		elseif last then
-			drawStop(last, START_COLOR)
+			drawCursor(last, color)
 		end
 
 		if IsControlJustPressed(0, KEY.mark) and last then
