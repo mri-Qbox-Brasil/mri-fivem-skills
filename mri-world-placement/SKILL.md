@@ -12,7 +12,7 @@ marked in the world, with a preview; never a number field, a coordinate or a typ
 
 | Tool | For | Module |
 | --- | --- | --- |
-| Point with ghost | NPC or object: a see-through copy follows the aim. Without `model` (interaction point: clock-in, register, stash) a 0.25 m sphere (`DrawMarker` 28) in the `mri:color` accent follows the aim, the same cursor as the mri_Qbox zone drawer, and there is no heading | `WorldPlacer.point` |
+| Point with ghost | NPC or object: a see-through copy follows the aim. Without `model` (interaction point: clock-in, register, stash) a small sphere (`DrawMarker` 28, scale 0.1: the scale is the radius) in the `mri:color` accent follows the aim, the same cursor as the mri_Qbox zone drawer, and there is no heading | `WorldPlacer.point` |
 | Path | NPC route, trail, fence: stops with a line on the ground | `WorldPlacer.path` |
 | Zone (box with heading) | anything shaped like a cube that faces a way: elevator floor, garage spot, shop counter, stash, trigger area | `WorldPlacer.zone` |
 
@@ -61,6 +61,8 @@ or cancel (`HUD_FRONTEND_DEFAULT_SOUNDSET`).
   goes for `lib.requestModel`, `lib.callback.await` and any `Wait(n)`.
 - A blocked key (Esc 200, Enter 191, wheel 14/15) only answers through
   `IsDisabledControlJustPressed`.
+- Esc opens the pause menu on release, after the tool already stopped blocking it: on cancel,
+  keep `DisableControlAction(0, 200)` every frame until the key is up (`releaseEsc`).
 - Ghost: alpha 170, no collision, frozen, `SetBlockingOfNonTemporaryEvents`. Only move it
   when the aim changed. The model accepts a numeric hash (`tonumber(model) or joaat(model)`).
 - Raycast `1 | 16` (world and objects), ignoring the player's own ped.
