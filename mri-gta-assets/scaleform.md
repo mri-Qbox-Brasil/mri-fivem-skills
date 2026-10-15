@@ -78,4 +78,6 @@ The pause menu routes column calls from the frontend movie to the page component
 - The game's highlighted row is `view.index`.
 - `view.viewContainer._visible = false` hides the native list without losing its data; re-apply it
   in `updateScroll`, which the game calls after every change.
+- The street name and the scale bar at the bottom left are `this.details` (`mapDetailsMC`, children
+  `locationMC` and `zoomMC`); `SET_TITLE` toggles the children, so hiding the parent sticks.
 - Reference: `client/maplegend.lua` in mri_Qblips (command channel `mriq`).
