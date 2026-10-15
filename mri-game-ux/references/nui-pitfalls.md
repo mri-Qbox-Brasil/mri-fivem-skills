@@ -53,6 +53,14 @@ Outside the game, `fetchNui` usually answers a fixed `{ success: true }` when
 inject `window.invokeNative = function () {}` before the page loads
 (`Page.addScriptToEvaluateOnNewDocument`).
 
+- When writing a dev mode, detect the game by `GetParentResourceName`, not by
+  `invokeNative`: only FiveM defines it, so the mock runs in a plain browser and under the
+  probe (which fakes `invokeNative`). Gate on `import.meta.env.DEV` too, so the mock never
+  ships. Pattern in `dev-mock.md`.
+- A one-shot NUI callback (the Lua side hands a result once and clears it) read in a
+  `useEffect` is lost in dev: React StrictMode runs the effect twice and the first run takes
+  it. Store it outside the component (module draft) as soon as it arrives, then set state.
+
 ## Focus and keyboard
 
 - `SetNuiFocus(true, true)` only while there is an interactive interface. During a cutscene

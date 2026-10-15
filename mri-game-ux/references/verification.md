@@ -35,6 +35,14 @@ node scripts/nui-probe.mjs http://localhost:5173/ ./shots steps.json
 
 Tips:
 
+- Start the dev server with `BROWSER=none` (`BROWSER=none npx vite --port 3000`). `--open
+  false` is read as a path and opens `/false` in the user's own browser.
+- `eval` doesn't await a Promise. For async checks, store the result on `window.__x` in one
+  step and read it in a later step.
+- Page timers run late in headless: a screenshot can show the screen before the click took
+  effect. Assert with `eval` on `innerText` after a generous wait instead of trusting the
+  shot's timing, and keep artificial delays (`setTimeout` latency) out of the mock.
+
 - Dark `#root` background (gradient imitating sky and ground) to see scrims and light text;
   the dev body is light.
 - To compare before and after, `git stash` only the NUI files, measure, `git stash pop`.
