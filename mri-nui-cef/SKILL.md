@@ -1,6 +1,6 @@
 ---
 name: mri-nui-cef
-description: "FiveM NUI pages on the Chromium FiveM actually runs: CEF 103 limits and the CEF 144 upgrade (what breaks: alert/confirm, clipboard focus, old fx_version, CSS zoom, mutation events, throttling; what opens up: WASM, modern CSS, Tailwind 4), supporting both, the browser dev mock, focus and ESC, no infinite animations, packaging files the Lua reads, uploading video/music/image from the NUI to the server in HTTP parts with list and delete, loadscreen video compression, and NUI logs. Scanner script, clipboard helper, upload templates. Use when building or debugging a NUI, or asked \"does this work in FiveM's CEF?\", \"what breaks with CEF 144?\", \"copy doesn't work\", \"popover opens in the corner\", \"the NUI lags\", \"works in the browser but not in game\", \"upload a video from the panel\", \"the uploaded file is empty\" (pt-BR: \"o CEF novo quebra o quê?\", \"copiar não funciona na NUI\", \"a NUI tá travando\", \"no navegador funciona e no jogo não\", \"subir vídeo pelo painel\")."
+description: "FiveM NUI on the Chromium FiveM actually runs: CEF 103 limits and the CEF 144 upgrade (what breaks: alert/confirm, clipboard focus, old fx_version, CSS zoom, mutation events, throttling; what opens up: WASM, modern CSS, Tailwind 4), the browser dev mock, focus and ESC, no infinite animations, uploading video/music/image from the NUI to the server in HTTP parts, loadscreen video, NUI logs, and a NUI card over the pause menu map (one cursor, wheel without map zoom, hover and edge scroll). Scanner script, clipboard helper, upload templates. Use when building or debugging a NUI, or asked \"does this work in FiveM's CEF?\", \"what breaks with CEF 144?\", \"copy doesn't work\", \"the NUI lags\", \"works in the browser but not in game\", \"upload a video from the panel\", \"two cursors on the pause map\", \"the wheel zooms the map under my NUI\" (pt-BR: \"o CEF novo quebra o quê?\", \"copiar não funciona\", \"a NUI tá travando\", \"subir vídeo pelo painel\", \"dois cursores no mapa\", \"scroll dá zoom no mapa\")."
 ---
 
 # NUI on FiveM's CEF
@@ -93,6 +93,12 @@ The traps it covers:
   `Access-Control-Allow-Origin` through the proxy.
 - Players only get the file after the resource restarts, and a resource can't restart itself.
 - Don't re-encode a video that came from YouTube (already ~1 Mbps): it only gets jagged.
+
+## NUI over the pause menu
+
+A card over the pause map: one drawn cursor, the page takes the mouse only over the card (the map
+reads the wheel raw, so disabled controls never stop its zoom), smooth hover and edge scroll. Read
+`references/pause-menu-overlay.md` before building one.
 
 ## Testing in the browser
 

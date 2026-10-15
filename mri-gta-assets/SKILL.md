@@ -1,6 +1,6 @@
 ---
 name: mri-gta-assets
-description: "GTA V/FiveM 3D and stream files (cars, clothes, peds, weapons, animations, maps) - RPF7 and RSC7 formats (.ytd, .yft, .ydr, .ydd, .ycd, .ymap, .ytyp), metas (vehicles.meta, carcols, peds.meta, shop_ped_apparel), converting a single player mod into a FiveM resource, texture optimization (DXT, video memory, pages), how to read and write these files without OpenIV/CodeWalker, and a lookup of real game names (sounds and soundsets, animation dictionaries and clips, scenarios, props, peds, vehicles, weapons, particles, walk styles, timecycles) so none is guessed. Use when asked to \"optimize this car\", \"convert this mod to FiveM\", \"why is this car/map so heavy\", \"read/write ytd\", \"uncompressed texture\", \"install a clothing/ped/weapon/map mod\", \"which sound/animation/prop\" (pt-BR: \"otimiza esse carro\", \"converte esse mod pra FiveM\", \"por que pesa tanto\", \"qual som/animação usar\"), or when writing code that reads or writes these formats or uses a sound, animation or model name."
+description: "GTA V/FiveM game files: RPF7/RSC7 (.ytd, .yft, .ydr, .ydd, .ycd, .ymap, .ytyp), metas (vehicles.meta, carcols, peds.meta), single player mod to FiveM resource, texture optimization (DXT, pages), reading/writing these without OpenIV, pulling an original file out of the encrypted game .rpf, editing a Scaleform .gfx menu or HUD movie (decompile, change AS2 classes, recompile with FFDec, stream it) and talking to a pause menu page from Lua, plus a lookup of real game names (sounds, animations, scenarios, props, peds, vehicles, weapons, particles, walk styles, timecycles). Use when asked to \"optimize this car\", \"convert this mod to FiveM\", \"why is it so heavy\", \"read/write ytd\", \"extract this file from the game\", \"edit this gfx/scaleform\", \"change the pause menu\", \"which sound/animation/prop\" (pt-BR: \"otimiza esse carro\", \"converte esse mod\", \"tira esse arquivo do jogo\", \"edita esse gfx\", \"mexe no pause menu\", \"qual som/animação usar\"), or when code reads these formats or uses a game name."
 ---
 
 # GTA V assets (models, textures, mods)
@@ -15,6 +15,7 @@ installer.
 | RPF7, RSC7, pages, texture dictionary, other formats | [formats.md](formats.md) |
 | Texture weight, DXT compression, downsizing, backup and undo | [textures.md](textures.md) |
 | Single player mod to FiveM resource, `data_file` per meta | [mods.md](mods.md) |
+| Scaleform `.gfx`: original from the `.rpf`, decompile, recompile, pause menu channel | [scaleform.md](scaleform.md) |
 
 ## Real game names (look up, never guess)
 
