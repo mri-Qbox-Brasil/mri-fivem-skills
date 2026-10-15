@@ -48,20 +48,23 @@ FFDec is [JPEXS Free Flash Decompiler](https://github.com/jindrapetrik/jpexs-dec
 
 ## Talking to a pause menu page from Lua
 
-Validated in game with numeric markers in `SET_DATA_SLOT`; the string marker below
-(`ScaleformMovieMethodAddParamTextureNameString`) is waiting for its in-game test.
+Validated in game with Int arguments only. A string marker
+(`ScaleformMovieMethodAddParamTextureNameString`) never answered in game: use a large negative
+Int as the marker and Int command codes.
 
 The pause menu routes column calls from the frontend movie to the page component of that column:
 
 - `BeginScaleformMovieMethodOnFrontend('SET_DATA_SLOT')` with `(column, ...)` reaches the page's
   `SET_DATA_SLOT(...)` with the column removed. A page can claim calls whose first argument is a
-  marker string of its own and leave the rest to `super`.
+  marker number of its own and leave the rest to `super`.
 - `GET_COLUMN_SELECTION(column)` returns the page's `model.getCurrentSelection()`. Override it in
   the page's model to hand back a reply string, then read it with
   `EndScaleformMovieMethodReturnValue` + `IsScaleformMovieMethodReturnValueReady` +
   `GetScaleformMovieMethodReturnValueString`.
 - Calls run in order, so `send command, read, send, read` pairs line up even in batches. Keep one
-  reply slot, clear it when read, and let commands that answer nothing leave it alone.
+  reply slot and tag each reply with what it answers (index, offset). Do not clear it on read: the
+  game reads the column selection too. Send an explicit clear command when done, which hands the
+  selection back to the game.
 - Keep each reply short (about 60 characters were reported to come back whole); send long text in
   pieces with an offset.
 - Only one Lua reader at a time: the slot is shared.
