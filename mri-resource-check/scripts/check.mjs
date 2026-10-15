@@ -237,6 +237,7 @@ const warn = (where, message) => {
   console.log(`WARN ${where} ${message}`)
 }
 
+const hasLocales = existsSync(join(resourceDir, "locales"))
 const codeByFile = new Map()
 for (const file of files) {
   const src = readFileSync(file, 'utf8')
@@ -257,6 +258,15 @@ for (const file of files) {
     const name = match[1].replace(/[.:]/g, '[.:]')
     const params = new RegExp(`(?:function\\s+${name}\\s*\\(|\\b${name}\\s*=\\s*function\\s*\\()\\s*([^)\\s])`).exec(code)
     if (params) warn(`${show(file)}:${lineAt(code, match.index)}`, `SetTimeout passes its timer id as ${match[1]}'s first argument; wrap it: function() ${match[1]}() end`)
+  }
+  // Player-facing text belongs in the locale files when the resource has them.
+  if (hasLocales) {
+    src.split('\n').forEach((text, i) => {
+      if (!/\b(Notify|notify|ShowNotification|ShowHelpNotification|showTextUI)\b/.test(text)) return
+      // Literals paired left to right, so the code between two strings never reads as a phrase.
+      if ([...text.matchAll(/(['"])((?:\\.|(?!\1).)*)\1/g)].some((m) => /\p{L}{2,}\s+\p{L}/u.test(m[2])))
+        warn(`${show(file)}:${i + 1}`, 'fixed player text in a notify; put it in locales/*.json and use locale()')
+    })
   }
   // These events carry the new value, and qbx_core fires them before PlayerData is updated.
   for (const match of src.matchAll(/\b(?:RegisterNetEvent|AddEventHandler)\s*\(\s*['"](QBCore:Client:(?:OnJobUpdate|OnGangUpdate|SetDuty))['"]\s*,\s*function\s*\(\s*\)/g)) {

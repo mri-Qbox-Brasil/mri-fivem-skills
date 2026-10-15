@@ -1,6 +1,6 @@
 ---
 name: mri-resource-check
-description: "Checks a FiveM resource before calling a change done and looks up natives instead of guessing - parses every .lua including CfxLua syntax, flags natives that do not exist or run on the wrong side, the `and false or x` trap, `SetTimeout` passing its timer id to a named function, job/duty handlers that ignore the value the event carries, fixed waits used as a fix, bad fxmanifest globs, missing files and old fx_version, then the reload order and which log shows what (fxserver.log, CitizenFX_log). Node scripts, nothing to install. Use when finishing any change to a resource, when asked to \"check the resource\", \"validate the Lua\", \"did it load?\", \"SCRIPT ERROR after ensure\", \"No such export\", \"works on the server but not for the player\", \"does this native exist?\", \"attempt to call a nil value\", \"attempt to index a number value\" (pt-BR: \"confere o resource\", \"valida o lua\", \"carregou?\", \"deu erro depois do ensure\"), or when a bug only shows in game."
+description: "Checks a FiveM resource before calling a change done and looks up natives instead of guessing - parses every .lua including CfxLua syntax, flags natives that do not exist or run on the wrong side, the `and false or x` trap, `SetTimeout` passing its timer id to a named function, job/duty handlers that ignore the value the event carries, notify text outside the locale files, fixed waits used as a fix, bad fxmanifest globs, missing files and old fx_version, then the reload order and which log shows what (fxserver.log, CitizenFX_log). Node scripts, nothing to install. Use when finishing any change to a resource, when asked to \"check the resource\", \"validate the Lua\", \"did it load?\", \"SCRIPT ERROR after ensure\", \"No such export\", \"works on the server but not for the player\", \"does this native exist?\", \"attempt to call a nil value\", \"attempt to index a number value\" (pt-BR: \"confere o resource\", \"valida o lua\", \"carregou?\", \"deu erro depois do ensure\"), or when a bug only shows in game."
 ---
 
 # Checking a resource
@@ -48,6 +48,7 @@ node scripts/check.mjs <resource folder>        # or a list of .lua files; --no-
     (`attempt to index a number value`). Wrap it: `function() fn() end`.
   - `QBCore:Client:OnJobUpdate`, `OnGangUpdate` or `SetDuty` handler with no parameters:
     the event carries the new value, and qbx_core fires it before PlayerData is updated.
+  - Fixed player text in a notify (a quoted phrase) in a resource that has `locales/`.
   - `fx_version` other than `cerulean`. With a `ui_page`, the NUI may lose APIs that need a
     secure context on CEF 144.
   - A single `*` in the middle of a manifest path (`modules/*/client.lua`) matches nothing
@@ -69,6 +70,10 @@ Lua traps the parser can't see:
 - `require 'config.server'` (ox_lib) returns the same cached table everywhere in the
   resource: a field changed at runtime applies to every reader.
 - Event instead of polling. A loop with `Wait(0)` only for drawing and controls.
+- Player text (notify, help text, menu labels) goes through the locale: ox_lib `locale('key', ...)`
+  with `ox_lib 'locale'` in the manifest and every language in `locales/*.json`, keys in
+  English, values with proper accents, values from the game passed as `%s` arguments. Even when
+  the code around it hardcodes strings: the new line does not copy that.
 - No fixed `Wait(n)` / `SetTimeout(n)` to let something "settle" before reading it. That is a
   race that fails on a slow client. Use the value the event carries, or wait on the event or
   state that says it is ready. Framework events carry the new value: `OnJobUpdate(job)`,
