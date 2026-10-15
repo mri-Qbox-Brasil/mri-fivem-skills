@@ -1,6 +1,6 @@
 ---
 name: mri-upstream-wrap
-description: "Changing third-party FiveM resources (qbx_*, ox_*, any upstream) without editing their code, so updates stay a clean copy - a wrapper folder loaded from the fxmanifest, hooks through the resource's cached config, globals and events, keybinds that change for players who already joined, replacing a resource with `provide` plus a compat layer for its exports (`__cfx_export_<res>_<name>`), sharing settings through GlobalState, and the restart quirks of provided resources. Templates for the compat layer and a wrapper file. Use when asked to \"change ox_inventory/qbx_core\", \"replace resource X with ours\", \"keep compatibility with the old name\", \"No such export in resource\", \"the new default key doesn't apply\", \"integrate with another resource\" (pt-BR: \"mexe no qbx_core\", \"substitui o X pelo nosso\", \"manter compatível\", \"a tecla nova não pegou\", \"integrar com o outro resource\")."
+description: "Changing third-party FiveM resources (qbx_*, ox_*, any upstream) without editing their code, so updates stay a clean copy - a wrapper folder loaded from the fxmanifest, hooks through the resource's cached config, globals and events, keybinds that change for players who already joined, replacing a resource with `provide` plus a compat layer for its exports (`__cfx_export_<res>_<name>`), sharing settings through GlobalState, and the restart quirks of provided resources (exports stuck on the dead instance after an ensure). Templates for the compat layer and a wrapper file. Use when asked to \"change ox_inventory/qbx_core\", \"replace resource X with ours\", \"keep compatibility with the old name\", \"No such export in resource\", \"Execution of function reference in script host failed\", \"the new default key doesn't apply\", \"integrate with another resource\" (pt-BR: \"mexe no qbx_core\", \"substitui o X pelo nosso\", \"manter compatível\", \"a tecla nova não pegou\", \"integrar com o outro resource\")."
 ---
 
 # Changing upstream resources without editing them
@@ -68,5 +68,11 @@ register the command under a new name (your prefix) in the wrapper, with the new
   stops them, and re-ensuring them one by one can start the provider twice on the client
   (`No such export ... in resource ox_lib`, `module not found`). With a player in game, ask
   them to reconnect instead.
+- After an `ensure` on the provider, every resource that already called `exports['x']` keeps
+  the dead instance's function ("Execution of function reference in script host failed"):
+  the Lua scheduler caches exports by name and only clears them on `onClientResourceStop` /
+  `onServerResourceStop` for `x`, never for the provider. On the provider's own stop, fire
+  `TriggerEvent('onClientResourceStop', 'x')` (server: `onServerResourceStop`) for each name
+  it provides.
 - Never fix a bug of your own resource by editing the core or an upstream. Fix it where it
   lives.

@@ -252,6 +252,16 @@ for (const file of files) {
   code.split('\n').forEach((text, i) => {
     if (/\band\s+(false|nil)\s+or\b/.test(text)) warn(`${show(file)}:${i + 1}`, '`and false/nil or x` always gives x; use if/else')
   })
+  // SetTimeout calls its callback with the timer id: a function that takes arguments gets a number.
+  for (const match of code.matchAll(/\bSetTimeout\s*\(\s*[^,()]+,\s*([A-Za-z_][\w.:]*)\s*\)/g)) {
+    const name = match[1].replace(/[.:]/g, '[.:]')
+    const params = new RegExp(`(?:function\\s+${name}\\s*\\(|\\b${name}\\s*=\\s*function\\s*\\()\\s*([^)\\s])`).exec(code)
+    if (params) warn(`${show(file)}:${lineAt(code, match.index)}`, `SetTimeout passes its timer id as ${match[1]}'s first argument; wrap it: function() ${match[1]}() end`)
+  }
+  // These events carry the new value, and qbx_core fires them before PlayerData is updated.
+  for (const match of src.matchAll(/\b(?:RegisterNetEvent|AddEventHandler)\s*\(\s*['"](QBCore:Client:(?:OnJobUpdate|OnGangUpdate|SetDuty))['"]\s*,\s*function\s*\(\s*\)/g)) {
+    warn(`${show(file)}:${lineAt(src, match.index)}`, `${match[1]} handler ignores the value it carries; PlayerData still has the old one when it runs`)
+  }
 }
 
 const manifestFile = join(resourceDir, 'fxmanifest.lua')
