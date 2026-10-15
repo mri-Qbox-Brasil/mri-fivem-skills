@@ -60,9 +60,9 @@ local function accent()
 	return { tonumber(hex:sub(1, 2), 16), tonumber(hex:sub(3, 4), 16), tonumber(hex:sub(5, 6), 16) }
 end
 
--- Small sphere right on the aimed spot: the cursor of a point without a model.
+-- Aim cursor of a point without a model; a sphere marker scales by radius, so 0.1 is 20 cm across.
 local function drawCursor(point, color)
-	DrawMarker(28, point.x, point.y, point.z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.25, 0.25, 0.25, color[1], color[2], color[3], 220, false, false, 2, false, nil, nil, false)
+	DrawMarker(28, point.x, point.y, point.z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.1, 0.1, color[1], color[2], color[3], 220, false, false, 2, false, nil, nil, false)
 end
 
 local function drawStop(point, color)
@@ -112,6 +112,15 @@ local function drawLabel(c, text)
 	BeginTextCommandDisplayText('STRING')
 	AddTextComponentSubstringPlayerName(text)
 	EndTextCommandDisplayText(x, y)
+end
+
+-- The pause menu opens when Esc is released, so it stays blocked until the key is up.
+local function releaseEsc()
+	repeat
+		DisableControlAction(0, KEY.cancel, true)
+		Wait(0)
+	until not IsDisabledControlPressed(0, KEY.cancel)
+	DisableControlAction(0, KEY.cancel, true)
 end
 
 local function clampSize(value)
@@ -173,6 +182,7 @@ function WorldPlacer.point(opts)
 			break
 		elseif IsDisabledControlJustPressed(0, KEY.cancel) or IsControlJustPressed(0, KEY.undo) then
 			PlaySoundFrontend(-1, 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', true)
+			releaseEsc()
 			break
 		end
 		Wait(0)
@@ -250,6 +260,7 @@ function WorldPlacer.zone(opts)
 			break
 		elseif IsDisabledControlJustPressed(0, KEY.cancel) then
 			PlaySoundFrontend(-1, 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', true)
+			releaseEsc()
 			break
 		end
 		Wait(0)
@@ -307,6 +318,7 @@ function WorldPlacer.path(opts)
 			break
 		elseif IsDisabledControlJustPressed(0, KEY.cancel) then
 			PlaySoundFrontend(-1, 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', true)
+			releaseEsc()
 			break
 		end
 		Wait(0)
