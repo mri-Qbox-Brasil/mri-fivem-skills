@@ -97,7 +97,9 @@ and the game hook is a GL texture. WebGL2 works on 103.
   ignores `.mri-surface` nested in another.
 - Radius, clip and attributes are cached; changed through inline `style`: `refresh()`.
 - The loop runs while there is a `[data-glass]` in the DOM and redraws the canvas every
-  visible frame. Hidden doesn't draw; no element, it stops. Screen closed: remove it from the
+  visible frame. Hidden doesn't draw; no element, it stops and the canvas leaves the page
+  (1.4.1+: an idle canvas made AMD drivers drop the fill of rounded panels in any theme).
+  Screen closed: remove it from the
   DOM.
 - DUI (`?mode=dui`) and outside the game without `fallbackImage`: it doesn't start. mri_Qadmin
   iframe: untested.
