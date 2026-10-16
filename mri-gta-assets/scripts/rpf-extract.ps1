@@ -13,10 +13,13 @@ if (-not (Test-Path $dll)) { throw "CodeWalker.Core.dll not found in $CodeWalker
 $asm = [Reflection.Assembly]::LoadFrom($dll)
 
 # Keys are read from the game's own executable, so the game folder must be a legacy (non Enhanced) install.
-$asm.GetType('CodeWalker.GameFiles.GTA5Keys').GetMethod('LoadFromPath').Invoke($null, @($Game, $false, $null))
+# Signatures change between CodeWalker builds: dev46 has no Enhanced flag, later builds add it.
+$load = $asm.GetType('CodeWalker.GameFiles.GTA5Keys').GetMethod('LoadFromPath')
+if ($load.GetParameters().Count -eq 2) { [void]$load.Invoke($null, @($Game, $null)) } else { [void]$load.Invoke($null, @($Game, $false, $null)) }
 $manager = [Activator]::CreateInstance($asm.GetType('CodeWalker.GameFiles.RpfManager'))
 $quiet = [Action[string]] { param($s) }
-$manager.Init($Game, $false, $quiet, $quiet, $false, $true)
+$init = $manager.GetType().GetMethods() | Where-Object { $_.Name -eq 'Init' -and $_.GetParameters()[0].ParameterType -eq [string] }
+if ($init.GetParameters().Count -eq 5) { $manager.Init($Game, $quiet, $quiet, $false, $true) } else { $manager.Init($Game, $false, $quiet, $quiet, $false, $true) }
 
 $hits = foreach ($rpf in $manager.AllRpfs) {
   foreach ($entry in $rpf.AllEntries) { if ($entry.Name -ieq $Name) { $entry.Path } }
