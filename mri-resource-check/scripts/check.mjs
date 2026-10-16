@@ -241,6 +241,19 @@ const hasLocales = existsSync(join(resourceDir, "locales"))
 const sides = readManifest(resourceDir)
 // Server events the framework fires with TriggerEvent; a net handler lets any client fake them.
 const LOCAL_SERVER_EVENTS = /^(QBCore:Server:(PlayerLoaded|OnPlayerUnload|OnJobUpdate|OnGangUpdate|SetDuty|OnMoneyChange|OnPermissionUpdate)|qbx_core:server:(playerLoggedOut|onJobUpdate|onGangUpdate|onGroupUpdate|onSetMetaData|characterDeleted)|esx:(playerLoaded|playerDropped|setJob))$/
+// Event names that look like qbx_core's but it never fires: the handler silently never runs.
+const DEAD_QBX_EVENTS = {
+  playerLoaded: { server: "QBCore:Server:PlayerLoaded (AddEventHandler)", client: "QBCore:Client:OnPlayerLoaded" },
+  playerUnloaded: { server: "qbx_core:server:playerLoggedOut", client: "qbx_core:client:playerLoggedOut" },
+  jobChanged: { server: "qbx_core:server:onJobUpdate", client: "qbx_core:client:onJobUpdate" },
+  gangChanged: { server: "qbx_core:server:onGangUpdate", client: "qbx_core:client:onGangUpdate" },
+}
+const DEAD_QBX_EVENT = /\b(?:RegisterNetEvent|AddEventHandler)\s*\(\s*['"]qbx_core:(server|client):(playerLoaded|playerUnloaded|jobChanged|gangChanged)['"]/g
+// Old natives with a cheaper equivalent.
+const SLOW_NATIVES = [
+  [/\bGetPlayerPed\s*\(\s*-1\s*\)/, 'GetPlayerPed(-1): use cache.ped (ox_lib) or PlayerPedId()'],
+  [/\bGetDistanceBetweenCoords\s*\(/, 'GetDistanceBetweenCoords: use #(a - b) on vectors'],
+]
 const codeByFile = new Map()
 for (const file of files) {
   const src = readFileSync(file, 'utf8')
@@ -255,7 +268,11 @@ for (const file of files) {
   codeByFile.set(file, code)
   code.split('\n').forEach((text, i) => {
     if (/\band\s+(false|nil)\s+or\b/.test(text)) warn(`${show(file)}:${i + 1}`, '`and false/nil or x` always gives x; use if/else')
+    for (const [pattern, message] of SLOW_NATIVES) if (pattern.test(text)) warn(`${show(file)}:${i + 1}`, message)
   })
+  for (const match of src.matchAll(DEAD_QBX_EVENT)) {
+    warn(`${show(file)}:${lineAt(src, match.index)}`, `qbx_core:${match[1]}:${match[2]} is never fired by qbx_core; listen to ${DEAD_QBX_EVENTS[match[2]][match[1]]}`)
+  }
   // SetTimeout calls its callback with the timer id: a function that takes arguments gets a number.
   for (const match of code.matchAll(/\bSetTimeout\s*\(\s*[^,()]+,\s*([A-Za-z_][\w.:]*)\s*\)/g)) {
     const name = match[1].replace(/[.:]/g, '[.:]')

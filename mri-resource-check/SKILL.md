@@ -1,6 +1,6 @@
 ---
 name: mri-resource-check
-description: "Checks a FiveM resource before calling a change done and looks up natives instead of guessing - parses every .lua including CfxLua syntax, flags natives that do not exist or run on the wrong side, the `and false or x` trap, `SetTimeout` passing its timer id to a named function, job/duty handlers that ignore the value the event carries, server framework events registered with RegisterNetEvent (any client can fake them), notify text outside the locale files, fixed waits used as a fix, bad fxmanifest globs, missing files and old fx_version, then the reload order and which log shows what (fxserver.log, CitizenFX_log). Node scripts, nothing to install. Use when finishing any change to a resource, when asked to \"check the resource\", \"validate the Lua\", \"did it load?\", \"SCRIPT ERROR after ensure\", \"No such export\", \"works on the server but not for the player\", \"does this native exist?\", \"attempt to call a nil value\", \"attempt to index a number value\" (pt-BR: \"confere o resource\", \"valida o lua\", \"carregou?\", \"deu erro depois do ensure\"), or when a bug only shows in game."
+description: "Checks a FiveM resource before calling a change done and looks up natives instead of guessing - parses every .lua including CfxLua syntax, flags natives that do not exist or run on the wrong side, the `and false or x` trap, `SetTimeout` passing its timer id to a named function, job/duty handlers that ignore the value the event carries, server framework events registered with RegisterNetEvent (any client can fake them), qbx_core event names it never fires (dead handlers), GetPlayerPed(-1) and GetDistanceBetweenCoords, notify text outside the locale files, fixed waits used as a fix, bad fxmanifest globs, missing files and old fx_version, then the reload order and which log shows what (fxserver.log, CitizenFX_log). Node scripts, nothing to install. Use when finishing any change to a resource, when asked to \"check the resource\", \"validate the Lua\", \"did it load?\", \"SCRIPT ERROR after ensure\", \"No such export\", \"works on the server but not for the player\", \"does this native exist?\", \"attempt to call a nil value\", \"attempt to index a number value\" (pt-BR: \"confere o resource\", \"valida o lua\", \"carregou?\", \"deu erro depois do ensure\"), or when a bug only shows in game."
 ---
 
 # Checking a resource
@@ -54,6 +54,13 @@ node scripts/check.mjs <resource folder>        # or a list of .lua files; --no-
     `qbx_core:server:onJobUpdate`...): any client can fire it with fake arguments. Listen
     with `AddEventHandler`. Before listening to a framework event, grep the framework for
     who fires it: a name nobody fires (`qbx_core:server:playerLoaded`) is a dead handler.
+  - A handler for a `qbx_core:*` name that qbx_core never fires (`playerLoaded`,
+    `playerUnloaded`, `jobChanged`, `gangChanged`, on server or client), with the event to use
+    instead. Agents and third-party guides invent these; the code looks right and never runs.
+  - `GetPlayerPed(-1)` (use `cache.ped` or `PlayerPedId()`) and `GetDistanceBetweenCoords`
+    (use `#(a - b)`).
+  - Not flagged on purpose: a `GetInvokingResource()` guard on client net events. The
+    cheater controls the client and skips it; the real fix is the server validating.
   - `fx_version` other than `cerulean`. With a `ui_page`, the NUI may lose APIs that need a
     secure context on CEF 144.
   - A single `*` in the middle of a manifest path (`modules/*/client.lua`) matches nothing
