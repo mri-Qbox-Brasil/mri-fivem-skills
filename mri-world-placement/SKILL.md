@@ -1,6 +1,6 @@
 ---
 name: mri-world-placement
-description: "World placement standard for FiveM resource creation panels - place an NPC, object or point by aiming with a preview (ghost), mark a box zone with heading and size around the player (elevator floor, garage spot, stash), record a route or path stop by stop with a line on the ground, a key rail on the NUI instead of a textUI, and NPCs walking the route without stalling. Ships the ready Lua module (WorldPlacer.point, WorldPlacer.zone and WorldPlacer.path), the React rail (PlaceRail) and the rules that prevent flickering markers, missed keys, coordinate fields and typed player ids (pick a nearby player from a list). Use when asked to \"place in the world\", \"record a route\", \"place the NPC/object/zone in game\", \"in-game creator\", \"the marker flickers\", \"I don't want to type coordinates\" (pt-BR: \"posicionar no mundo\", \"marcar rota\", \"o marcador tá piscando\", \"não quero digitar coordenada\"), or when building any admin panel that stores a position, heading, zone or path."
+description: "World placement standard for FiveM resource creation panels - place an NPC, object or point by aiming with a preview (ghost), mark a box zone with heading and size around the player (elevator floor, garage spot, stash), record a route or path stop by stop with a line on the ground, a key rail on the NUI instead of a textUI, and NPCs walking the route without stalling, and the shared map panel (list, map, editor). Ships the ready Lua module (WorldPlacer.point, WorldPlacer.zone and WorldPlacer.path), the React rail (PlaceRail) and the rules that prevent flickering markers, missed keys, coordinate fields and typed player ids. Use when asked to \"place in the world\", \"record a route\", \"place the NPC/object/zone in game\", \"in-game creator\", \"the marker flickers\", \"I don't want to type coordinates\" (pt-BR: \"posicionar no mundo\", \"marcar rota\", \"o marcador tá piscando\", \"não quero digitar coordenada\"), or when building any admin panel that stores a position, heading, zone or path."
 ---
 
 # World placement
@@ -56,6 +56,16 @@ or cancel (`HUD_FRONTEND_DEFAULT_SOUNDSET`).
    player on the nearest walkable spot with `GetSafeCoordForPed(x, y, z, false, 32)`, flag 32 =
    flood fill from the point) and **Remove** when it is optional. No X/Y/Z anywhere, not even
    behind an "edit manually" toggle.
+
+## Map panel (list, map, editor)
+
+A panel whose items live on the map (elevators, blips, garages, zones) uses the same three
+columns everywhere: the list with search on the left, the GTA map in the middle, the editor of
+the selected item on the right. Clicking the list or the map selects; the map flies to the
+selection and shows its parts (floors, slots, NPC). The map only shows and selects: marking a
+position is still done in the world with the tools above (a pin may be dragged to fine tune).
+In a React NUI with `@mriqbox/ui-kit` this is `MriMapEditorLayout` with `MriGameMap` (see the
+ui-kit docs); never a hand-made Leaflet map per resource.
 
 ## Frame rules (no flicker, no missed keys)
 
