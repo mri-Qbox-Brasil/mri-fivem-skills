@@ -82,6 +82,12 @@ Lua traps the parser can't see:
 - `require 'config.server'` (ox_lib) returns the same cached table everywhere in the
   resource: a field changed at runtime applies to every reader.
 - Event instead of polling. A loop with `Wait(0)` only for drawing and controls.
+- Never read `GlobalState[key]`, `LocalPlayer.state[key]` or `Entity(x).state[key]` inside a
+  loop to see if it changed: every read decodes a fresh copy of the value, so a table there
+  makes garbage each tick and the resmon memory of the resource climbs (the `+`). Keep the
+  value in a local updated by `AddStateBagChangeHandler(key, 'global' | 'player:<id>' |
+  'entity:<netId>', fn)`, seeded once from the bag. A loop that only serves that value does no
+  work (no table, no native) while it is empty.
 - Player text (notify, help text, menu labels) goes through the locale: ox_lib `locale('key', ...)`
   with `ox_lib 'locale'` in the manifest and every language in `locales/*.json`, keys in
   English, values with proper accents, values from the game passed as `%s` arguments. Even when
