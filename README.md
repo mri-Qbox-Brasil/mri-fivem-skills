@@ -16,7 +16,6 @@ resources, options in the admin panel and the NUI's Chromium version. They come 
 | [`mri-resource-check`](mri-resource-check) | Check a resource before calling it done: Lua parser with CfxLua syntax, natives that don't exist or run on the wrong side, native lookup, `SetTimeout` and framework-event timing traps, manifest pitfalls, reload order, which log shows what |
 | [`mri-upstream-wrap`](mri-upstream-wrap) | Change third-party resources without editing them: wrapper folder, hooks, keybinds, `provide` with a compat layer for exports, exports stuck after an ensure |
 | [`mri-nui-cef`](mri-nui-cef) | NUI on FiveM's Chromium: CEF 103 limits, what CEF 144 breaks and opens up, a scanner for the breaking changes, file upload from the NUI, a NUI card over the pause map |
-| [`mri-panel-settings`](mri-panel-settings) | Every option of a resource in its admin panel instead of config.lua, applied live on server and clients, and admin forms that pick jobs, grades, items and characters from lists instead of typed names, with Lua and React templates |
 
 The skills are written in English; the agent still answers in the user's language, and each
 `description` also lists Brazilian Portuguese trigger phrases.
