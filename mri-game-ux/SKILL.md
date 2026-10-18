@@ -1,6 +1,6 @@
 ---
 name: mri-game-ux
-description: "Makes FiveM resource screens and scenes (multichar, character creation, spawn, appearance, loading, cutscenes, NPC conversation) feel like an AAA game - menus that say where they lead, camera and interface transitions without hard cuts, depth of field and handheld camera, music in phases with crossfade, cinema bars, destructive confirmation without a modal. Use when asked for \"AAA feel\", \"more cinematic\", \"too sudden\", \"it flickers\", \"the music stops\" (pt-BR: \"cara de triple A\", \"mais cinematográfico\", \"tá repentino\", \"tá piscando\", \"a música para\"), or when designing or reviewing an in-game screen flow with a scripted camera and NUI."
+description: "Makes FiveM resource screens and scenes (multichar, character creation, spawn, appearance, loading, cutscenes, NPC conversation) feel like an AAA game - menus that say where they lead, camera and interface transitions without hard cuts, depth of field and handheld camera, music in phases with crossfade, cinema bars, destructive confirmation without a modal, player settings panels with fixed size and a preview card for every visual choice. Use when asked for \"AAA feel\", \"more cinematic\", \"too sudden\", \"it flickers\", \"the music stops\" (pt-BR: \"cara de triple A\", \"mais cinematográfico\", \"tá repentino\", \"tá piscando\", \"a música para\"), or when designing or reviewing an in-game screen flow with a scripted camera and NUI."
 ---
 
 # AAA game UX in FiveM resources
@@ -44,6 +44,9 @@ Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
 - **A scene is a scene.** Cutscene and arrival with cinema bars, name as credit, discreet
   "skip".
 - **Configurable.** Tracks, camera shots and times in the config, with good defaults.
+- **A settings panel shows, it doesn't list.** Fixed size (never resizes on tab or option),
+  every visual choice is a card with a picture of the result in the real color, options that
+  depend on another dim instead of vanishing. Details in `references/menus.md`.
 
 ## References (read only the one for the subject)
 
@@ -52,7 +55,7 @@ Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
 | `references/transitions.md` | screens entering and leaving, glide vs cut, ped fade, camera arc |
 | `references/camera-scene.md` | scripted camera, depth of field, handheld camera, area streaming, time and weather, 3D text, NPC conversation |
 | `references/sound.md` | music in phases, crossfade, music with the NUI closed, effects, cutscenes |
-| `references/menus.md` | title, landing, selection, destructive confirmation, gamepad, world prompts |
+| `references/menus.md` | title, landing, selection, destructive confirmation, gamepad, world prompts, player settings panels |
 | `references/nui-pitfalls.md` | flicker on switch, player that restarts, animation vs transform, loadscreen, legibility over the world |
 | `references/verification.md` | screenshots and measurements in headless Chrome, music check, diagnostic logs |
 | `references/dev-mock.md` | browser dev mode for a NUI: stateful mock server, one scenario per screen, data read from the Lua config |

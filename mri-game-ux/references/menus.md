@@ -50,6 +50,31 @@ No black modal out of nowhere:
 - Ending: pose, the camera moves to the appearance editor's shot, a card with the name, and
   the editor opens right there, without fade or teleport.
 
+## Player settings panels
+
+Any panel where the player picks how something looks (HUD, GPS, marker, crosshair, chat). Build it
+like this from the start, without being asked:
+
+- **Fixed size.** Width and height set on the card (`h-[min(820px,calc(100vh-48px))] w-[460px]`),
+  body scrolls inside with `scrollbar-gutter: stable`. Switching tab or toggling an option never
+  resizes the panel.
+- **Pick by look.** Every visual choice (style, shape, icon, indicator) is a grid of cards: a small
+  picture of the result on top, the name under it, the selected card in the accent. Draw the
+  picture with the same code the game uses (same canvas tile, same SVG glyph), in the color the
+  player will actually see (send it in the open message), never a gray placeholder.
+- **Segmented rows for amounts.** Size, speed, opacity: label on the left, `MriSegmentedTabs` on
+  the right, same column width for all rows.
+- **Group in sections** with a small uppercase title ("Shape", "Icon", "What to show"). Short
+  toggles go two per row with one or two word labels.
+- **Dependent options dim** (`opacity-40 pointer-events-none`) instead of disappearing, so nothing
+  jumps.
+- **One concept, one control.** A plain dot is an icon option, not a separate style; text on/off
+  and extras (beam, ring) are toggles that work with every style.
+- **Live.** The world stays visible beside the panel and every change applies at once; reset to
+  default in the footer.
+- Check both tabs in the browser mock (`references/dev-mock.md`) before handing over.
+- Reference: `mri_Qblips` (`web/src/components/Studio.tsx`, `web/src/lib/gpsArt.ts`).
+
 ## Gamepad
 
 Every screen navigable by gamepad: visible focus (ring in the accent color), button hints at

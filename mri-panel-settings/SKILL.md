@@ -40,7 +40,9 @@ sort), so a server that had 1750 still sees 1750.
 4. The installer must keep `data/settings.json` on updates ("Manter ao atualizar").
 5. Panel: one tab, one card per section, each change saves its section after a short pause
    (600 ms for text, 0 for toggles and choices). A world tool saves through the same callback
-   and sends a `settingsChanged` NUI message so the tab reloads.
+   and sends a `settingsChanged` NUI message so the tab reloads. The panel keeps a fixed size,
+   and a visual choice (style, icon, color mode) is a card with a preview of the result, never a
+   bare list of names (skill `mri-game-ux`, `references/menus.md`, "Player settings panels").
 
 ## Merge and clean
 
