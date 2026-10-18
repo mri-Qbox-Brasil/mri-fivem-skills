@@ -39,10 +39,12 @@ Templates: `templates/upload-server.lua`, `templates/upload-files.js`,
   `https://<web_baseUrl>/<resource>` (answers only if the owner put a real certificate in
   front, or `server-tls.crt`/`.key`, which FXServer serves on the same port). Ping each with a
   1 s timeout; none answers: latent events.
-- **Latent events: one in flight, 5 MB/s.** Firing several `TriggerLatentServerEvent` at once
-  (or a rate like 24 MB/s) works on the server's PC and fails for everyone else: they share one
-  queue, the last ones wait behind the first and hit the answer timeout. Send the next only
-  after the server answers; HTTP can keep several in flight.
+- **Latent events: one in flight, 5 MB/s.** That is the validated route above. A photo studio
+  that fired up to 16 latent events at once at 24 MB/s, each with a 60 s answer timeout counted
+  from the queue, failed for every player outside the server's PC (on the server's PC the
+  upload goes over localhost HTTP, so it never showed). Not measured why; the likely cause is
+  the later events waiting behind the first ones. Send the next only after the server answers;
+  HTTP can keep several in flight.
 - **Base64 to bytes on the server:** decode in a server `.js` and return an `ArrayBuffer`
   (`buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.length)`): Lua gets a byte string.
   A `Buffer` or `Uint8Array` reaches Lua as a table of numbers.
