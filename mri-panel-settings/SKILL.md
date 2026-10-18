@@ -1,6 +1,6 @@
 ---
 name: mri-panel-settings
-description: "Puts every option of a FiveM resource in its admin panel instead of config.lua: a data/settings.json read only by the server, defaults seeded from config.lua so edited servers keep their values, typed merge per section, cleaners for lists and maps, live apply over the Config table on the server and on every client through a GlobalState key (no restart), rebuild of zones, blips, targets and NPCs created at boot, integrations (target, radial, fuel) detected instead of configured, and the panel controls (ready-made choices, world tools, no typed numbers). Ships the Lua templates. Use when asked to \"make the config editable in game\", \"move config.lua to the panel\", \"settings tab\", \"option in the admin panel\", \"apply without restart\" (pt-BR: \"deixa a config editável ingame\", \"leva o config pro painel\", \"aba de ajustes\", \"opção no painel\", \"configurável no jogo\"), or when a resource still has options only in config.lua."
+description: "Puts every option of a FiveM resource in its admin panel instead of config.lua and makes every admin form pick from lists instead of typed names: data/settings.json read only by the server, defaults seeded from config.lua, typed merge per section, live apply over Config on server and clients through GlobalState (no restart), rebuild of zones, blips, targets and NPCs, integrations detected, ready-made choices instead of numbers, and pickers for jobs and gangs with grade, items and characters. Ships Lua and React templates. Use when asked to \"make the config editable in game\", \"move config.lua to the panel\", \"settings tab\", \"apply without restart\", \"don't make me type the job/item\" (pt-BR: \"leva o config pro painel\", \"aba de ajustes\", \"configurável no jogo\", \"selecionar grupo e cargo\", \"por que tenho que digitar o item?\"), or when a resource still has options in config.lua or a free text field for a job, grade, item or citizenid."
 ---
 
 # Options in the panel, not in config.lua
@@ -15,7 +15,7 @@ touched for settings: don't ask which options, don't leave some behind.
 | --- | --- |
 | On/off, mode, price, fee, limit, time | panel, ready-made choice (segmented or select), never a number field |
 | Position, zone, route, NPC | panel, marked in the world (skill `mri-world-placement`), never X/Y/Z |
-| Job, gang, grade, vehicle model, player | panel, picked from a list |
+| Job, gang, grade, item, vehicle model, character | panel, picked from a list (see "Pick, never type") |
 | Names (shop label, plate start) | panel, text field |
 | Target, radial menu, fuel script, framework | nothing: detected with `GetResourceState` |
 | Interaction key | fixed (E): the help texts name it, a choice breaks them |
@@ -24,6 +24,24 @@ touched for settings: don't ask which options, don't leave some behind.
 
 A price choice list keeps the value saved before it even when it is not in the list (add it and
 sort), so a server that had 1750 still sees 1750.
+
+## Pick, never type
+
+Applies to every admin form, not only settings: a door's access, an elevator floor, a shop's
+allowed jobs. An owner never types a job name, a grade number, an item name or a citizenid.
+
+- `templates/pickers.lua`: admin-only callbacks `groupOptions` (qbx_core `GetJobs` + `GetGangs`,
+  each with its grades sorted by level), `itemOptions` (`ox_inventory:Items()`) and
+  `characterOptions` (every row of `players`, labeled by name). One NUI callback per list.
+- `templates/pickers.tsx`: `useOptions(event)` fetches a list once per NUI session,
+  `withMissing` keeps a saved value that left the list (deleted item, removed job) so it can be
+  removed, and `GroupPicker` is one searchable `MriSelect multiple` for jobs and gangs plus a
+  grade `MriSelect` (by grade name) per chosen group with more than one grade.
+- Items: `MriSelect multiple`, then one row per chosen item for its own options (used up on
+  use). Characters: `MriSelect multiple` labeled `name · citizenid`.
+- No empty row with a "+" button and a free input: the select is the list.
+- Keep the stored shape (`{job = grade}`, `{name, remove}[]`, citizenid list): only the editor
+  changes, saved data and readers stay as they were.
 
 ## Wiring (templates/)
 
@@ -81,5 +99,6 @@ sort), so a server that had 1750 still sees 1750.
   a restart; a world tool returns to the tab with the new value; an old `config.lua` value shows
   in the panel on the first run.
 
-Reference: `mri_Qgarage` (`modules/settings/`, `web/src/pages/GarageSettings.tsx`). Tested in
-the browser and with `ensure`; the in-game pass is pending.
+Reference: `mri_Qgarage` (`modules/settings/`, `web/src/pages/GarageSettings.tsx`); pickers in
+`mri_Qelevators` (`AccessField` in `web/src/components/Editor.tsx`) and `mri_Qdoorlock` (door
+groups, items, characters). Tested in the browser and with `ensure`; the in-game pass is pending.
