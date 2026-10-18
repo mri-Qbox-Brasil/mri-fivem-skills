@@ -72,6 +72,12 @@ like this from the start, without being asked:
   and extras (beam, ring) are toggles that work with every style.
 - **Live.** The world stays visible beside the panel and every change applies at once; reset to
   default in the footer.
+- **The owner decides first.** The same panel opened by an admin edits the server default
+  everyone sees (saved on the server, sent through GlobalState), with a "Players can customize"
+  switch at the top, off by default. A player opens it only when that switch is on, saves their
+  own look locally (KVP), and their reset goes back to the server default; when off, the player
+  gets a short notice and sees the default. Validate the default on the server with the same
+  shared choice table the client uses.
 - Check both tabs in the browser mock (`references/dev-mock.md`) before handing over.
 - Reference: `mri_Qblips` (`web/src/components/Studio.tsx`, `web/src/lib/gpsArt.ts`).
 
