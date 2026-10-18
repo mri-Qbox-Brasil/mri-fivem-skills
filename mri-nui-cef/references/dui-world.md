@@ -65,6 +65,10 @@ GPS route on the road). Lines marked *(not seen in game yet)* still wait for an 
 - Skip the resample (about 130 route and ground probes) while the player stands still with the
   same destination, look and color: the route is identical. Compare the color as a string, a
   freshly built table never matches. With route and marker on, mri_Qblips measured 0.18 ms.
+- Driving, all probes plus the mesh build in one frame showed as resmon spikes (0.40 ms). Spread
+  them: `Wait(0)` every ~12 probes and before the build, and resample every 250 ms at speed (the
+  start of the ribbon fades out under the car anyway). Each point is still a world position on
+  the route and `at` is summed from real spacing, so a chunked list is a valid polyline.
 
 ## Waypoint color
 
