@@ -62,6 +62,9 @@ GPS route on the road). Lines marked *(not seen in game yet)* still wait for an 
   sampled (150 to 350 ms), never per frame; the frame only loops the rows and calls
   `DrawTexturedPoly`. Drop points on straight, flat stretches (direction change under ~2 degrees,
   quads up to 25 m): the tile wraps, so it looks the same with far fewer calls.
+- Skip the resample (about 130 route and ground probes) while the player stands still with the
+  same destination, look and color: the route is identical. Compare the color as a string, a
+  freshly built table never matches. With route and marker on, mri_Qblips measured 0.18 ms.
 
 ## Waypoint color
 
