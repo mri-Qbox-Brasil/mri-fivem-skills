@@ -1,6 +1,6 @@
 ---
 name: mri-nui-cef
-description: "FiveM NUI on the Chromium FiveM actually runs: CEF 103 limits and the CEF 144 upgrade (what breaks: alert/confirm, clipboard focus, old fx_version, CSS zoom, mutation events, throttling; what opens up: WASM, modern CSS, Tailwind 4), the browser dev mock, focus and ESC, no infinite animations, uploading video/music/image from the NUI to the server in HTTP parts, loadscreen video, NUI logs, and a NUI card over the pause menu map (one cursor, wheel without map zoom, hover and edge scroll). Scanner script, clipboard helper, upload templates. Use when building or debugging a NUI, or asked \"does this work in FiveM's CEF?\", \"what breaks with CEF 144?\", \"copy doesn't work\", \"the NUI lags\", \"works in the browser but not in game\", \"upload a video from the panel\", \"two cursors on the pause map\", \"the wheel zooms the map under my NUI\" (pt-BR: \"o CEF novo quebra o quê?\", \"copiar não funciona\", \"a NUI tá travando\", \"subir vídeo pelo painel\", \"dois cursores no mapa\", \"scroll dá zoom no mapa\")."
+description: "FiveM NUI on the Chromium FiveM actually runs: CEF 103 limits and the CEF 144 upgrade (what breaks: alert/confirm, clipboard focus, old fx_version, CSS zoom, mutation events, throttling; what opens up: WASM, modern CSS, Tailwind 4), the browser dev mock, focus and ESC, no infinite animations, uploading video/music/image from the NUI to the server in HTTP parts, loadscreen video, NUI logs, a NUI card over the pause menu map (one cursor, wheel without map zoom, hover and edge scroll), and DUI drawn in the world (destination marker standing on the ground, screen edge indicator, GPS route painted on the road) without per-frame NUI messages. Scanner script, clipboard helper, upload templates. Use when building or debugging a NUI, or asked \"does this work in FiveM's CEF?\", \"what breaks with CEF 144?\", \"copy doesn't work\", \"the NUI lags\", \"works in the browser but not in game\", \"upload a video from the panel\", \"two cursors on the pause map\", \"the wheel zooms the map under my NUI\", \"3D marker at the waypoint\", \"draw the route on the road\" (pt-BR: \"o CEF novo quebra o quê?\", \"copiar não funciona\", \"a NUI tá travando\", \"subir vídeo pelo painel\", \"dois cursores no mapa\", \"scroll dá zoom no mapa\")."
 ---
 
 # NUI on FiveM's CEF
@@ -100,9 +100,16 @@ The traps it covers:
 
 ## NUI over the pause menu
 
-A card over the pause map: one drawn cursor, the page takes the mouse only over the card (the map
+A card over the pause map: one cursor (CEF's over the card, the game's off it), the page takes the mouse only over the card (the map
 reads the wheel raw, so disabled controls never stop its zoom), smooth hover and edge scroll. Read
 `references/pause-menu-overlay.md` before building one.
+
+## DUI in the world
+
+Pictures that live in the 3D world or follow a point on screen (destination marker, screen edge
+indicator, road route texture) are DUI pages drawn by the game, never a NUI moved every frame.
+Pool, billboard quad, screen sprite, edge arrow, GPS route ribbon and their costs:
+`references/dui-world.md`.
 
 ## Testing in the browser
 

@@ -5,12 +5,15 @@ mri_Qblips; validated in game unless a line says otherwise.
 
 ## One cursor
 
-- The game draws its pause cursor **under** the NUI, so it vanishes behind the card. Hide it with
-  `SetMouseCursorVisible(false)` every frame while the card is up, and draw your own cursor in the
-  page (a fixed div moved with `transform`, `pointer-events: none`, top z-index). Restore with
-  `SetMouseCursorVisible(true)` on close and in `onResourceStop`.
-- Outside the card, drive the page from the game cursor: `GetDisabledControlNormal(0, 239/240)`
-  each frame, sent to the page only when it moved, so the drawn cursor and hover follow it.
+- Over the card the page holds the mouse, so CEF draws its own cursor: keep the plain default
+  arrow, with `cursor: pointer` on buttons, labels and tabs. Off the card the game cursor shows.
+  Each frame `SetMouseCursorVisible(not over)`: the game cursor would freeze under the card.
+  Restore `SetMouseCursorVisible(true)` on close and in `onResourceStop`.
+- Don't draw a cursor in the page (a div following relayed positions): it lags behind the real
+  mouse and never matches the game arrow. Custom CSS cursors looked worse too.
+- Hover and edge scroll follow real `mousemove` events while they arrive; positions relayed from
+  Lua (`GetDisabledControlNormal(0, 239/240)`, sent only when moved) count only when no real
+  event came in the last ~100 ms (cursor off the card).
 
 ## The mouse over the card
 
@@ -24,8 +27,7 @@ mri_Qblips; validated in game unless a line says otherwise.
     `GetActiveScreenResolution()`; ignore it for ~3 frames after the hand over (stale position);
   - cursor leaves the rect: drop the mouse (`SetNuiFocus(typing, false)`) and
     `SetCursorLocation(x, y)` so the map cursor continues from the same spot.
-- Inside, the page gets real clicks and real wheel, so lists scroll natively. Hide CEF's own
-  cursor with `cursor: none !important` on everything while the card is up.
+- Inside, the page gets real clicks and real wheel, so lists scroll natively.
 - Keys never reach the game while focused: the page handles Escape and asks Lua to close
   (`SetFrontendActive(false)`); game shortcuts like Q/E tab switching only work off the card.
   (Escape through the page: waiting for its in-game test.)
