@@ -110,6 +110,12 @@ Lua traps the parser can't see:
 - A rule that depends on a group (minimum grade, salary) reads the grade in the group that granted
   the access, not the player's current job: with jobs and gangs in one access list, a gang member
   must not pass a job grade check with the gang grade.
+- A vehicle spawned with props gets its final plate a moment after it exists: anything keyed by
+  plate (keys, fuel, mileage) waits until `GetVehicleNumberPlateText` matches before it counts.
+  Key resources check the plate the moment the player sits, so a car the player is warped into
+  needs the key announced again once the plate lands (mri_Qcarkeys: its own
+  `mm_carkeys:client:addtempkeys` re-checks and starts the engine), or the player has to get out
+  and back in.
 - Something that lasts a session (a shift, a timer) kept in the database: refresh its end
   with a heartbeat and, on start, close what was left open at its last heartbeat. A crash or
   an `ensure` then loses at most one interval instead of counting the downtime.
