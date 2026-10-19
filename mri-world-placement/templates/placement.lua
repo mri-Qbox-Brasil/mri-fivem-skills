@@ -18,8 +18,10 @@ local SHIFT = 21
 local active = false
 
 -- Key rail drawn by the ui_page while a tool runs (false hides it).
+-- worldTool tells the MRI pause menu (it reads Esc even while blocked) that Esc belongs to the tool.
 local function hud(data)
 	SendNUIMessage({ action = 'placeHud', data = data })
+	if (data ~= false) ~= (LocalPlayer.state.worldTool == true) then LocalPlayer.state:set('worldTool', data ~= false, false) end
 end
 
 local function block()
