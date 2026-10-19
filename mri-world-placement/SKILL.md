@@ -16,6 +16,13 @@ marked in the world, with a preview; never a number field, a coordinate or a typ
 | Path | NPC route, trail, fence: stops with a line on the ground | `WorldPlacer.path` |
 | Zone (box with heading) | anything shaped like a cube that faces a way: elevator floor, garage spot, shop counter, stash, trigger area | `WorldPlacer.zone` |
 
+Picking a thing that already stands in the world (a door, a prop to bind) follows the same keys:
+aim, `E` picks, `Backspace` undoes the last pick or cancels, `Esc` cancels. The aim thread does the
+raycast and, for props without collision (doors driven by the DoorSystem), the object of
+`GetGamePool('CObject')` closest to the camera ray, a few times a second; the draw loop only
+outlines the aimed entity (`SetEntityDrawOutline`) and reads it. Never `FindFirstObject` every
+frame. Reference: `mri_Qdoorlock` `client/picker.lua` (one or two leaves of a double door).
+
 Pick by shape: a model to stand somewhere is a point; a sequence is a path; a volume with a
 front is a zone. The zone sits on the player (walk to it, the player's heading turns it), with
 a yellow box, an arrow for the heading and the size written above; zones already placed show
