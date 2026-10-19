@@ -62,7 +62,10 @@ or cancel (`HUD_FRONTEND_DEFAULT_SOUNDSET`).
 A panel whose items live on the map (elevators, blips, garages, zones) uses the same three
 columns everywhere: the list with search on the left, the GTA map in the middle, the editor of
 the selected item on the right. Clicking the list or the map selects; the map flies to the
-selection and shows its parts (floors, slots, NPC). The map only shows and selects: marking a
+selection and shows its parts (floors, slots, NPC). A map that only draws names is useless: each
+item gets a pin at its center (visible at any zoom) with a summary in the tooltip, the selected item
+gets a card over the map with its name, a one-line summary and its actions (Go there, redraw), and a
+small legend explains the colors. The map only shows, selects and acts: marking a
 position is still done in the world with the tools above (a pin may be dragged to fine tune).
 In a React NUI with `@mriqbox/ui-kit` this is `MriMapEditorLayout` with `MriGameMap` (see the
 ui-kit docs); never a hand-made Leaflet map per resource.
