@@ -104,6 +104,12 @@ Lua traps the parser can't see:
   branch with its own copy of the steps: the copy skips the options the main path has (take
   out mode, keys before the player sits) and every later fix has to be made twice. Before
   adding a branch, grep for the function that already does the job and extend it.
+- Renaming something whose name is a key elsewhere (a garage label in `player_vehicles.garage`, a
+  shop id in a purchases table) moves those rows in the same save, in one transaction: otherwise
+  everything stored under the old name vanishes for the players.
+- A rule that depends on a group (minimum grade, salary) reads the grade in the group that granted
+  the access, not the player's current job: with jobs and gangs in one access list, a gang member
+  must not pass a job grade check with the gang grade.
 - Something that lasts a session (a shift, a timer) kept in the database: refresh its end
   with a heartbeat and, on start, close what was left open at its last heartbeat. A crash or
   an `ensure` then loses at most one interval instead of counting the downtime.
