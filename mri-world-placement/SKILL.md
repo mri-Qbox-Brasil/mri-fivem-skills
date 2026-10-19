@@ -82,6 +82,10 @@ ui-kit docs); never a hand-made Leaflet map per resource.
   `IsDisabledControlJustPressed`.
 - Esc opens the pause menu on release, after the tool already stopped blocking it: on cancel,
   keep `DisableControlAction(0, 200)` every frame until the key is up (`releaseEsc`).
+- A resource with world tools of its own (older than `WorldPlacer`): every one of them follows
+  these rules too. Give them one shared end function (hide the rail, `releaseEsc`) and call it
+  from every exit, instead of fixing them one by one when a player trips on it (mri_Qgarage
+  `Rail.finish`).
 - Ghost: alpha 170, no collision, frozen, `SetBlockingOfNonTemporaryEvents`. Only move it
   when the aim changed. The model accepts a numeric hash (`tonumber(model) or joaat(model)`).
 - Raycast `1 | 16` (world and objects), ignoring the player's own ped.
