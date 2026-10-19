@@ -98,6 +98,12 @@ Lua traps the parser can't see:
   `OnGangUpdate(gang)`, `SetDuty(onDuty)`; `GetPlayerData()` inside them still has the old one.
   On the server it is the other way round: qbx_core writes `PlayerData` first and then fires
   `QBCore:Server:OnJobUpdate` / `SetDuty`, so a handler can read the player and stay idempotent.
+- One flow per thing, variants as parameters. A new kind of the same action (a fleet car next
+  to a stored car, a job shop next to a garage) goes through the existing function with what
+  differs passed in (plate or model, the mode), never an early `if kind then ... return end`
+  branch with its own copy of the steps: the copy skips the options the main path has (take
+  out mode, keys before the player sits) and every later fix has to be made twice. Before
+  adding a branch, grep for the function that already does the job and extend it.
 - Something that lasts a session (a shift, a timer) kept in the database: refresh its end
   with a heartbeat and, on start, close what was left open at its last heartbeat. A crash or
   an `ensure` then loses at most one interval instead of counting the downtime.
