@@ -82,7 +82,7 @@ ui-kit docs); never a hand-made Leaflet map per resource.
   `IsDisabledControlJustPressed`.
 - Esc opens the pause menu on release, after the tool already stopped blocking it: on cancel,
   keep `DisableControlAction(0, 200)` every frame until the key is up (`releaseEsc`).
-- While a tool runs, `LocalPlayer.state.worldTool` is true (set with the rail, cleared after Esc is
+- While a tool runs, `LocalPlayer.state.escBusy` is true (set with the rail, cleared after Esc is
   up). Custom pause menus read Esc even while it is blocked (mri_Qpausemenu opens on
   `IsDisabledControlJustPressed(0, 200)`) and stay shut while it is set; blocking the control alone
   does not stop them. Clear it on `onResourceStop` too, or a restart mid-tool locks the pause menu.
