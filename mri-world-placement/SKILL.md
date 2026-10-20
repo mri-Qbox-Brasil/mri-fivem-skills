@@ -114,6 +114,18 @@ ui-kit docs); never a hand-made Leaflet map per resource.
   server builds the list with the same reach the action checks, so the list never offers
   someone the action then refuses.
 
+## Erasing a map prop
+
+A deleted ymap prop comes back whenever its area streams in again. Use both:
+
+- `CreateModelHideExcludingScriptObjects(x, y, z, 0.5, model, true)` at the saved position, so
+  the streamer never recreates it. Plain `CreateModelHide` also hides your own props of that
+  model; a big radius hides the neighbour (erase one chair, the whole table goes).
+- A reaper loop every few seconds near the camera (`GetClosestObjectOfType` + `DeleteObject`)
+  for the instance already streamed in and builds where the hide misses.
+- `RemoveModelHide(..., false)` on restore and in `onResourceStop`, or hides stack on restart
+  and one remove no longer brings the prop back. (mri_mechanic, mri_Qobjects, 2026-10-20)
+
 ## NPC walking the route
 
 Reference: `mri_Qnpc` (`client/route.lua`).
