@@ -52,7 +52,5 @@ mri_Qblips; validated in game unless a line says otherwise.
 - The map page is active when `IsPauseMenuActive()`, `GetPauseMenuState() == 15` and
   `PauseMenuIsContextActive(joaat('MAP_CanZoom'))`.
 - There is no native to hide the instructional buttons bar at the bottom; only
-  `PauseMenuRedrawInstructionalButtons` exists. Hiding it takes its `.gfx`: see `mri-gta-assets`
-  (`scaleform.md`, pause menu key bar). Draw your own bar in the page with the same keys.
-- Reading or changing the game's own pause page goes through its `.gfx`: see `mri-gta-assets`
-  (`scaleform.md`).
+  `PauseMenuRedrawInstructionalButtons` exists. Hiding it takes editing its `.gfx`. Draw your own bar in the page with the same keys.
+- Reading or changing the game's own pause page goes through its `.gfx`.

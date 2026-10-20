@@ -19,7 +19,7 @@ node scripts/natives.mjs vehicle door         # every native with these words
 
 Data: the official Cfx lists (`static.cfx.re/natives/natives.json` and
 `natives_cfx.json`), downloaded on first use and cached for a week in the system temp folder.
-Data only, no code. Sounds, animations and model names: `mri-gta-assets` (`gta-data.mjs`).
+Data only, no code. Sounds, animations and model names: [DurtyFree/gta-v-data-dumps](https://github.com/DurtyFree/gta-v-data-dumps).
 
 ## 1. Parser, natives and pitfalls
 
