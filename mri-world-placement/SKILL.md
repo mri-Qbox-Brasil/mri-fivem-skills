@@ -19,7 +19,7 @@ marked in the world, with a preview; never a number field, a coordinate or a typ
 Picking a thing that already stands in the world (a door, a prop to bind) follows the same keys:
 aim, `E` picks, `Backspace` undoes the last pick or cancels, `Esc` cancels. The aim thread does the
 raycast and, for props without collision (doors driven by the DoorSystem), the object of
-`GetGamePool('CObject')` closest to the camera ray, a few times a second; the draw loop only
+`GetGamePool('CObject')` whose model center (`GetModelDimensions` midpoint through `GetOffsetFromEntityInWorldCoords`, not the origin, which on a door is the hinge) is closest to the camera ray. Every frame of the aim thread: a throttled scan makes the marker and the outline jump in steps. The marker sits on that center when the ray went through. The draw loop only
 outlines the aimed entity (`SetEntityDrawOutline`) and reads it. Never `FindFirstObject` every
 frame. Reference: `mri_Qdoorlock` `client/picker.lua` (one or two leaves of a double door).
 
