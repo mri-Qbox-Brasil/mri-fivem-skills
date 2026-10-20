@@ -82,6 +82,12 @@ Lua traps the parser can't see:
 - `require 'config.server'` (ox_lib) returns the same cached table everywhere in the
   resource: a field changed at runtime applies to every reader.
 - Event instead of polling. A loop with `Wait(0)` only for drawing and controls.
+- Some natives set state for the whole game, not for one entity: outline color and shader
+  (`SetEntityDrawOutlineColor`, `SetEntityDrawOutlineShader`), timecycle, `SetNuiFocus`,
+  hud and radar toggles. An effect that changes one hands it back when it ends, on every exit
+  (early return, cancel, `onResourceStop`); code that relies on one sets it right before
+  use. mri_Qspawn faded the outline alpha to 0 on spawn and kept it, so every outline of every
+  script was invisible while the code logged it as on (mri_Qdoorlock, 2026-10-20).
 - Never read `GlobalState[key]`, `LocalPlayer.state[key]` or `Entity(x).state[key]` inside a
   loop to see if it changed: every read decodes a fresh copy of the value, so a table there
   makes garbage each tick and the resmon memory of the resource climbs (the `+`). Keep the
@@ -177,6 +183,8 @@ Lua traps the parser can't see:
 
 ## 5. Bug only in game
 
+**First report, logs first.** A second change made without knowing the cause is a guess, and
+the user notices (mri_Qdoorlock outline, 2026-10-20: two blind fixes before one log showed it).
 Don't guess. Add readable logs with a prefix that is easy to filter (`[SHOP] [DIAG]`) at the
 moment that matters, printing the state that decides the cause (task status, entity exists,
 frozen, statebag value). Ask the user to reproduce, read the client log, fix the cause and
