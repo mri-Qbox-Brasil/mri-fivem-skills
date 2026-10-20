@@ -84,6 +84,9 @@ node scripts/cef-scan.mjs <resources folder> --src-only
 - **Tabs that load a list per tab** (React): store the list with the tab id
   (`{ tab, entries }`) and only render it when the id matches; the effect that clears runs
   after the render and the new tab draws once with the old list.
+- **SVG glow on lines** (`<filter>` with `feGaussianBlur`): with the default
+  `filterUnits="objectBoundingBox"` a perfectly vertical or flat line has a zero-size box and
+  vanishes. Give the filter `filterUnits="userSpaceOnUse"` with the canvas size as region.
 
 ## Uploading files from the NUI
 
