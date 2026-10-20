@@ -72,6 +72,13 @@ synthesized Web Audio (it sounds like a cheap browser game).
 - Before picking another sound, search the real names (`node scripts/gta-data.mjs sounds
   <words>` in the `mri-gta-assets` skill); a DLC soundset may need a loaded bank.
 - Reference: `data/sounds.json`, `utils.uiSound` and `web/src/lib/uiSound.ts` in mri_Qgarage.
+- A genre sound players already know (hitmarker, kill confirm, headshot) is a recorded CC0
+  sample, not a WebAudio synth or a GTA sound with a similar name: synthesized pitched tones
+  and game counter ticks read as noise. Freesound filtered by CC0 serves the preview without
+  login (`cdn.freesound.org/previews/<id/1000>/<id>_<user>-hq.mp3`, the full URL is in the
+  sound page HTML). Without listening, `ffmpeg -lavfi showspectrumpic` shows what it is: a
+  hitmarker is a 30 to 50 ms broadband burst. Trim, fade, ship as a small mono .wav (mp3 adds
+  ~25 ms of encoder silence) and vary pitch and gain per kind instead of adding notes.
 
 ## Cutscenes
 
