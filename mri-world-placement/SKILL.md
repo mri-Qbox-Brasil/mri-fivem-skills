@@ -114,6 +114,16 @@ ui-kit docs); never a hand-made Leaflet map per resource.
   server builds the list with the same reach the action checks, so the list never offers
   someone the action then refuses.
 
+## In-world catalog and tools
+
+- Catalog on the right and tools on the left as floating side panels, the world in the middle.
+  A bottom drawer covers half the screen, and the hover preview prop (drawn at a screen point)
+  ends up behind it (mri_Qobjects, 2026-10-20).
+- The NUI sends where the preview goes: the middle of the gap between the panels, from their
+  `getBoundingClientRect()`, as `sx, sy` (0-1) for `GetWorldCoordFromScreenCoord`.
+- A tool that picks a model (brush, replace) shows its settings in the tools panel and picks
+  from the catalog grid; the grid click does not place in that mode.
+
 ## Erasing a map prop
 
 A deleted ymap prop comes back whenever its area streams in again. Use both:
