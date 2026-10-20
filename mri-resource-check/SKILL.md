@@ -119,6 +119,11 @@ Lua traps the parser can't see:
   `OnGangUpdate(gang)`, `SetDuty(onDuty)`; `GetPlayerData()` inside them still has the old one.
   On the server it is the other way round: qbx_core writes `PlayerData` first and then fires
   `QBCore:Server:OnJobUpdate` / `SetDuty`, so a handler can read the player and stay idempotent.
+- Changing a numeric metadata (hunger, thirst, stress) inside `qbx_core:server:onSetMetaData`
+  is lost: qbx_core fires the event and only then sets the player's state bag to the value it
+  had, and the state bag handler writes that back to `PlayerData`. Defer the change one tick
+  (`SetTimeout(0, ...)`), read `GetMetadata` there and set from it. The refunded `SetMetadata`
+  fires the event again, so only react to a drop (`new < old`).
 - One flow per thing, variants as parameters. A new kind of the same action (a fleet car next
   to a stored car, a job shop next to a garage) goes through the existing function with what
   differs passed in (plate or model, the mode), never an early `if kind then ... return end`
