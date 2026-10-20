@@ -128,6 +128,11 @@ ui-kit docs); never a hand-made Leaflet map per resource.
   `getBoundingClientRect()`, as `sx, sy` (0-1) for `GetWorldCoordFromScreenCoord`.
 - A tool that picks a model (brush, replace) shows its settings in the tools panel and picks
   from the catalog grid; the grid click does not place in that mode.
+- A world action started from the panels hides them and brings them back, as they were, when it
+  ends or is cancelled: keep the panels mounted while hidden (search, category and open tool
+  survive) and reopen from the mode change back to browse. A tool that refused to start drops the
+  request, or the panels pop up later at random.
+- Placing several in a row is a visible switch in the catalog, not a hidden Shift+click.
 
 ## Erasing a map prop
 
