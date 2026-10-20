@@ -41,6 +41,7 @@ node scripts/cef-scan.mjs <resources folder> --src-only
 | --- | --- |
 | `alert()`, `confirm()` removed | your own modal, or hold-to-confirm |
 | `document.execCommand('copy')` needs the element focused | `el.focus()` before `el.select()`; `templates/clipboard.ts` |
+| `navigator.clipboard.writeText` rejects its promise in the NUI instead of throwing, so a `try { writeText } catch { execCommand }` never reaches the fallback and copy fails silently (mri_Qobjects, 2026-10-20) | `templates/clipboard.ts`, or `execCommand('copy')` directly |
 | `fx_version 'adamant'`/`'bodacious'` or `__resource.lua`: the page may not be a secure context | `fx_version 'cerulean'` (nothing else changes for the Lua) |
 | Mutation events (`DOMNodeInserted`, `DOMSubtreeModified`) removed | `MutationObserver` |
 | CSS `zoom` follows the standard | test clicks, drag and popover positions inside zoomed areas; prefer `transform: scale()` |
