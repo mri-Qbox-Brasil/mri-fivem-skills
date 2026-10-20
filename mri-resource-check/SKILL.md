@@ -93,6 +93,11 @@ Lua traps the parser can't see:
   event points at (a look, a preset, a config the server just published) may arrive before or
   after it. Give the published data a version (`rev`) and apply it when the state bag handler
   sees a newer one, instead of acting on the event and hoping the bag got there first.
+- A number from a net event can be NaN or inf (msgpack carries both), and NaN fails every
+  `<`, `>` and `==`, so it slips past clamps and limits and lands in the database. Refuse it
+  first: `if not n or n ~= n or math.abs(n) == math.huge then return end`.
+- A limit that drops a gain (`max < value then return`) must only apply when the amount is
+  positive, or XP above a limit lowered later can never go down.
 - An export copies its whole answer through msgpack: `exports.ox_inventory:Items()` with no name
   sends every item. Ask for one (`Items(name)`) or cache the list once.
 - After the player's model changes (`SetPlayerModel`, an appearance resource's
