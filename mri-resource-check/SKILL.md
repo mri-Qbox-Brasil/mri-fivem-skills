@@ -131,6 +131,13 @@ Lua traps the parser can't see:
   needs the key announced again once the plate lands (mri_Qcarkeys: its own
   `mm_carkeys:client:addtempkeys` re-checks and starts the engine), or the player has to get out
   and back in.
+- A lock set by the server (a preset, a mode, an item) covers every path to the same effect: if
+  players may also tune each part by hand, clamp those parts to what the allowed choices reach,
+  or the locked one comes back one option at a time. Temporary effects the script applies itself
+  (pause, away) may skip the lock; anything the player picks may not.
+- Idle detection reads input (`GetDisabledControlNormal` on look axes, movement, keys,
+  `IsNuiFocused()`), not the rendered camera: GTA's idle camera moves on its own after ~30 s,
+  so "camera did not move" never becomes true for a player who walked away.
 - Something that lasts a session (a shift, a timer) kept in the database: refresh its end
   with a heartbeat and, on start, close what was left open at its last heartbeat. A crash or
   an `ensure` then loses at most one interval instead of counting the downtime.
