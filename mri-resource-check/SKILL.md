@@ -87,7 +87,17 @@ Lua traps the parser can't see:
   makes garbage each tick and the resmon memory of the resource climbs (the `+`). Keep the
   value in a local updated by `AddStateBagChangeHandler(key, 'global' | 'player:<id>' |
   'entity:<netId>', fn)`, seeded once from the bag. A loop that only serves that value does no
-  work (no table, no native) while it is empty.
+  work (no table, no native) while it is empty. A value read in shared code on both sides gets
+  the same handler plus a server setter that fills the local too.
+- A state bag and an event (or callback) are two channels with no order between them: data the
+  event points at (a look, a preset, a config the server just published) may arrive before or
+  after it. Give the published data a version (`rev`) and apply it when the state bag handler
+  sees a newer one, instead of acting on the event and hoping the bag got there first.
+- An export copies its whole answer through msgpack: `exports.ox_inventory:Items()` with no name
+  sends every item. Ask for one (`Items(name)`) or cache the list once.
+- After the player's model changes (`SetPlayerModel`, an appearance resource's
+  `setPlayerModel`/`setPlayerAppearance`), the ped is a new entity and `cache.ped` still holds
+  the old one for a moment: use `PlayerPedId()` right after (health, armour, weapons).
 - Player text (notify, help text, menu labels) goes through the locale: ox_lib `locale('key', ...)`
   with `ox_lib 'locale'` in the manifest and every language in `locales/*.json`, keys in
   English, values with proper accents, values from the game passed as `%s` arguments. Even when
