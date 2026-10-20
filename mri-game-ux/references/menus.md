@@ -71,7 +71,8 @@ like this from the start, without being asked:
 - **One concept, one control.** A plain dot is an icon option, not a separate style; text on/off
   and extras (beam, ring) are toggles that work with every style.
 - **Live.** The world stays visible beside the panel and every change applies at once; reset to
-  default in the footer.
+  default in the footer. A save waiting on a pause (color drag) is sent at once when the panel
+  closes or switches mode, never dropped.
 - **The owner decides first.** The same panel opened by an admin edits the server default
   everyone sees (saved on the server, sent through GlobalState), with a "Players can customize"
   switch at the top, off by default. A player opens it only when that switch is on, saves their

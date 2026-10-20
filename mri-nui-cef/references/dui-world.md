@@ -22,6 +22,17 @@ GPS route on the road). Lines marked *(not seen in game yet)* still wait for an 
   another script) and list the folder in `files` (`'dui/*'` does not cover `dui/fonts/*`).
 - Two pictures in one page: a 1024x1024 page with the world marker in the left half and a square
   badge in the top right; draw each part with its own UVs. One DUI per marker instead of two.
+- Pool full when a marker is added: leave it without a page and let the slow loop take one as
+  soon as another marker frees it, or it never shows.
+
+## Destination height and the waypoint
+
+- A map waypoint has no real height: start at `GetHeightmapTopZForPosition` (works unstreamed),
+  snap with `GetGroundZFor_3dCoord(x, y, 1000)` once found, and show no up/down until then.
+- A point a script sends keeps its z: snapping it from 1000 m puts an upper floor on the roof.
+  Snap only the map waypoint, a point sent from a waypoint (flag it) or z = 0.
+- Removing a marker that set the waypoint turns it off only if the waypoint is still on that spot:
+  the player may have marked somewhere else since.
 
 ## Upright in the world (billboard)
 
