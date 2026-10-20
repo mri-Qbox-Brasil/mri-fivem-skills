@@ -20,7 +20,7 @@ Picking a thing that already stands in the world (a door, a prop to bind) follow
 aim, `E` picks, `Backspace` undoes the last pick or cancels, `Esc` cancels. The aim thread does the
 raycast and, for props without collision (doors driven by the DoorSystem), the object of
 `GetGamePool('CObject')` whose model center (`GetModelDimensions` midpoint through `GetOffsetFromEntityInWorldCoords`, not the origin, which on a door is the hinge) is closest to the camera ray. Every frame of the aim thread: a throttled scan makes the marker and the outline jump in steps. The marker sits on that center when the ray went through. The draw loop only
-outlines the aimed entity (`SetEntityDrawOutline`) and reads it. Never `FindFirstObject` every
+outlines the aimed entity (`SetEntityDrawOutline`) and reads it. Outline color and shader are global to the whole game, so set them right before every `SetEntityDrawOutline(entity, true)` (`SetEntityDrawOutlineShader(0)`, `SetEntityDrawOutlineColor(255, 255, 255, 255)`): another script that fades the alpha to 0 (mri_Qspawn arrival pulse) otherwise leaves every outline invisible, and the code logs the outline as on. Never `FindFirstObject` every
 frame. Reference: `mri_Qdoorlock` `client/picker.lua` (one or two leaves of a double door).
 
 Pick by shape: a model to stand somewhere is a point; a sequence is a path; a volume with a
