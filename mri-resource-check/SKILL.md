@@ -144,6 +144,9 @@ Lua traps the parser can't see:
 - Idle detection reads input (`GetDisabledControlNormal` on look axes, movement, keys,
   `IsNuiFocused()`), not the rendered camera: GTA's idle camera moves on its own after ~30 s,
   so "camera did not move" never becomes true for a player who walked away.
+- Every field an admin panel saves needs a reader. After a rewrite of the flow that used it, grep
+  each saved field (spots, NPC, blip) for the code that reads it: a garage kept editing spots for
+  weeks after the take out stopped using them, and nothing errors when a value is simply ignored.
 - Something that lasts a session (a shift, a timer) kept in the database: refresh its end
   with a heartbeat and, on start, close what was left open at its last heartbeat. A crash or
   an `ensure` then loses at most one interval instead of counting the downtime.
