@@ -113,6 +113,11 @@ ui-kit docs); never a hand-made Leaflet map per resource.
   name, current group and distance, with a refresh button. Never a server id field. The
   server builds the list with the same reach the action checks, so the list never offers
   someone the action then refuses.
+- A vehicle's look (livery, extras, paint) is set on the car itself: a local copy stands in front
+  of the admin, the rail changes it (arrows livery and extra, `Space` toggles, `Q`/`E` paint from
+  a named list) and `Enter` saves the props. Read the counts from the car (`GetVehicleLiveryCount`,
+  else `GetNumVehicleMods(veh, 48)`, `DoesExtraExist` 0 to 20): never a livery or extra number
+  field. Reference: `mri_Qgarage` `modules/fleet/look.lua`.
 
 ## In-world catalog and tools
 
