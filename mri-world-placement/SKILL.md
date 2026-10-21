@@ -101,6 +101,10 @@ ui-kit docs); never a hand-made Leaflet map per resource.
   up). Custom pause menus read Esc even while it is blocked (mri_Qpausemenu opens on
   `IsDisabledControlJustPressed(0, 200)`) and stay shut while it is set; blocking the control alone
   does not stop them. Clear it on `onResourceStop` too, or a restart mid-tool locks the pause menu.
+- ox_inventory keeps its keybinds (TAB hotbar, 1 to 5 slots, inventory key) live during a tool, and
+  `DisableControlAction` does not stop a `lib.addKeybind`. A tool that uses those keys sets
+  `LocalPlayer.state` `invHotkeys = false` and `invBusy = true`, saves the old values and puts them
+  back on exit and on `onResourceStop` (mri_Qobjects build mode, 2026-10-21: TAB opened the hotbar).
 - A resource with world tools of its own (older than `WorldPlacer`): every one of them follows
   these rules too. Give them one shared end function (hide the rail, `releaseEsc`) and call it
   from every exit, instead of fixing them one by one when a player trips on it (mri_Qgarage
