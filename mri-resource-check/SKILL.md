@@ -56,7 +56,7 @@ node scripts/check.mjs <resource folder>        # or a list of .lua files; --no-
     who fires it: a name nobody fires (`qbx_core:server:playerLoaded`) is a dead handler.
   - A handler for a `qbx_core:*` name that qbx_core never fires (`playerLoaded`,
     `playerUnloaded`, `jobChanged`, `gangChanged`, on server or client), with the event to use
-    instead. Agents and third-party guides invent these; the code looks right and never runs.
+    instead.
   - `GetPlayerPed(-1)` (use `cache.ped` or `PlayerPedId()`) and `GetDistanceBetweenCoords`
     (use `#(a - b)`).
   - Not flagged on purpose: a `GetInvokingResource()` guard on client net events. The
@@ -86,17 +86,14 @@ Lua traps the parser can't see:
   (`SetEntityDrawOutlineColor`, `SetEntityDrawOutlineShader`), timecycle, `SetNuiFocus`,
   hud and radar toggles. An effect that changes one hands it back when it ends, on every exit
   (early return, cancel, `onResourceStop`); code that relies on one sets it right before
-  use. mri_Qspawn faded the outline alpha to 0 on spawn and kept it, so every outline of every
-  script was invisible while the code logged it as on (mri_Qdoorlock, 2026-10-20).
+  use.
 - Before saying a resource can't tell or do something, read its `fxmanifest.lua` exports,
   its compat exports and its `GlobalState` keys.
 - Never read `GlobalState[key]`, `LocalPlayer.state[key]` or `Entity(x).state[key]` inside a
   loop to see if it changed: every read decodes a fresh copy of the value, so a table there
   makes garbage each tick and the resmon memory of the resource climbs (the `+`). Keep the
   value in a local updated by `AddStateBagChangeHandler(key, 'global' | 'player:<id>' |
-  'entity:<netId>', fn)`, seeded once from the bag. A loop that only serves that value does no
-  work (no table, no native) while it is empty. A value read in shared code on both sides gets
-  the same handler plus a server setter that fills the local too.
+  'entity:<netId>', fn)`, seeded once from the bag.
 - A state bag and an event (or callback) are two channels with no order between them: data the
   event points at (a look, a preset, a config the server just published) may arrive before or
   after it. Give the published data a version (`rev`) and apply it when the state bag handler
@@ -126,12 +123,9 @@ Lua traps the parser can't see:
   had, and the state bag handler writes that back to `PlayerData`. Defer the change one tick
   (`SetTimeout(0, ...)`), read `GetMetadata` there and set from it. The refunded `SetMetadata`
   fires the event again, so only react to a drop (`new < old`).
-- One flow per thing, variants as parameters. A new kind of the same action (a fleet car next
-  to a stored car, a job shop next to a garage) goes through the existing function with what
-  differs passed in (plate or model, the mode), never an early `if kind then ... return end`
-  branch with its own copy of the steps: the copy skips the options the main path has (take
-  out mode, keys before the player sits) and every later fix has to be made twice. Before
-  adding a branch, grep for the function that already does the job and extend it.
+- One flow per thing, variants as parameters: a new kind of the same action goes through the
+  existing function with what differs passed in, never an early `if kind then ... return end`
+  branch copying the steps (the copy skips options and every fix has to be made twice).
 - Renaming something whose name is a key elsewhere (a garage label in `player_vehicles.garage`, a
   shop id in a purchases table) moves those rows in the same save, in one transaction: otherwise
   everything stored under the old name vanishes for the players.
@@ -141,9 +135,8 @@ Lua traps the parser can't see:
 - A vehicle spawned with props gets its final plate a moment after it exists: anything keyed by
   plate (keys, fuel, mileage) waits until `GetVehicleNumberPlateText` matches before it counts.
   Key resources check the plate the moment the player sits, so a car the player is warped into
-  needs the key announced again once the plate lands (mri_Qcarkeys: its own
-  `mm_carkeys:client:addtempkeys` re-checks and starts the engine), or the player has to get out
-  and back in.
+  needs the key announced again once the plate lands (mri_Qcarkeys:
+  `mm_carkeys:client:addtempkeys`).
 - A lock set by the server (a preset, a mode, an item) covers every path to the same effect: if
   players may also tune each part by hand, clamp those parts to what the allowed choices reach,
   or the locked one comes back one option at a time. Temporary effects the script applies itself
@@ -151,15 +144,13 @@ Lua traps the parser can't see:
 - Idle detection reads input (`GetDisabledControlNormal` on look axes, movement, keys,
   `IsNuiFocused()`), not the rendered camera: GTA's idle camera moves on its own after ~30 s,
   so "camera did not move" never becomes true for a player who walked away.
-- Every field an admin panel saves needs a reader. After a rewrite of the flow that used it, grep
-  each saved field (spots, NPC, blip) for the code that reads it: a garage kept editing spots for
-  weeks after the take out stopped using them, and nothing errors when a value is simply ignored.
+- Every field an admin panel saves needs a reader: after rewriting a flow, grep each saved field
+  for the code that reads it. An ignored value raises no error.
 - A column added to an existing table on start (`onResourceStart`) checks with
   ``SHOW COLUMNS FROM `t` LIKE 'c'`` and runs the `ALTER` inside `pcall`. That handler usually
   also loads the saved rows: an error there (oxmysql throws "Duplicate column name") stops it
-  and the resource starts with nothing. In mri_Qobjects (2026-10-21) an
-  `information_schema.COLUMNS` count came back 0 with the column there, and that start loaded
-  no props.
+  and the resource starts with nothing. Don't use an `information_schema.COLUMNS` count: it can
+  come back 0 with the column there.
 - Something that lasts a session (a shift, a timer) kept in the database: refresh its end
   with a heartbeat and, on start, close what was left open at its last heartbeat. A crash or
   an `ensure` then loses at most one interval instead of counting the downtime.
@@ -199,9 +190,7 @@ Lua traps the parser can't see:
 
 ## 5. Bug only in game
 
-**First report, logs first.** A second change made without knowing the cause is a guess, and
-the user notices (mri_Qdoorlock outline, 2026-10-20: two blind fixes before one log showed it).
-Don't guess. Add readable logs with a prefix that is easy to filter (`[SHOP] [DIAG]`) at the
+**First report, logs first.** A second change made without knowing the cause is a guess. Add readable logs with a prefix that is easy to filter (`[SHOP] [DIAG]`) at the
 moment that matters, printing the state that decides the cause (task status, entity exists,
 frozen, statebag value). Ask the user to reproduce, read the client log, fix the cause and
 remove the temporary logs.
