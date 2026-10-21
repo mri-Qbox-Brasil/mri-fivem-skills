@@ -27,6 +27,13 @@ GPS route on the road). Lines marked *(not seen in game yet)* still wait for an 
   a `w x w/aspect` box and `transform: scaleY(innerHeight / (w/aspect))` to fill the square; the
   quad in the world stretches it back. Reuse an entry with `SetDuiUrl`, park it on `about:blank`.
   Reference: mri_Qposter `client/render.lua` and `dui/poster.html`.
+- Many saved things (posters): cap the DUIs alive at once (8 is a good default, owner choice up to 16),
+  give them to the closest by camera distance, and tell far or off screen pages (`IsSphereVisible`) to
+  pause their video through `SendDuiMessage`. Never one DUI per saved thing in range.
+- Flat on a building and seen from past ~100 m: the game swaps in the low detail model, which sticks
+  out of the wall and hides the quad. Each frame pull every corner toward `GetFinalRenderedCamCoord`
+  by `min(15, (dist - 20) * 0.006)` m along its line of sight: same place and size on screen, in front
+  of the LOD. Reference: mri_Qposter `client/render.lua`.
 - Pool full when a marker is added: leave it without a page and let the slow loop take one as
   soon as another marker frees it, or it never shows.
 
