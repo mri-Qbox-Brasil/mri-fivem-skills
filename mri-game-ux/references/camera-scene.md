@@ -13,6 +13,27 @@ One scripted camera, one per-frame thread that computes the pose (glide, arc, sw
 `SetCamCoord`/`PointCamAtCoord` and draws what is per frame (lights, 3D text, depth of field).
 Invalidate the thread with a token when the scene is rebuilt.
 
+## Obstacles and the player's ped
+
+Every scripted camera around a subject (showroom, customizing, orbit, conversation) does this,
+not only the shot picked at the start:
+
+- **Collision every frame.** A synchronous probe (`StartExpensiveSynchronousShapeTestLosProbe`,
+  flags `1 | 2 | 16`: world, vehicles, objects; ignore the subject) from the subject's center
+  (not the composition aim, which can sit inside a wall) to the camera. On a hit, the camera
+  moves to the hit point minus 0.3 m (minimum ~0.8 m). Pull in fast (half the gap per frame),
+  come back out slowly (`1 - exp(-dt * 3)`), and with nothing in the way follow the planned
+  distance directly, or every zoom and reframe lags. The async probe (`StartShapeTestLosProbe`)
+  is only for choosing a side before the move: it waits frames.
+- **The player's own ped.** Peds are left out of the probe on purpose: the camera does not
+  jump because of your own body. Hide it instead: `SetEntityLocallyInvisible(cache.ped)` every
+  frame while the player is customizing or orbiting (only they stop seeing it; others still do).
+  The opening shot still tries to leave the ped out by choosing the side.
+- **Free orbit is a sphere.** Drag (NUI `movementX/Y`, sent at most every ~33 ms) or the mouse in
+  a world tool (`GetDisabledControlNormal(0, 1)` and `(0, 2)`) turns and tilts: elevation from a
+  few degrees above the ground to ~80 degrees (over the roof), radius kept. Side only, never
+  up and down, hides what is on top (roof, callsign, light bar). Drag down = look from above.
+
 ## Background blur (DOF)
 
 - Natives: `SetCamUseShallowDofMode(cam, true)`, `SetCamNearDof`, `SetCamFarDof`,
@@ -110,8 +131,9 @@ Pattern from `mri_Qnpc` (`client/dialog.lua`, `web/src/components/Conversation.t
 
 Pattern from `mri_Qgarage` (`modules/lib/cam.lua` `cam.focusPart`, `modules/fleet/look.lua`):
 
-- Each row or key takes the camera to the part it changes, like LS Customs: livery from the side
-  (profile, lower), an extra on its own bone (`extra_N`, `GetEntityBoneIndexByName` +
+- Each row or key takes the camera to the part it changes, like LS Customs: livery from a high
+  3/4 (side, hood and roof with the callsign in one shot; a pure side profile hides the roof),
+  an extra on its own bone (`extra_N`, `GetEntityBoneIndexByName` +
   `GetOffsetFromEntityGivenWorldCoords`, camera on that side, closer), a part in the middle (roof
   bar) from above, paint on the whole car. A list the player changes blind is not a choice.
 - Every value (yaw, distance, height, framed point, composition) eases each frame
@@ -121,4 +143,4 @@ Pattern from `mri_Qgarage` (`modules/lib/cam.lua` `cam.focusPart`, `modules/flee
   off the key loop.
 - The player turns the camera (drag on the scene or Q/E on the NUI, mouse in a world tool) and
   zooms with the wheel; both reset on the next part.
-- While the camera orbits in a world tool, `SetEntityLocallyInvisible(ped)` every frame.
+- Obstacles, the player's ped and the orbit follow "Obstacles and the player's ped" above.
