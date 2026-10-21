@@ -34,6 +34,9 @@ GPS route on the road). Lines marked *(not seen in game yet)* still wait for an 
   out of the wall and hides the quad. Each frame pull every corner toward `GetFinalRenderedCamCoord`
   by `min(15, (dist - 20) * 0.006)` m along its line of sight: same place and size on screen, in front
   of the LOD. Reference: mri_Qposter `client/render.lua`.
+- Brightness per item *(not seen in game yet)*: dim with the vertex color of `DrawTexturedPoly`
+  (`r = g = b = 255 x brightness`, free and instant); brighten past 100% only in the page
+  (`filter: brightness(x)` on the content, sent through `SendDuiMessage`). Reference: mri_Qposter.
 - Pool full when a marker is added: leave it without a page and let the slow loop take one as
   soon as another marker frees it, or it never shows.
 
