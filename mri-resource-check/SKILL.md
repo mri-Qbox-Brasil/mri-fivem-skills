@@ -86,7 +86,7 @@ with `strict`:
 - **Static scenery (decoration props, previews, ghosts):** keep it local.
   The server keeps the data and sends it, each client spawns it with `isNetwork = false`
   near the player and deletes it when far. Lockdown never sees a local entity. Example:
-  mri_Qobjects (rows in the database, `CreateObjectNoOffset(..., false, false, false)` on
+  mri_Qmapeditor (rows in the database, `CreateObjectNoOffset(..., false, false, false)` on
   each client).
 - Deleting a map prop or a local entity on the client is fine; taking control of a networked
   one (`NetworkRequestControlOfEntity`) still works, since lockdown only blocks creation.
@@ -176,7 +176,7 @@ Lua traps the parser can't see:
 - A column added to an existing table on start (`onResourceStart`) checks with
   ``SHOW COLUMNS FROM `t` LIKE 'c'`` and runs the `ALTER` inside `pcall`. That handler usually
   also loads the saved rows: an error there (oxmysql throws "Duplicate column name") stops it
-  and the resource starts with nothing. In mri_Qobjects (2026-10-21) the "Duplicate column" came
+  and the resource starts with nothing. In mri_Qmapeditor (then mri_Qobjects, 2026-10-21) the "Duplicate column" came
   from the module running twice (see the next item), each copy adding the column.
 - A file the manifest runs as a script (`server/**/*`) and that another file also `require`s runs
   twice: two start handlers, two caches, every net event handled twice. List only the entry
