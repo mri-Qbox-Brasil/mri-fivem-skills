@@ -152,6 +152,12 @@ Lua traps the parser can't see:
 - Every field an admin panel saves needs a reader. After a rewrite of the flow that used it, grep
   each saved field (spots, NPC, blip) for the code that reads it: a garage kept editing spots for
   weeks after the take out stopped using them, and nothing errors when a value is simply ignored.
+- A column added to an existing table on start (`onResourceStart`) checks with
+  ``SHOW COLUMNS FROM `t` LIKE 'c'`` and runs the `ALTER` inside `pcall`. That handler usually
+  also loads the saved rows: an error there (oxmysql throws "Duplicate column name") stops it
+  and the resource starts with nothing. In mri_Qobjects (2026-10-21) an
+  `information_schema.COLUMNS` count came back 0 with the column there, and that start loaded
+  no props.
 - Something that lasts a session (a shift, a timer) kept in the database: refresh its end
   with a heartbeat and, on start, close what was left open at its last heartbeat. A crash or
   an `ensure` then loses at most one interval instead of counting the downtime.
