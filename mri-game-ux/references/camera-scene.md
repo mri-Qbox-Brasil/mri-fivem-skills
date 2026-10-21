@@ -105,3 +105,20 @@ Pattern from `mri_Qnpc` (`client/dialog.lua`, `web/src/components/Conversation.t
   bar, arrows/W/S, numbers, mouse, `NAV_UP_DOWN` sound.
 - Config values from JSON: `40` becomes an integer and a float native reads it wrong; force
   `+ 0.0` on merge.
+
+## Customizing a car (livery, extras, paint)
+
+Pattern from `mri_Qgarage` (`modules/lib/cam.lua` `cam.focusPart`, `modules/fleet/look.lua`):
+
+- Each row or key takes the camera to the part it changes, like LS Customs: livery from the side
+  (profile, lower), an extra on its own bone (`extra_N`, `GetEntityBoneIndexByName` +
+  `GetOffsetFromEntityGivenWorldCoords`, camera on that side, closer), a part in the middle (roof
+  bar) from above, paint on the whole car. A list the player changes blind is not a choice.
+- Every value (yaw, distance, height, framed point, composition) eases each frame
+  (`1 - exp(-dt * 5)`), so moving between parts and back to the hero shot glides, never jumps.
+  The drift fades to a breath while on a part, so the part stays framed.
+- Pick the side with a clear line of sight (wall behind the spot); the probe waits, so run it
+  off the key loop.
+- The player turns the camera (drag on the scene or Q/E on the NUI, mouse in a world tool) and
+  zooms with the wheel; both reset on the next part.
+- While the camera orbits in a world tool, `SetEntityLocallyInvisible(ped)` every frame.

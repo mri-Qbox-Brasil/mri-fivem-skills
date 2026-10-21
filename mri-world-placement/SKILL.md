@@ -117,7 +117,10 @@ ui-kit docs); never a hand-made Leaflet map per resource.
   of the admin, the rail changes it (arrows livery and extra, `Space` toggles, `Q`/`E` paint from
   a named list) and `Enter` saves the props. Read the counts from the car (`GetVehicleLiveryCount`,
   else `GetNumVehicleMods(veh, 48)`, `DoesExtraExist` 0 to 20): never a livery or extra number
-  field. Reference: `mri_Qgarage` `modules/fleet/look.lua`.
+  field. A car just created reads 0 liveries until the game streams them in (the second open
+  works, the model is cached): poll the counts for up to 1.5 s before saying it has none
+  (`utils.lookParts`). The camera goes to the part being changed (mri-game-ux, camera-scene.md).
+  Reference: `mri_Qgarage` `modules/fleet/look.lua`.
 
 ## In-world catalog and tools
 
