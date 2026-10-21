@@ -88,11 +88,8 @@ Lua traps the parser can't see:
   (early return, cancel, `onResourceStop`); code that relies on one sets it right before
   use. mri_Qspawn faded the outline alpha to 0 on spawn and kept it, so every outline of every
   script was invisible while the code logged it as on (mri_Qdoorlock, 2026-10-20).
-- Before saying a resource can't tell or can't do something, read what it exposes: the
-  `exports`/`server_exports` of its `fxmanifest.lua`, its compat files (exports under another
-  script's name, like `cd_easytime:GetWeather`) and its `GlobalState` keys. Saying "the
-  multichar can't know if the city is in blackout" sent the fix to the weather script, while
-  `GetWeather().blackout` already answered it (mri_Qmultichar, 2026-10-21).
+- Before saying a resource can't tell or do something, read its `fxmanifest.lua` exports,
+  its compat exports and its `GlobalState` keys.
 - Never read `GlobalState[key]`, `LocalPlayer.state[key]` or `Entity(x).state[key]` inside a
   loop to see if it changed: every read decodes a fresh copy of the value, so a table there
   makes garbage each tick and the resmon memory of the resource climbs (the `+`). Keep the
