@@ -47,7 +47,14 @@ end)
   (callbacks answer `not_ready`), or are started from inside that function.
 - **Never poll for the schema.** A `while not schemaReady do Wait(100) end` with a timeout hides
   the real order and, when the timeout passes, runs the queries anyway with no error in the log.
-  If something has to wait, start it from the ready function.
+  If something has to wait, start it from the ready function. An export or a thread in another
+  file that must answer with data awaits a promise the start resolves:
+  `local schema = promise.new()` / `function WaitForSchema() Citizen.Await(schema) end` /
+  `schema:resolve(true)` right after `prepare()`.
+- **`MySQL.ready` runs at once when oxmysql is already up**, while the manifest is still loading:
+  functions from files listed after it do not exist yet (`attempt to call a nil value`). With the
+  start spread over several files, run it from `onResourceStart` with `MySQL.ready.await()`, then
+  `prepare()`, then the rest, as mri_Qbossmenu does.
 - **No `pcall` around the schema.** A failed `CREATE` or `ALTER` must show in the console; a
   swallowed error leaves the resource running on missing tables.
 - **New column:** check `information_schema.COLUMNS` (or ``SHOW COLUMNS FROM `t` LIKE 'c'``)
@@ -66,5 +73,7 @@ end)
    `MySQL.ready`, exports called by other resources while starting. Move them into the ready
    function, or gate them on the `ready` flag.
 3. Remove the polling waits and the `pcall`s around the schema.
-4. `ensure` on a database where the tables exist, then on one without them (or a renamed
+4. A new file in the manifest (`schema.lua`) needs the server `refresh` before the `ensure`, or
+   the old manifest starts without it.
+5. `ensure` on a database where the tables exist, then on one without them (or a renamed
    prefix), and read the console both times.
