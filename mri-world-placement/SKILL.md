@@ -87,6 +87,9 @@ ui-kit docs); never a hand-made Leaflet map per resource.
   goes for `lib.requestModel`, `lib.callback.await` and any `Wait(n)`.
 - A blocked key (Esc 200, Enter 191, wheel 14/15) only answers through
   `IsDisabledControlJustPressed`.
+- Enter is 191 (`INPUT_FRONTEND_RDOWN`) plus 201, both disabled every frame. Never 176 alone
+  (`INPUT_CELLPHONE_SELECT`): the garage spot tool finished on it and Enter did nothing in game
+  (mri_Qgarage, 2026-10-21). Old tools: grep the key loop for 176 before calling Enter done.
 - Esc opens the pause menu on release, after the tool already stopped blocking it: on cancel,
   keep `DisableControlAction(0, 200)` every frame until the key is up (`releaseEsc`).
 - While a tool runs, `LocalPlayer.state.escBusy` is true (set with the rail, cleared after Esc is
