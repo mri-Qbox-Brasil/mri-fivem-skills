@@ -22,6 +22,11 @@ GPS route on the road). Lines marked *(not seen in game yet)* still wait for an 
   another script) and list the folder in `files` (`'dui/*'` does not cover `dui/fonts/*`).
 - Two pictures in one page: a 1024x1024 page with the world marker in the left half and a square
   badge in the top right; draw each part with its own UVs. One DUI per marker instead of two.
+- Things of many shapes (posters, screens): a pool by exact size never hits. Use a square DUI per
+  quality (512, 1024, 2048) and pass the shape to the page (`?aspect=w/h`): lay the content out in
+  a `w x w/aspect` box and `transform: scaleY(innerHeight / (w/aspect))` to fill the square; the
+  quad in the world stretches it back. Reuse an entry with `SetDuiUrl`, park it on `about:blank`.
+  Reference: mri_Qposter `client/render.lua` and `dui/poster.html`.
 - Pool full when a marker is added: leave it without a page and let the slow loop take one as
   soon as another marker frees it, or it never shows.
 

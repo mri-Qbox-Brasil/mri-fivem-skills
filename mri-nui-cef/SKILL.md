@@ -112,8 +112,10 @@ reads the wheel raw, so disabled controls never stop its zoom), smooth hover and
 
 Pictures that live in the 3D world or follow a point on screen (destination marker, screen edge
 indicator, road route texture) are DUI pages drawn by the game, never a NUI moved every frame.
-Pool, billboard quad, screen sprite, edge arrow, GPS route ribbon and their costs:
-`references/dui-world.md`.
+**Every DUI comes from a pool and its texture waits for `IsDuiAvailable`**: a runtime texture can
+never be removed, so creating a DUI each time a thing comes in range leaks (mri_Qposter, 2026-10-21).
+Pool, square page for any shape, billboard quad, screen sprite, edge arrow, GPS route ribbon and
+their costs: `references/dui-world.md`.
 
 ## Testing in the browser
 
