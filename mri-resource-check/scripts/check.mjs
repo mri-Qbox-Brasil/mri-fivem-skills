@@ -323,6 +323,22 @@ if (existsSync(manifestFile)) {
   })
 }
 
+// A module the manifest already runs as a script and that is also `require`d runs twice: two caches, two start handlers.
+if (existsSync(manifestFile)) {
+  const manifest = readManifest(resourceDir)
+  const listed = (rel) => ['client', 'server', 'shared'].some((side) => manifest.patterns[side].some((re) => re.test(rel)))
+  const reported = new Set()
+  for (const file of walk(resourceDir, [])) {
+    const src = readFileSync(file, 'utf8')
+    for (const match of src.matchAll(/\brequire\s*\(?\s*['"]([\w.]+)['"]/g)) {
+      const rel = `${match[1].replace(/\./g, '/')}.lua`
+      if (reported.has(rel) || !existsSync(join(resourceDir, rel)) || !listed(rel)) continue
+      reported.add(rel)
+      warn(`${show(file)}:${lineAt(src, match.index)}`, `require '${match[1]}' loads ${rel}, which the manifest also runs as a script: it runs twice; list only the entry files`)
+    }
+  }
+}
+
 let nativeSummary = 'natives: skipped (--no-natives)'
 if (checkNatives && codeByFile.size) {
   let natives = null

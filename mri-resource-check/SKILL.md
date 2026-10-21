@@ -149,8 +149,11 @@ Lua traps the parser can't see:
 - A column added to an existing table on start (`onResourceStart`) checks with
   ``SHOW COLUMNS FROM `t` LIKE 'c'`` and runs the `ALTER` inside `pcall`. That handler usually
   also loads the saved rows: an error there (oxmysql throws "Duplicate column name") stops it
-  and the resource starts with nothing. Don't use an `information_schema.COLUMNS` count: it can
-  come back 0 with the column there.
+  and the resource starts with nothing. In mri_Qobjects (2026-10-21) the "Duplicate column" came
+  from the module running twice (see the next item), each copy adding the column.
+- A file the manifest runs as a script (`server/**/*`) and that another file also `require`s runs
+  twice: two start handlers, two caches, every net event handled twice. List only the entry
+  files; a client module that is only required goes in `files`. `check.mjs` warns about it.
 - Something that lasts a session (a shift, a timer) kept in the database: refresh its end
   with a heartbeat and, on start, close what was left open at its last heartbeat. A crash or
   an `ensure` then loses at most one interval instead of counting the downtime.
