@@ -1,6 +1,6 @@
 ---
 name: mri-resource-check
-description: "Checks a FiveM resource before calling a change done and looks up natives instead of guessing - parses every .lua (CfxLua too), flags natives that do not exist or run on the wrong side, the `and false or x` trap, SetTimeout passing its timer id, job/duty handlers that ignore the value the event carries, server framework events on RegisterNetEvent (any client can fake them), qbx_core event names it never fires, GetPlayerPed(-1) and GetDistanceBetweenCoords, notify text outside the locales, fixed waits used as a fix, bad fxmanifest globs, missing files and old fx_version, then the reload order and which log shows what. Node scripts, nothing to install. Use when finishing any change to a resource, or when asked to \"check the resource\", \"did it load?\", \"SCRIPT ERROR after ensure\", \"No such export\", \"does this native exist?\", \"attempt to call a nil value\" (pt-BR: \"confere o resource\", \"valida o lua\", \"carregou?\", \"deu erro depois do ensure\"), or when a bug only shows in game."
+description: "Checks a FiveM resource before calling a change done and looks up natives instead of guessing - parses every .lua (CfxLua too), flags natives that do not exist or run on the wrong side, the `and false or x` trap, SetTimeout passing its timer id, job/duty handlers that ignore the value the event carries, server framework events on RegisterNetEvent (any client can fake them), qbx_core event names it never fires, notify text outside the locales, fixed waits used as a fix, bad fxmanifest globs, missing files and old fx_version, how oxmysql tables are created at start, then the reload order and which log shows what. Use when finishing any change to a resource, or when asked to \"check the resource\", \"did it load?\", \"SCRIPT ERROR after ensure\", \"No such export\", \"does this native exist?\", \"attempt to call a nil value\" (pt-BR: \"confere o resource\", \"valida o lua\", \"carregou?\", \"cria as tabelas\", \"deu erro depois do ensure\"), or when a bug only shows in game."
 ---
 
 # Checking a resource
@@ -146,6 +146,9 @@ Lua traps the parser can't see:
   so "camera did not move" never becomes true for a player who walked away.
 - Every field an admin panel saves needs a reader: after rewriting a flow, grep each saved field
   for the code that reads it. An ignored value raises no error.
+- Tables: created in Lua on every start inside `MySQL.ready`, then the loads, in sequence; no
+  `install.sql`, no polling wait for the schema, no `pcall` around it. Read
+  [references/database.md](references/database.md) before writing or reviewing any table code.
 - A column added to an existing table on start (`onResourceStart`) checks with
   ``SHOW COLUMNS FROM `t` LIKE 'c'`` and runs the `ALTER` inside `pcall`. That handler usually
   also loads the saved rows: an error there (oxmysql throws "Duplicate column name") stops it
