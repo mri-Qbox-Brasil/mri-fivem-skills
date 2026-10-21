@@ -1,6 +1,6 @@
 ---
 name: mri-resource-check
-description: "Checks a FiveM resource before calling a change done and looks up natives instead of guessing - parses every .lua (CfxLua too), flags natives that do not exist or run on the wrong side, the `and false or x` trap, SetTimeout passing its timer id, job/duty handlers that ignore the value the event carries, server framework events on RegisterNetEvent (any client can fake them), qbx_core event names it never fires, notify text outside the locales, fixed waits used as a fix, bad fxmanifest globs, missing files and old fx_version, how oxmysql tables are created at start, then the reload order and which log shows what. Use when finishing any change to a resource, or when asked to \"check the resource\", \"did it load?\", \"SCRIPT ERROR after ensure\", \"No such export\", \"does this native exist?\", \"attempt to call a nil value\" (pt-BR: \"confere o resource\", \"valida o lua\", \"carregou?\", \"cria as tabelas\", \"deu erro depois do ensure\"), or when a bug only shows in game."
+description: "Checks a FiveM resource before calling a change done and looks up natives instead of guessing - parses every .lua (CfxLua too), flags natives that do not exist or run on the wrong side, the `and false or x` trap, SetTimeout passing its timer id, job/duty handlers that ignore the value the event carries, server framework events on RegisterNetEvent (any client can fake them), client spawns that sv_entityLockdown refuses, qbx_core event names it never fires, notify text outside the locales, fixed waits used as a fix, bad fxmanifest globs, missing files and old fx_version, how oxmysql tables are created at start, then the reload order and which log shows what. Use when finishing any change to a resource, or when asked to \"check the resource\", \"did it load?\", \"SCRIPT ERROR after ensure\", \"No such export\", \"does this native exist?\", \"will it work with entity lockdown?\", \"attempt to call a nil value\" (pt-BR: \"confere o resource\", \"valida o lua\", \"carregou?\", \"cria as tabelas\", \"funciona com entity lockdown?\", \"deu erro depois do ensure\"), or when a bug only shows in game."
 ---
 
 # Checking a resource
@@ -57,6 +57,9 @@ node scripts/check.mjs <resource folder>        # or a list of .lua files; --no-
   - A handler for a `qbx_core:*` name that qbx_core never fires (`playerLoaded`,
     `playerUnloaded`, `jobChanged`, `gangChanged`, on server or client), with the event to use
     instead.
+  - `CreateObject`, `CreateObjectNoOffset`, `CreateVehicle`, `CreatePed`,
+    `CreatePedInsideVehicle` or `ClonePed` with `isNetwork = true` in a client file: a server
+    with `sv_entityLockdown` (the anti-cheat setting) refuses it. See "Entity lockdown" below.
   - `GetPlayerPed(-1)` (use `cache.ped` or `PlayerPedId()`) and `GetDistanceBetweenCoords`
     (use `#(a - b)`).
   - Not flagged on purpose: a `GetInvokingResource()` guard on client net events. The
@@ -68,6 +71,27 @@ node scripts/check.mjs <resource folder>        # or a list of .lua files; --no-
   - A file listed in the manifest that doesn't exist.
 - Prove the checker runs before trusting an all-clear: a deliberately broken file must
   `FAIL`, a made-up native must `WARN`.
+
+### Entity lockdown
+
+`set sv_entityLockdown strict` in server.cfg stops cheaters from spawning entities: the server
+refuses every networked entity a client creates (`relaxed` only those created by scripts, so
+traffic and population still come from clients). Write every resource so it keeps working
+with `strict`:
+
+- **Everyone must see it and it can move or be taken (vehicle, ped, item on the ground):**
+  create it on the server (`CreateVehicleServerSetter`, `CreateObjectNoOffset`, `CreatePed`
+  in a server file), send the net id, and the client finds it with
+  `NetworkGetEntityFromNetworkId` once `NetworkDoesNetworkIdExist` is true.
+- **Static scenery (decoration props, previews, ghosts):** keep it local.
+  The server keeps the data and sends it, each client spawns it with `isNetwork = false`
+  near the player and deletes it when far. Lockdown never sees a local entity. Example:
+  mri_Qobjects (rows in the database, `CreateObjectNoOffset(..., false, false, false)` on
+  each client).
+- Deleting a map prop or a local entity on the client is fine; taking control of a networked
+  one (`NetworkRequestControlOfEntity`) still works, since lockdown only blocks creation.
+- Test once with `strict` on: a client-created networked entity shows for the creator only,
+  or not at all, and other players never see it.
 
 ## 2. Read the flow
 

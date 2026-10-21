@@ -254,6 +254,34 @@ const SLOW_NATIVES = [
   [/\bGetPlayerPed\s*\(\s*-1\s*\)/, 'GetPlayerPed(-1): use cache.ped (ox_lib) or PlayerPedId()'],
   [/\bGetDistanceBetweenCoords\s*\(/, 'GetDistanceBetweenCoords: use #(a - b) on vectors'],
 ]
+// Index of the isNetwork argument in each client spawn native.
+const NETWORK_ARG = { CreateObject: 4, CreateObjectNoOffset: 4, CreateVehicle: 5, CreatePed: 6, CreatePedInsideVehicle: 5, ClonePed: 1 }
+const NETWORKED_SPAWN = new RegExp(`(?<![\\w.:])(${Object.keys(NETWORK_ARG).join('|')})\\s*\\(`, 'g')
+// Top-level arguments of the call whose '(' ends right before `start`, or null when it doesn't close.
+function callArgs(code, start) {
+  const args = []
+  let depth = 0
+  let from = start
+  for (let i = start; i < code.length; i++) {
+    const ch = code[i]
+    if (ch === '"' || ch === "'") {
+      const end = code.indexOf(ch, i + 1)
+      if (end < 0) return null
+      i = end
+    } else if ('({['.includes(ch)) depth++
+    else if (')}]'.includes(ch)) {
+      if (depth === 0) {
+        args.push(code.slice(from, i).trim())
+        return args
+      }
+      depth--
+    } else if (ch === ',' && depth === 0) {
+      args.push(code.slice(from, i).trim())
+      from = i + 1
+    }
+  }
+  return null
+}
 const codeByFile = new Map()
 for (const file of files) {
   const src = readFileSync(file, 'utf8')
@@ -298,6 +326,13 @@ for (const file of files) {
     for (const match of src.matchAll(/\bRegisterNetEvent\s*\(\s*['"]([^'"]+)['"]/g)) {
       if (LOCAL_SERVER_EVENTS.test(match[1]))
         warn(`${show(file)}:${lineAt(src, match.index)}`, `${match[1]} is fired by the framework on the server; RegisterNetEvent lets any client fake it, use AddEventHandler`)
+    }
+  }
+  if (sideOf(sides, relative(resourceDir, file).replace(/\\/g, '/')) === 'client') {
+    for (const match of code.matchAll(NETWORKED_SPAWN)) {
+      const args = callArgs(code, match.index + match[0].length)
+      if (args && /^true$/.test(args[NETWORK_ARG[match[1]]] ?? ''))
+        warn(`${show(file)}:${lineAt(code, match.index)}`, `${match[1]} with isNetwork = true on the client: sv_entityLockdown refuses it; spawn it on the server, or pass false for a local entity`)
     }
   }
 }
