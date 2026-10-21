@@ -129,18 +129,14 @@ Pattern from `mri_Qnpc` (`client/dialog.lua`, `web/src/components/Conversation.t
 
 ## Customizing a car (livery, extras, paint)
 
-Pattern from `mri_Qgarage` (`modules/lib/cam.lua` `cam.focusPart`, `modules/fleet/look.lua`):
+Pattern from `mri_Qgarage` (`modules/lib/cam.lua` `cam.hold` / `cam.nudge`, `modules/fleet/look.lua`):
 
-- Each row or key takes the camera to the part it changes, like LS Customs: livery from a high
-  3/4 (side, hood and roof with the callsign in one shot; a pure side profile hides the roof),
-  an extra on its own bone (`extra_N`, `GetEntityBoneIndexByName` +
-  `GetOffsetFromEntityGivenWorldCoords`, camera on that side, closer), a part in the middle (roof
-  bar) from above, paint on the whole car. A list the player changes blind is not a choice.
-- Every value (yaw, distance, height, framed point, composition) eases each frame
-  (`1 - exp(-dt * 5)`), so moving between parts and back to the hero shot glides, never jumps.
-  The drift fades to a breath while on a part, so the part stays framed.
-- Pick the side with a clear line of sight (wall behind the spot); the probe waits, so run it
-  off the key loop.
-- The player turns the camera (drag on the scene or Q/E on the NUI, mouse in a world tool) and
-  zooms with the wheel; both reset on the next part.
+- The player steers, the script never moves the camera by itself: no glide to the part on hover,
+  on a row change or on a key. Tried on the garage (2026-10-21) and the owner called it awful:
+  the camera ran off while the player was still looking.
+- On open the camera holds (`cam.hold(true)`): the drift fades to zero and the player turns
+  (drag on the scene or Q/E on the NUI, mouse in a world tool), tilts up to look from above (the
+  roof and the callsign) and zooms with the wheel. Every value eases each frame
+  (`1 - exp(-dt * 5)`), so input glides. On close (`cam.hold(false)`) turn and zoom reset and
+  the shot eases back to the hero shot.
 - Obstacles, the player's ped and the orbit follow "Obstacles and the player's ped" above.
