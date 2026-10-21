@@ -12,7 +12,7 @@ marked in the world, with a preview; never a number field, a coordinate or a typ
 
 | Tool | For | Module |
 | --- | --- | --- |
-| Point with ghost | NPC or object: a see-through copy follows the aim. Without `model` (interaction point: clock-in, register, stash) a small sphere (`DrawMarker` 28, scale 0.1: the scale is the radius) in the `mri:color` accent follows the aim, the same cursor as the mri_Qbox zone drawer, and there is no heading | `WorldPlacer.point` |
+| Point with ghost | NPC or object: a see-through copy follows the aim (`object = true` for a prop: `CreateObject` local, mri_Qcrafting bench). Without `model` (interaction point: clock-in, register, stash) a small sphere (`DrawMarker` 28, scale 0.1: the scale is the radius) in the `mri:color` accent follows the aim, the same cursor as the mri_Qbox zone drawer, and there is no heading | `WorldPlacer.point` |
 | Path | NPC route, trail, fence: stops with a line on the ground | `WorldPlacer.path` |
 | Zone (box with heading) | anything shaped like a cube that faces a way: elevator floor, garage spot, shop counter, stash, trigger area | `WorldPlacer.zone` |
 

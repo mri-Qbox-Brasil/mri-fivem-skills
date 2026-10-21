@@ -61,6 +61,20 @@ local function ghostPed(model, heading)
 	return ped
 end
 
+-- Prop ghost (bench, sign): local only, so sv_entityLockdown never refuses it.
+local function ghostObject(model, heading)
+	local hash = tonumber(model) or joaat(model)
+	if not IsModelInCdimage(hash) or not pcall(lib.requestModel, hash, 10000) then return nil end
+	local coords = GetEntityCoords(cache.ped)
+	local object = CreateObject(hash, coords.x, coords.y, coords.z, false, false, false)
+	SetModelAsNoLongerNeeded(hash)
+	SetEntityHeading(object, heading)
+	SetEntityAlpha(object, 170, false)
+	SetEntityCollision(object, false, false)
+	FreezeEntityPosition(object, true)
+	return object
+end
+
 -- Suite accent from the mri:color convar, like the mri_Qbox zone drawer.
 local function accent()
 	local hex = GetConvar('mri:color', '#00E699'):match('^#(%x%x%x%x%x%x)') or '00E699'
@@ -144,14 +158,15 @@ end
 
 ---Ghost follows the aim; arrows and wheel rotate, E confirms, Backspace or Esc cancels.
 ---Without `model` (an interaction point) a sphere in the suite accent follows the aim instead and there is no heading.
----@param opts { model?: string|number, heading?: number }
+---`object` makes the ghost a prop (CreateObject) instead of a ped.
+---@param opts { model?: string|number, object?: boolean, heading?: number }
 ---@return { coords: { x: number, y: number, z: number }, heading?: number }|nil
 function WorldPlacer.point(opts)
 	if active then return nil end
 	local heading = tonumber(opts.heading) or GetEntityHeading(cache.ped)
 	local ghost
 	if opts.model then
-		ghost = ghostPed(opts.model, heading)
+		if opts.object then ghost = ghostObject(opts.model, heading) else ghost = ghostPed(opts.model, heading) end
 		if not ghost then return nil end
 	end
 
