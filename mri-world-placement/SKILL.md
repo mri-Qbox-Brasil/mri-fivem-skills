@@ -85,6 +85,11 @@ ui-kit docs); never a hand-made Leaflet map per resource.
   in the same loop the drawing shows every other frame (flicker) and `JustPressed` gets lost.
   The aim runs on its own thread (`trackAim`) and the loop only reads `aim.coords`. The same
   goes for `lib.requestModel`, `lib.callback.await` and any `Wait(n)`.
+- Admins mark from noclip: the mri_Qadmin noclip calls `DisableAllControlActions` every frame and
+  uses E to go down, so `IsControlJustPressed(0, 38)` never fires there. Read every tool key with
+  `IsDisabledControlJustPressed`/`IsDisabledControlPressed` and also accept a shot (left click, 24)
+  as mark, shown on the rail (mri_Qposter, 2026-10-21). Aim with `GetFinalRenderedCam*`, never the
+  gameplay cam: in noclip the rendered camera is the scripted one.
 - A blocked key (Esc 200, Enter 191, wheel 14/15) only answers through
   `IsDisabledControlJustPressed`.
 - Enter is 191 (`INPUT_FRONTEND_RDOWN`) plus 201, both disabled every frame. Never 176 alone
