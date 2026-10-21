@@ -37,6 +37,22 @@ GPS route on the road). Lines marked *(not seen in game yet)* still wait for an 
 - Brightness per item *(not seen in game yet)*: dim with the vertex color of `DrawTexturedPoly`
   (`r = g = b = 255 x brightness`, free and instant); brighten past 100% only in the page
   (`filter: brightness(x)` on the content, sent through `SendDuiMessage`). Reference: mri_Qposter.
+- YouTube in a DUI page: an `iframe` of `youtube.com/embed/<id>?autoplay=1&mute=1&loop=1&playlist=<id>&enablejsapi=1`
+  with `referrerPolicy = 'strict-origin-when-cross-origin'`. Without an origin (page opened as `file://`) YouTube
+  answers "Erro 153"; served from an http(s) origin it plays. Volume, mute and pause by `postMessage`
+  (`{"event":"command","func":"setVolume","args":[50]}`); resend after the iframe `load`. *(not seen in game yet)*
+- Sound with distance: Lua sends a target volume with each update (`(1 - dist / range)^2 x volume`) and the
+  page eases toward it every 60 ms, so 400 ms updates still fade smoothly. A poster being heard must not be
+  paused by the off screen eco rule.
+- Playlist that changes at the same moment for every player: send `GetCloudTimeAsInt()` with the update and
+  pick `floor(clock / interval) % count` in the page; cross fade the layers and remove the old one after the
+  fade (an idle iframe still costs).
+- A picture that is not on the web (uploaded from a PC): the page can't tell Lua it booted, so send it with
+  `SendDuiMessage` a few times after each load (300 ms, 1.2 s, 3 s, 7 s) and let the page ignore repeats.
+  Reference: mri_Qposter `client/render.lua` (`feed`).
+- On a vehicle: store the corners as `GetOffsetFromEntityGivenWorldCoords` offsets plus the plate; find the
+  vehicle by plate in `GetGamePool('CVehicle')` in the slow loop and place the corners with
+  `GetOffsetFromEntityInWorldCoords` every frame. Raycast with flag `2` so the aim can hit cars.
 - Pool full when a marker is added: leave it without a page and let the slow loop take one as
   soon as another marker frees it, or it never shows.
 

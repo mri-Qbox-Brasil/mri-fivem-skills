@@ -5,6 +5,15 @@ Validated in game on FXServer (Windows, October 2026): a 30 MB video uploaded fr
 panel, saved, listed and deleted. The body limit was measured with `curl` against a handler
 that echoed the byte count.
 
+## Small pictures without a restart *(not seen in game yet)*
+
+A file saved in the resource reaches players only after a restart. For pictures that must show at once
+(a poster from a player's PC): shrink in the NUI with a canvas (`toDataURL('image/webp', 0.86)`, long side
+2048, shrink again while over ~3.5 MB), send the data URL in 512 KB parts over latent events with an answer
+per part, keep it as a text file under `data/`, and hand it to clients with `TriggerLatentClientEvent` when
+they ask (always answer, `false` when missing). Store `upload:<id>` as the address. Reference: mri_Qposter
+`server/uploads.lua`, `web/src/lib/media.ts`.
+
 ## Path of the bytes
 
 1. The NUI asks Lua for an upload slot (NUI callback, then `lib.callback` to the server). The
