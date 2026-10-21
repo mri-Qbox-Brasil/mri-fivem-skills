@@ -266,6 +266,8 @@ for (const file of files) {
   }
   const code = transform(src, 'code')
   codeByFile.set(file, code)
+  // Test fixtures copy old code on purpose; their warnings buried the real ones.
+  if (TEST_DIR.test(relative(resourceDir, file).replace(/\\/g, '/'))) continue
   code.split('\n').forEach((text, i) => {
     if (/\band\s+(false|nil)\s+or\b/.test(text)) warn(`${show(file)}:${i + 1}`, '`and false/nil or x` always gives x; use if/else')
     for (const [pattern, message] of SLOW_NATIVES) if (pattern.test(text)) warn(`${show(file)}:${i + 1}`, message)
