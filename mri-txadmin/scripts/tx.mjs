@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const ACTIONS = ['ensure', 'restart', 'start', 'stop', 'refresh', 'say', 'console'];
+const ACTIONS = ['ensure', 'restart', 'start', 'stop', 'refresh', 'say', 'console', 'server-restart'];
 const LOG_WAIT_MS = 4000;
 
 function parseArgs(argv) {
@@ -18,6 +18,7 @@ function parseArgs(argv) {
       return value;
     };
     switch (key) {
+      case '--config': opts.config = next(); break;
       case '--url': opts.url = next(); break;
       case '--base': opts.base = next(); break;
       case '--profile': opts.profile = next(); break;
@@ -56,15 +57,15 @@ async function cachedSession(cfg) {
   return fresh;
 }
 
-async function command(cfg, session, action, parameter) {
-  const res = await fetch(`${cfg.url}/fxserver/commands`, {
+async function command(cfg, session, route, payload) {
+  const res = await fetch(`${cfg.url}/fxserver/${route}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Cookie: session.cookie,
       'x-txadmin-csrftoken': session.csrf,
     },
-    body: JSON.stringify({ action, parameter }),
+    body: JSON.stringify(payload),
   });
   const body = await res.json().catch(() => ({}));
   if (res.status === 401 || res.status === 403 || body.logout) {
@@ -115,8 +116,9 @@ async function readFrom(path, offset) {
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
-  const raw = await readFile(join(root, 'config.json'), 'utf8').catch(() => null);
-  if (!raw) throw new Error('missing config.json: copy config.example.json and fill it in');
+  const configPath = opts.config ?? join(root, 'config.json');
+  const raw = await readFile(configPath, 'utf8').catch(() => null);
+  if (!raw) throw new Error(`missing ${configPath}: copy config.example.json and fill it in`);
   const cfg = JSON.parse(raw);
   if (opts.url) cfg.url = opts.url;
   if (opts.base) cfg.base = opts.base;
@@ -124,17 +126,20 @@ async function main() {
 
   const [action, ...rest] = opts.positional;
   if (!ACTIONS.includes(action)) {
-    throw new Error(`usage: node scripts/tx.mjs <${ACTIONS.join('|')}> [resource | message]`);
+    throw new Error(`usage: node scripts/tx.mjs <${ACTIONS.join('|')}> [resource | message] [--config file]`);
   }
   // say and console take one text; resource actions take one or more resources, all on the same login.
   const single = action === 'say' || action === 'console';
-  const parameters = single ? [rest.join(' ')] : action === 'refresh' ? [''] : rest;
-  if (action !== 'refresh' && !parameters.filter(Boolean).length) throw new Error(`${action} needs a ${single ? 'text' : 'resource'}`);
+  const bare = action === 'refresh' || action === 'server-restart';
+  const parameters = single ? [rest.join(' ')] : bare ? [''] : rest;
+  if (!bare && !parameters.filter(Boolean).length) throw new Error(`${action} needs a ${single ? 'text' : 'resource'}`);
 
   const txAction = action === 'say' ? 'admin_broadcast' : `${action}_res`;
-  const send = (session, parameter) => action === 'console'
-    ? consoleCommand(cfg, session, parameter)
-    : command(cfg, session, txAction, parameter);
+  const send = (session, parameter) => {
+    if (action === 'console') return consoleCommand(cfg, session, parameter);
+    if (action === 'server-restart') return command(cfg, session, 'controls', { action: 'restart' });
+    return command(cfg, session, 'commands', { action: txAction, parameter });
+  };
   const logPath = join(cfg.base, 'txData', cfg.profile, 'logs', 'fxserver.log');
   const offset = await stat(logPath).then((s) => s.size).catch(() => null);
 

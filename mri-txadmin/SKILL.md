@@ -1,6 +1,6 @@
 ---
 name: mri-txadmin
-description: "Runs ensure, restart, start or stop on a resource of a local FiveM server, or any server console command, through the txAdmin API (no rcon) and shows what fxserver.log recorded. Use when asked to \"ensure X\", \"restart the resource\", \"restart the script\", \"stop/start the resource\" (pt-BR: \"dá ensure no X\", \"reinicia o resource\", \"para/sobe o resource\"), or when a change needs reloading on the server to be tested, or to run a server console command (pt-BR: \"roda no console\", \"manda esse comando no servidor\")."
+description: "Runs ensure, restart, start or stop on a resource of a FiveM server (local or a remote VPS over an SSH tunnel), restarts the whole server, or runs any server console command, through the txAdmin API (no rcon) and shows what fxserver.log recorded. Use when asked to \"ensure X\", \"restart the resource\", \"restart the script\", \"stop/start the resource\", \"restart the server\" (pt-BR: \"dá ensure no X\", \"reinicia o resource\", \"para/sobe o resource\", \"reinicia o servidor\"), or when a change needs reloading on the server to be tested, or to run a server console command (pt-BR: \"roda no console\", \"manda esse comando no servidor\")."
 ---
 
 # Server commands through txAdmin
@@ -20,6 +20,7 @@ node scripts/tx.mjs stop my_resource
 node scripts/tx.mjs ensure job_a job_b job_c   # several at once, on the same login
 node scripts/tx.mjs refresh                    # rescan resources (new folder)
 node scripts/tx.mjs console "mri_inventory get items water"   # any server console command
+node scripts/tx.mjs server-restart             # whole server, drops every player
 ```
 
 | Action | What it does |
@@ -28,6 +29,7 @@ node scripts/tx.mjs console "mri_inventory get items water"   # any server conso
 | `restart <res>` | Restarts (fails if stopped). |
 | `start <res>` / `stop <res>` | Starts / stops. |
 | `refresh` | Server `refresh`, to see a new resource or a changed `fxmanifest.lua` (new file in `client_scripts` or `server_scripts`): without it `ensure` starts with the old manifest and the client or the server gets `attempt to index a nil value` on the missing file's global. Run it before the `ensure` whenever the manifest file lists changed. |
+| `server-restart` | Restarts the whole server (txAdmin's Restart button, `POST /fxserver/controls`). Drops every player: only when asked, after checking nobody is online. For a new or fixed resource, `refresh` + `ensure` is enough. |
 | `say <message>` | txAdmin announcement to every player. Only when asked. |
 | `console <command>` | Runs one line in the server console, as the Live Console does (needs the `console.write` permission), and prints the log lines it caused. The answer only shows in the log, so commands meant for agents should print one parseable line. |
 
@@ -37,7 +39,22 @@ expires. For several resources, pass them all in one command instead of looping 
 429, wait the 15 minutes: retrying doesn't help.
 
 Flags: `--base <folder>` and `--profile <profile>` (defaults in `config.json`), `--url` if
-txAdmin isn't on port 40120, `--no-log` to skip reading the log.
+txAdmin isn't on port 40120, `--no-log` to skip reading the log, `--config <file>` to use
+another login file instead of the skill's `config.json` (one per server).
+
+## Remote server (VPS)
+
+Keep one config file per server outside the repo (e.g. `~/.vps/<server>/txadmin.json`) and
+reach txAdmin through an SSH tunnel, so the password never crosses the internet in plain HTTP:
+
+```bash
+ssh -f -N -o ExitOnForwardFailure=yes -L 40199:127.0.0.1:40120 <ssh-host>
+node scripts/tx.mjs ensure my_resource --config ~/.vps/<server>/txadmin.json --no-log
+```
+
+The file's `url` is `http://127.0.0.1:40199`. `fxserver.log` is on the VPS, so pass `--no-log`
+and read it over SSH (`txData/<profile>/logs/fxserver.log`). Close the tunnel afterwards (the
+`ssh` process with `40199` in its command line).
 
 ## After the command
 
