@@ -11,7 +11,7 @@ resources, options in the admin panel and the NUI's Chromium version. They come 
 | [`mri-game-ux`](mri-game-ux) | AAA-feeling screens and scenes: scripted camera, transitions without hard cuts, music in phases, menus, NPC conversations |
 | [`mri-world-placement`](mri-world-placement) | Place NPCs, objects and zones and record routes in the world, with a ready Lua module and key rail, no flickering markers |
 | [`mri-nui-glass`](mri-nui-glass) | Real liquid glass on the NUI: the blurred game behind the panel, which CEF's `backdrop-filter` can't do |
-| [`mri-txadmin`](mri-txadmin) | `ensure`, `restart`, `start`, `stop` and any console command through the local txAdmin API, no rcon, with the server log |
+| [`mri-txadmin`](mri-txadmin) | `ensure`, `restart`, `start`, `stop`, whole server restart and any console command through the txAdmin API (local, or a VPS over an SSH tunnel), no rcon, with the server log |
 | [`mri-resource-check`](mri-resource-check) | Check a resource before calling it done: Lua parser with CfxLua syntax, natives that don't exist or run on the wrong side, native lookup, `SetTimeout` and framework-event timing traps, manifest pitfalls, reload order, which log shows what |
 | [`mri-upstream-wrap`](mri-upstream-wrap) | Change third-party resources without editing them: wrapper folder, hooks, keybinds, `provide` with a compat layer for exports, exports stuck after an ensure |
 | [`mri-nui-cef`](mri-nui-cef) | NUI on FiveM's Chromium: CEF 103 limits, what CEF 144 breaks and opens up, a scanner for the breaking changes, file upload from the NUI, a NUI card over the pause map |
