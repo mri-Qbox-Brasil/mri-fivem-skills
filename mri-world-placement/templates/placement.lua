@@ -8,7 +8,8 @@ local WHEEL_STEP = 15.0
 local RAY_DISTANCE = 30.0
 -- Weapon wheel, attacks, vehicle weapon scroll and Esc (200), so the keys only drive the tool.
 local BLOCKED_CONTROLS = { 14, 15, 16, 17, 24, 25, 37, 44, 140, 141, 142, 200 }
-local KEY = { mark = 38, undo = 177, finish = 191, cancel = 200, left = 174, right = 175, wheelUp = 15, wheelDown = 14 }
+-- Keys read as disabled and a shot also marks: the mri_Qadmin noclip blocks every control and uses E to go down.
+local KEY = { mark = 38, shoot = 24, undo = 177, finish = 191, cancel = 200, left = 174, right = 175, wheelUp = 15, wheelDown = 14 }
 local START_COLOR = { 0, 230, 153 }
 local STOP_COLOR = { 255, 255, 255 }
 local ZONE_COLOR = { 255, 210, 0 }
@@ -22,6 +23,10 @@ local active = false
 local function hud(data)
 	SendNUIMessage({ action = 'placeHud', data = data })
 	if (data ~= false) ~= (LocalPlayer.state.escBusy == true) then LocalPlayer.state:set('escBusy', data ~= false, false) end
+end
+
+local function marked()
+	return IsDisabledControlJustPressed(0, KEY.mark) or IsDisabledControlJustPressed(0, KEY.shoot)
 end
 
 local function block()
@@ -167,8 +172,8 @@ function WorldPlacer.point(opts)
 		end
 
 		if ghost then
-			if IsControlPressed(0, KEY.left) then heading = heading + ROTATE_SPEED * frame end
-			if IsControlPressed(0, KEY.right) then heading = heading - ROTATE_SPEED * frame end
+			if IsDisabledControlPressed(0, KEY.left) then heading = heading + ROTATE_SPEED * frame end
+			if IsDisabledControlPressed(0, KEY.right) then heading = heading - ROTATE_SPEED * frame end
 			if IsDisabledControlJustPressed(0, KEY.wheelUp) then heading = heading + WHEEL_STEP end
 			if IsDisabledControlJustPressed(0, KEY.wheelDown) then heading = heading - WHEEL_STEP end
 			heading = heading % 360
@@ -177,12 +182,12 @@ function WorldPlacer.point(opts)
 			drawCursor(last, color)
 		end
 
-		if IsControlJustPressed(0, KEY.mark) and last then
+		if marked() and last then
 			PlaySoundFrontend(-1, 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', true)
 			result = { coords = { x = last.x, y = last.y, z = last.z } }
 			if ghost then result.heading = math.floor(heading * 100 + 0.5) / 100 end
 			break
-		elseif IsDisabledControlJustPressed(0, KEY.cancel) or IsControlJustPressed(0, KEY.undo) then
+		elseif IsDisabledControlJustPressed(0, KEY.cancel) or IsDisabledControlJustPressed(0, KEY.undo) then
 			PlaySoundFrontend(-1, 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', true)
 			releaseEsc()
 			break
@@ -229,7 +234,7 @@ function WorldPlacer.zone(opts)
 
 		local step = (IsDisabledControlJustPressed(0, KEY.wheelUp) and 1 or 0) - (IsDisabledControlJustPressed(0, KEY.wheelDown) and 1 or 0)
 		if step ~= 0 then
-			if IsControlPressed(0, SHIFT) then
+			if IsDisabledControlPressed(0, SHIFT) then
 				size.z = clampSize(size.z + step * ZONE_STEP)
 			else
 				size.x, size.y = clampSize(size.x + step * ZONE_STEP), clampSize(size.y + step * ZONE_STEP)
@@ -237,7 +242,7 @@ function WorldPlacer.zone(opts)
 			push()
 		end
 
-		if IsControlJustPressed(0, KEY.mark) then
+		if marked() then
 			local mark = {
 				coords = { x = coords.x, y = coords.y, z = coords.z },
 				heading = math.floor(heading * 100 + 0.5) / 100,
@@ -250,7 +255,7 @@ function WorldPlacer.zone(opts)
 			end
 			marks[#marks + 1] = mark
 			push()
-		elseif IsControlJustPressed(0, KEY.undo) then
+		elseif IsDisabledControlJustPressed(0, KEY.undo) then
 			PlaySoundFrontend(-1, 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', true)
 			if not opts.multiple then break end
 			if #marks > 0 then
@@ -307,11 +312,11 @@ function WorldPlacer.path(opts)
 			drawStop(last, STOP_COLOR)
 		end
 
-		if IsControlJustPressed(0, KEY.mark) and last and #points < max then
+		if marked() and last and #points < max then
 			points[#points + 1] = { x = last.x, y = last.y, z = last.z }
 			PlaySoundFrontend(-1, 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', true)
 			hud({ mode = 'route', count = #points })
-		elseif IsControlJustPressed(0, KEY.undo) and #points > 0 then
+		elseif IsDisabledControlJustPressed(0, KEY.undo) and #points > 0 then
 			points[#points] = nil
 			PlaySoundFrontend(-1, 'BACK', 'HUD_FRONTEND_DEFAULT_SOUNDSET', true)
 			hud({ mode = 'route', count = #points })

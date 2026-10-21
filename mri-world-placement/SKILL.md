@@ -34,7 +34,7 @@ Pattern from `mri_Qelevators` (`client/placement.lua`).
 | Key | Point | Path | Zone |
 | --- | --- | --- | --- |
 | Aim / walk | moves the ghost | previews the next stop | the box follows the player |
-| `E` | confirm | mark stop | mark (single: confirm) |
+| `E` or shot (left click) | confirm | mark stop | mark (single: confirm) |
 | `←` `→`, wheel | rotate | | wheel: width; `Shift` + wheel: height |
 | `Backspace` | cancel | undo the last one | undo the last one (single: cancel) |
 | `Enter` | | finish (no stop = cancel) | finish (no zone = cancel) |

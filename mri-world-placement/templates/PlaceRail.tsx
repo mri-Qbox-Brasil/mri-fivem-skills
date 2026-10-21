@@ -3,6 +3,14 @@ import { MriKbd, MriKeyHint, MriMouse } from '@mriqbox/ui-kit'
 import { useT } from '@/lib/i18n'
 import { useStore } from '@/store'
 
+// A shot or E marks: E alone fails in noclip, which uses it to go down.
+const markKeys = (
+  <>
+    <MriMouse button="left" />
+    <MriKbd variant="accent">E</MriKbd>
+  </>
+)
+
 // Key rail shown while a world tool runs; the panel itself is hidden.
 // Store: `hud: { mode: 'place' | 'spot' | 'route' | 'zone'; count?: number; size?: { x: number; y: number; z: number }; multiple?: boolean } | null`,
 // set by the `placeHud` NUI message.
@@ -21,7 +29,7 @@ export function PlaceRail() {
     counter = <span className="font-mono tabular-nums text-foreground">{t('rail.count', { count: (hud.count ?? 0) + 1 })}</span>
     keys = (
       <>
-        <MriKeyHint keys={<MriKbd variant="accent">E</MriKbd>} label={t('rail.mark')} />
+        <MriKeyHint keys={markKeys} label={t('rail.mark')} />
         <MriKeyHint keys={<MriKbd>BACKSPACE</MriKbd>} label={t('rail.undo')} />
         <MriKeyHint keys={<MriKbd>ENTER</MriKbd>} label={t('rail.finish')} />
         <MriKeyHint keys={<MriKbd>ESC</MriKbd>} label={t('rail.cancel')} />
@@ -50,7 +58,7 @@ export function PlaceRail() {
           }
           label={t('rail.height')}
         />
-        <MriKeyHint keys={<MriKbd variant="accent">E</MriKbd>} label={t(hud.multiple ? 'rail.zone_mark' : 'rail.place')} />
+        <MriKeyHint keys={markKeys} label={t(hud.multiple ? 'rail.zone_mark' : 'rail.place')} />
         {hud.multiple ? (
           <>
             <MriKeyHint keys={<MriKbd>BACKSPACE</MriKbd>} label={t('rail.undo')} />
@@ -67,7 +75,7 @@ export function PlaceRail() {
     title = t('rail.place_title')
     keys = (
       <>
-        <MriKeyHint keys={<MriKbd variant="accent">E</MriKbd>} label={t('rail.place')} />
+        <MriKeyHint keys={markKeys} label={t('rail.place')} />
         <MriKeyHint keys={<MriKbd>BACKSPACE</MriKbd>} label={t('rail.cancel')} />
       </>
     )
@@ -85,7 +93,7 @@ export function PlaceRail() {
           }
           label={t('rail.rotate')}
         />
-        <MriKeyHint keys={<MriKbd variant="accent">E</MriKbd>} label={t('rail.place')} />
+        <MriKeyHint keys={markKeys} label={t('rail.place')} />
         <MriKeyHint keys={<MriKbd>BACKSPACE</MriKbd>} label={t('rail.cancel')} />
       </>
     )
