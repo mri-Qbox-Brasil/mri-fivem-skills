@@ -50,7 +50,8 @@ GPS route on the road). Lines marked *(not seen in game yet)* still wait for an 
 - Jagged and shimmering from afar *(not seen in game yet)*: a DUI texture has no mipmaps, so a 2048 page on a
   poster that covers 150 px aliases. Pick the size from the screen: `span / dist x focal` px, with
   `focal = screenH / (2 tan(fov / 2))` (`GetActiveScreenResolution`, `GetFinalRenderedCamFov`), the smallest
-  size above it, the item quality as the cap. Shrink only under 60% of the current size and at most every 2 s; the new
+  largest size at or below it (down to 32 px: rounding up or a 128 floor still leaves 2 to 4 texels per pixel and
+  aliases far away), the item quality as the cap. Change only past a 15% margin and at most every 2 s; the new
   DUI loads under the old one, which is drawn 2 cm toward the camera (coplanar quads fight) and fades out once the new
   page had 1.5 s. A resize reloads the page: skip it while the item plays sound. Cap the idle pool in total too
   (several sizes now). Reference: mri_Qposter `client/render.lua` (`sizeFor`).
