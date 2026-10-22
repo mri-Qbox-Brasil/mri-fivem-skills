@@ -116,7 +116,9 @@ ui-kit docs); never a hand-made Leaflet map per resource.
   props (a helipad is often one; `GetGroundZFor_3dCoord` skips them) with the saved height as
   fallback, and only another vehicle blocks it. A box test against everything at the model's size
   fails on helicopters (the rotor touches the rails) and the car lands somewhere else (mri_Qgarage
-  `Ghost.isSpotFree(..., marked)`, 2026-10-21).
+  `Ghost.isSpotFree(..., marked)`, 2026-10-21). With every marked spot of the type taken, never fall
+  back to a place near the player: show the item on a spot and refuse the action with a reason on the
+  button ("Spots taken").
 - No `lib.showTextUI`, ox_lib menu or instruction `DrawText`: the rail belongs to the NUI.
 
 ## What the system decides by itself
