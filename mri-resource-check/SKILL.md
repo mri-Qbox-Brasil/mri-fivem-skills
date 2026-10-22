@@ -114,6 +114,12 @@ Lua traps the parser can't see:
   hud and radar toggles. An effect that changes one hands it back when it ends, on every exit
   (early return, cancel, `onResourceStop`); code that relies on one sets it right before
   use.
+- Listing other resources' events for a panel: read their `.lua` on the server (`io.readdir` and
+  `io.open` exist in FXServer Lua), skipping web, stream and data folders, in time slices (an
+  `os.clock` budget of about 4 ms, then `Wait(0)`). A yield every 40 files froze the server in
+  0.5 s chunks over 90 resources (20 s in all). Scan in the background after start and cache.
+  Listening to a client event later needs `RegisterNetEvent` in your own resource (net safety is
+  per resource); its return goes to `RemoveEventHandler`. Reference: mri_Qrpg `server/events.lua`.
 - Before saying a resource can't tell or do something, read its `fxmanifest.lua` exports,
   its compat exports and its `GlobalState` keys.
 - Never read `GlobalState[key]`, `LocalPlayer.state[key]` or `Entity(x).state[key]` inside a

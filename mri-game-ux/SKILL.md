@@ -46,6 +46,11 @@ Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
 - **One thing on screen at a time.** One action can fire several gains (skill XP, player XP,
   level up). A level up shows only its notice, with no bar; otherwise one bar, the most specific
   (the skill over the player level), and anything arriving during the notice is dropped.
+- **Side quests come from people.** A stranger with a ? offers it: marker 32 over the head and blip
+  66 (the GTA "random character"), yellow while offering, green when there is something to hand in.
+  The person is a local ped of that player only, created near and deleted far; at the end it walks
+  off (`TaskWanderStandard`, delete later) instead of vanishing. The step in hand sits in a small
+  card in a corner with its progress (mri_Qrpg, 2026-10-22).
 - **Configurable.** Tracks, camera shots and times in the config, with good defaults.
 - **A settings panel shows, it doesn't list.** Fixed size (never resizes on tab or option),
   every visual choice is a card with a picture of the result in the real color, options that
