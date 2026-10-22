@@ -43,6 +43,9 @@ Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
   closed screens (editor, cutscene) until the end of the flow.
 - **A scene is a scene.** Cutscene and arrival with cinema bars, name as credit, discreet
   "skip".
+- **One thing on screen at a time.** One action can fire several gains (skill XP, player XP,
+  level up). A level up shows only its notice, with no bar; otherwise one bar, the most specific
+  (the skill over the player level), and anything arriving during the notice is dropped.
 - **Configurable.** Tracks, camera shots and times in the config, with good defaults.
 - **A settings panel shows, it doesn't list.** Fixed size (never resizes on tab or option),
   every visual choice is a card with a picture of the result in the real color, options that
