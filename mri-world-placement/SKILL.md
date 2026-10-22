@@ -60,9 +60,17 @@ or cancel (`HUD_FRONTEND_DEFAULT_SOUNDSET`).
 4. On the panel the result becomes a **summary**, not numbers: "3 stops · 29 m · there and
    back", "Position marked". A "Mark again" button starts over.
    Every placed thing also gets **Go there** (server checks the admin, closes the panel, puts the
-   player on the nearest walkable spot with `GetSafeCoordForPed(x, y, z, false, 32)`, flag 32 =
-   flood fill from the point) and **Remove** when it is optional. No X/Y/Z anywhere, not even
-   behind an "edit manually" toggle.
+   player on the nearest walkable spot) and **Remove** when it is optional. No X/Y/Z anywhere, not
+   even behind an "edit manually" toggle.
+   **Go there loads the place first.** Far away the map, collision and navmesh aren't streamed:
+   a bare `SetEntityCoords` drops the player into an empty world, and `GetSafeCoordForPed` called
+   before the move finds no navmesh and returns false. Order: fade out (wait `IsScreenFadedOut`),
+   freeze the ped (or the vehicle), move to the point, `NewLoadSceneStartSphere(x, y, z, 80.0, 0)`,
+   loop `RequestCollisionAtCoord` + `Wait(0)` until `IsNewLoadSceneLoaded`,
+   `HasCollisionLoadedAroundEntity` and `IsNavmeshLoadedInArea` (±20 m) or 8 s pass,
+   `NewLoadSceneStop`, only then `GetSafeCoordForPed(x, y, z, false, 32)` (flag 32 = flood fill
+   from the point) and move there if found, unfreeze, fade in. Reference: `mri_Qfarm`
+   (`Utils.tpToLoc` in `shared/utils.lua`).
 
 ## Map panel (list, map, editor)
 
