@@ -168,6 +168,17 @@ A deleted ymap prop comes back whenever its area streams in again. Use both:
 - `RemoveModelHide(..., false)` on restore and in `onResourceStop`, or hides stack on restart
   and one remove no longer brings the prop back. (mri_mechanic, mri_Qobjects, 2026-10-20)
 
+**Moving a map prop** is the same erase plus a script copy: read `GetEntityArchetypeName`,
+`GetEntityCoords` and `GetEntityRotation(ent, 2)`, save a copy at that pose, hide the
+original, then open the gizmo on the copy. The reaper must skip your own handles of the same
+model, or it deletes the copy. Skip mission entities (other scripts' props).
+
+**Doors and gates placed by script** only work with a door lock (`AddDoorToSystem` by model and
+coords, as ox_doorlock does) when the object is not frozen: a frozen door stays shut. Save a
+fixed/loose flag per prop (loose = `FreezeEntityPosition(false)` + `ActivatePhysics`), start
+door and gate models loose, freeze them only while the gizmo holds them. (mri_Qmapeditor,
+2026-10-22)
+
 ## NPC walking the route
 
 Reference: `mri_Qnpc` (`client/route.lua`).
