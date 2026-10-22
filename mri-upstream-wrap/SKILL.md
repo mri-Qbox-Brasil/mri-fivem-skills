@@ -32,6 +32,22 @@ edited inside them is lost or turns every update into a merge. So:
   function(setCB) setCB(fn) end)` in a separate file, instead of rewriting every
   `exports(...)` call.
 
+## Job money (society account)
+
+The job's money lives in the bank resource, not in a boss menu: every boss menu (qbx_management
+replacements, mri_Qbossmenu) moves it through the bank too. Charge or pay a job straight there, so
+the feature works with any boss menu or none:
+
+| Bank | Balance | Take out | Account |
+| --- | --- | --- | --- |
+|  (Qbox standard; ps-banking provides it) |  |  | job name, lowercase |
+|  (QBCore) |  |  | job name |
+|  (old QBCore) |  |  | job name |
+
+Pick the first one whose  is  and wrap the call in  (ps-banking
+throws when its insert fails). No bank running: hide the feature. Reference: mri_Qgarage
+ (, buying a job car).
+
 ## Settings from your resource to the upstream
 
 Publish a small key in `GlobalState` (e.g. `myorg:needs`): your resource writes it on start
