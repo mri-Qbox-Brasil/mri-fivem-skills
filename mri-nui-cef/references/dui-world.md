@@ -47,6 +47,12 @@ GPS route on the road). Lines marked *(not seen in game yet)* still wait for an 
 - Playlist that changes at the same moment for every player: send `GetCloudTimeAsInt()` with the update and
   pick `floor(clock / interval) % count` in the page; cross fade the layers and remove the old one after the
   fade (an idle iframe still costs).
+- Nothing pops in or out *(not seen in game yet)*: fade the vertex alpha of `DrawTexturedPoly` over the last 15% of the
+  reach (at least 4 m), so the quad is already gone before the slot is freed past the keep margin. A slot that loses its
+  DUI (cap, hidden, removed) goes to a `leaving` list drawn with alpha falling over ~600 ms, then back to the pool;
+  if the item returns first, take the same slot back. In the page, a layer gets its `on` class (opacity transition)
+  only after `load`/`loadeddata` (timeout fallback), and in a playlist the old layer stays until the new one loaded.
+  Reference: mri_Qposter `client/render.lua` (`leaving`, `edge`) and `dui/poster.html` (`ready`).
 - A picture that is not on the web (uploaded from a PC): the page can't tell Lua it booted, so send it with
   `SendDuiMessage` a few times after each load (300 ms, 1.2 s, 3 s, 7 s) and let the page ignore repeats.
   Reference: mri_Qposter `client/render.lua` (`feed`).
