@@ -160,12 +160,20 @@ async function main() {
 
   if (opts.noLog || offset === null) return;
   await new Promise((resolve) => setTimeout(resolve, LOG_WAIT_MS));
-  const lines = (await readFrom(logPath, offset)).split(/\r?\n/).filter(Boolean);
+  // dependents stopped with the resource do not come back by themselves; a slow start gets up to 15 s more
+  const stoppedLeft = (lines) => {
+    const started = new Set(lines.map((l) => l.match(/Started resource (\S+)/)?.[1]).filter(Boolean));
+    return [...new Set(lines.map((l) => l.match(/Stopping resource (\S+)/)?.[1]).filter(Boolean))].filter((r) => !started.has(r));
+  };
+  let lines, left;
+  for (let waited = 0; ; waited += 1000) {
+    lines = (await readFrom(logPath, offset)).split(/\r?\n/).filter(Boolean);
+    left = stoppedLeft(lines);
+    if (!left.length || waited >= 15000) break;
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
   console.log(`--- fxserver.log (${lines.length} new lines) ---`);
   for (const line of lines.slice(-60)) console.log(line);
-  // dependents stopped with the resource do not come back by themselves
-  const started = new Set(lines.map((l) => l.match(/Started resource (\S+)/)?.[1]).filter(Boolean));
-  const left = [...new Set(lines.map((l) => l.match(/Stopping resource (\S+)/)?.[1]).filter(Boolean))].filter((r) => !started.has(r));
   if (left.length) console.log(`!!! stopped and not started again: ${left.join(', ')}`);
 }
 
