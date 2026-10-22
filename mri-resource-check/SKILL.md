@@ -44,6 +44,9 @@ node scripts/check.mjs <resource folder>        # or a list of .lua files; --no-
     isn't loaded (`exports` handlers don't create globals).
   - `cond and false or x` / `cond and nil or x`: always `x`. Use `if`/`else` (or
     `not cond and x or nil`).
+    The same trap hides in a settings merge: `local n = type(new) == 'table' and new[k] or nil`
+    turns a saved `false` into `nil`, so the default `true` wins and a panel switch never
+    turns off. Read the key with `if type(new) == 'table' then n = new[k] end`.
   - `SetTimeout(ms, fn)` where `fn` takes arguments: SetTimeout calls it with the timer id
     (`attempt to index a number value`). Wrap it: `function() fn() end`.
   - `QBCore:Client:OnJobUpdate`, `OnGangUpdate` or `SetDuty` handler with no parameters:
