@@ -170,6 +170,11 @@ Lua traps the parser can't see:
   so "camera did not move" never becomes true for a player who walked away.
 - Every field an admin panel saves needs a reader: after rewriting a flow, grep each saved field
   for the code that reads it. An ignored value raises no error.
+- A server handler that gives something (heal, revive, effect, payment to a medic) checks that the
+  target needs it (down, injured, bleeding) and takes the item in the same handler. An item the
+  client removes with a second event after the effect is simply never sent by a cheater, and a
+  revive without the "is down" check charges the target again on every call. A client event that
+  adds an item to its sender only gives back what the server counted it putting down.
 - Tables: created in Lua on every start inside `MySQL.ready`, then the loads, in sequence; no
   `install.sql`, no polling wait for the schema, no `pcall` around it. Read
   [references/database.md](references/database.md) before writing or reviewing any table code.
