@@ -36,6 +36,8 @@ Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
   next one enters after the camera started moving.
 - **Glide near, cut far.** A long flight crosses unstreamed world. Above a threshold (18 m in
   the multichar) cut through black; below it, glide.
+- **Glide around the subject.** Orbit the aim point and turn the aim as yaw and pitch; a straight
+  lerp spins the view 180 degrees when the shot starts behind the NPC (`references/transitions.md`).
 - **The interface waits for the scene.** Camera first, then text.
 - **Destructive means hold, not modal.** Confirmation on the action bar itself (a ring that
   fills while holding mouse or key), Esc leaves.

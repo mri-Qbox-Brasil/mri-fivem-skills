@@ -20,6 +20,21 @@ peds.
 - If a cut is running and another request arrives, only update the pending target. The
   running cut applies the last one.
 
+## Glide around the subject, never through it
+
+A straight lerp of position and aim point breaks when the glide starts on the other side of
+the subject (the player looking at an NPC's back, the shot is on its face): the camera crosses
+the peds and the aim point passes behind the camera, so the view spins 180 degrees in one frame.
+
+- Position orbits the target's aim point: interpolate the angle around it (shortest way),
+  the flat radius and the height separately.
+- Aim turns as a direction: yaw (shortest way) and pitch, plus the aim distance. Never lerp the
+  aim point.
+- More turn, more time: add up to ~0.7 s at 180 degrees over the base glide.
+- Small turns look the same as a lerp, so every glide can use it.
+
+Reference: `glide()` and `setShot()` in `mri_Qnpc` `client/dialog.lua`.
+
 ## Arc (crane)
 
 To enter a new phase, the camera rises midway instead of going straight:
