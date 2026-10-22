@@ -17,7 +17,9 @@ GPS route on the road). Lines marked *(not seen in game yet)* still wait for an 
 - `CreateRuntimeTxd` once, then `CreateRuntimeTextureFromDuiHandle(txd, name, GetDuiHandle(dui))`
   after `IsDuiAvailable`; wait ~250 ms more before the first `SendDuiMessage` (the page script may
   still be booting).
-- Cache the last sent message per entry (a key string) and skip identical sends.
+- Cache the last sent message per entry (the encoded string) and skip identical sends, but keep sending for a
+  few seconds after each page load (a message sent before the page script runs is lost). Send only what changes:
+  a shared clock rounded to the playlist turn, not every second; volume rounded to 0.01.
 - Fonts: bundle the files next to the page (an OFL font like Barlow; not a paid one copied from
   another script) and list the folder in `files` (`'dui/*'` does not cover `dui/fonts/*`).
 - Two pictures in one page: a 1024x1024 page with the world marker in the left half and a square
