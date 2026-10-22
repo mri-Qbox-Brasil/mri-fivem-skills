@@ -1,6 +1,6 @@
 ---
 name: mri-world-placement
-description: "World placement standard for FiveM resource creation panels - place an NPC, object or point by aiming with a preview (ghost), mark a box zone with heading and size around the player (elevator floor, garage spot, stash), record a route or path stop by stop with a line on the ground, a key rail on the NUI instead of a textUI, and NPCs walking the route without stalling, and the shared map panel (list, map, editor). Ships the ready Lua module (WorldPlacer.point, WorldPlacer.zone and WorldPlacer.path), the React rail (PlaceRail) and the rules that prevent flickering markers, missed keys, coordinate fields and typed player ids. Use when asked to \"place in the world\", \"record a route\", \"place the NPC/object/zone in game\", \"in-game creator\", \"the marker flickers\", \"I don't want to type coordinates\" (pt-BR: \"posicionar no mundo\", \"marcar rota\", \"o marcador tá piscando\", \"não quero digitar coordenada\"), or when building any admin panel that stores a position, heading, zone or path."
+description: "World placement standard for FiveM resource creation panels - place an NPC, object or point by aiming with a preview (ghost), mark a box zone with heading and size around the player (elevator floor, garage spot), record a route or path stop by stop with a line on the ground, a key rail on the NUI instead of a textUI, and NPCs walking the route without stalling, and the shared map panel (list, map, editor). Ships the ready Lua module (WorldPlacer.point, WorldPlacer.zone and WorldPlacer.path), the React rail (PlaceRail) and the rules that prevent flickering markers, missed keys, coordinate fields and typed player ids. Use when asked to \"place in the world\", \"record a route\", \"place the NPC/object/zone in game\", \"in-game creator\", \"the marker flickers\", \"I don't want to type coordinates\" (pt-BR: \"posicionar no mundo\", \"marcar rota\", \"o marcador tá piscando\", \"não quero digitar coordenada\"), or when building any admin panel that stores a position, heading, zone or path."
 ---
 
 # World placement
@@ -14,7 +14,7 @@ marked in the world, with a preview; never a number field, a coordinate or a typ
 | --- | --- | --- |
 | Point with ghost | NPC or object: a see-through copy follows the aim (`object = true` for a prop: `CreateObject` local, mri_Qcrafting bench). Without `model` (interaction point: clock-in, register, stash) a small sphere (`DrawMarker` 28, scale 0.1: the scale is the radius) in the `mri:color` accent follows the aim, the same cursor as the mri_Qbox zone drawer, and there is no heading | `WorldPlacer.point` |
 | Path | NPC route, trail, fence: stops with a line on the ground | `WorldPlacer.path` |
-| Zone (box with heading) | anything shaped like a cube that faces a way: elevator floor, garage spot, shop counter, stash, trigger area | `WorldPlacer.zone` |
+| Zone (box with heading) | a real area that faces a way: elevator floor, garage spot, trigger area. Never a stash, register or bench: those are points, a sphere target around where the admin aims (mri_Qstashes moved off zones on 2026-10-21) | `WorldPlacer.zone` |
 
 Picking a thing that already stands in the world (a door, a prop to bind) follows the same keys:
 aim, `E` picks, `Backspace` undoes the last pick or cancels, `Esc` cancels. The aim thread does the
