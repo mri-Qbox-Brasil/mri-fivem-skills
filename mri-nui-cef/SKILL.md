@@ -50,6 +50,7 @@ node scripts/cef-scan.mjs <resources folder> --src-only
 | Mic and camera only in the resource's own page, not in iframes inside it | request them in the top page |
 | WebUSB, Bluetooth, HID, Serial, printing, picture-in-picture blocked | none |
 | Cookies expire after 400 days at most | keep state in the server or KVP |
+| `scrollIntoView()` returns a Promise in current Chrome (seen in the headless test of mri_Qcrafting, 2026-10-22), so `useEffect(() => el?.scrollIntoView(), [x])` hands React a non-function cleanup and the whole tree unmounts ("destroy is not a function") | braces around every expression-bodied effect: `useEffect(() => { el?.scrollIntoView() }, [x])` |
 
 ## CEF 144: what opens up
 
