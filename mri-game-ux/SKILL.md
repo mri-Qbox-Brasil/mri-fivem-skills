@@ -46,11 +46,17 @@ Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
 - **One thing on screen at a time.** One action can fire several gains (skill XP, player XP,
   level up). A level up shows only its notice, with no bar; otherwise one bar, the most specific
   (the skill over the player level), and anything arriving during the notice is dropped.
-- **Side quests come from people.** A stranger with a ? offers it: marker 32 over the head and blip
-  66 (the GTA "random character"), yellow while offering, green when there is something to hand in.
-  The person is a local ped of that player only, created near and deleted far; at the end it walks
-  off (`TaskWanderStandard`, delete later) instead of vanishing. The step in hand sits in a small
-  card in a corner with its progress (mri_Qrpg, 2026-10-22).
+- **Side quests come from people, with RPG marks.** The mark over the head says what the player can
+  do there, never just "this is a quest NPC": yellow **!** = has a quest to offer, yellow **?** = ready
+  to hand in, grey **?** (or nothing) = quest running, nothing to do here yet. GTA markers have a ?
+  (type 32) but no !, so the ! is drawn another way (DUI in the world, sprite or 3D text); a ? on an
+  offer reads wrong (Murai, 2026-10-22). Blip 66 (the GTA "random character") while offering or
+  handing in. The person is a local ped of that player only, created near and deleted far; at the end
+  it walks off (`TaskWanderStandard`, delete later) instead of vanishing.
+- **Progress is live.** The card of the step in hand moves while the player does it: distances and
+  counters add up on the client every second and show at once (server value plus what is pending);
+  the server gets them in batches and on the moment the goal is hit. A counter that waits for a
+  30 s report feels broken (mri_Qrpg, 2026-10-22).
 - **Configurable.** Tracks, camera shots and times in the config, with good defaults.
 - **A settings panel shows, it doesn't list.** Fixed size (never resizes on tab or option),
   every visual choice is a card with a picture of the result in the real color, options that

@@ -198,6 +198,27 @@ Reference: `mri_Qnpc` (`client/route.lua`).
   leg.
 - Spawn point at the route center with radius = spawn distance + route reach.
 
+## NPC roaming like a local
+
+Reference: `mri_Qnpc` (`NpcRoute.wander` in `client/route.lua`).
+
+- Never `TaskWanderInArea` for a ped that should look like a local: it picks any point of the
+  area and the ped walks down the middle of the street (mri_Qnpc, 2026-10-22).
+- Pick the next spot yourself: a random point in the circle (`sqrt(random) * radius` spreads it
+  evenly), snapped with `GetSafeCoordForPed(x, y, z, true, 1 | 2)` (pavement only, not isolated);
+  drop results outside the circle or more than a few meters above or below. A few tries, then stay
+  where it is (park, interior: no pavement).
+- Walk there with `TaskFollowNavMeshToCoord` at speed 1.0 and a deadline; stop and do something
+  for 8 to 25 s like GTA's own peds: the NPC's own animation if it has one, else a random ambient
+  scenario (`WORLD_HUMAN_STAND_MOBILE`, `_SMOKING`, `_HANG_OUT_STREET`, `_STAND_IMPATIENT`,
+  `_TOURIST_MAP`, `_DRINKING`, `_WINDOW_SHOP_BROWSE`, `_AA_COFFEE`), then `ClearPedTasks` and
+  a short wait so the scenario exit plays before the next walk.
+- Talking to the player: `ClearPedTasks`, wait for the conversation to end, go on.
+- Roaming is local to each client (each player sees the ped somewhere else in the area), so a ped
+  that must be the same for everyone (guard, killable, networked) only stands or follows a route.
+- Interaction on a moving ped: target on the entity (it follows the ped) or a key prompt checked
+  against the ped's position, never a fixed point at its spawn.
+
 ## Verify
 
 - Browser: send `placeHud` through the dev mock and check the rail (pt-BR and English,
