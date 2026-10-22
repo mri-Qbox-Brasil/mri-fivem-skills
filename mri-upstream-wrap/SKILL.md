@@ -1,6 +1,6 @@
 ---
 name: mri-upstream-wrap
-description: "Changing third-party FiveM resources (qbx_*, ox_*, any upstream) without editing their code, so updates stay a clean copy - a wrapper folder loaded from the fxmanifest, hooks through the resource's cached config, globals and events, keybinds that change for players who already joined, replacing a resource with `provide` plus a compat layer for its exports (`__cfx_export_<res>_<name>`), sharing settings through GlobalState, and the restart quirks of provided resources (exports stuck on the dead instance after an ensure). Templates for the compat layer and a wrapper file. Use when asked to \"change ox_inventory/qbx_core\", \"replace resource X with ours\", \"keep compatibility with the old name\", \"No such export in resource\", \"Execution of function reference in script host failed\", \"the new default key doesn't apply\", \"integrate with another resource\" (pt-BR: \"mexe no qbx_core\", \"substitui o X pelo nosso\", \"manter compatível\", \"a tecla nova não pegou\", \"integrar com o outro resource\")."
+description: "Changing third-party FiveM resources (qbx_*, ox_*, any upstream) without editing their code, so updates stay a clean copy - a wrapper folder loaded from the fxmanifest, hooks through the resource's cached config, globals and events, keybinds that change for players who already joined, replacing a resource with `provide` plus a compat layer for its exports (`__cfx_export_<res>_<name>`), sharing settings through GlobalState, and the restart quirks of provided resources (exports stuck on the dead instance after an ensure). Templates for the compat layer and a wrapper file. Use when asked to \"change ox_inventory/qbx_core\", \"replace resource X with ours\", \"keep compatibility with the old name\", \"No such export in resource\", \"Execution of function reference in script host failed\", \"the new default key doesn't apply\", \"integrate with another resource\", \"charge the job money\", \"society account\" (pt-BR: \"mexe no qbx_core\", \"cobrar do cofre do emprego\", \"dinheiro da empresa\", \"substitui o X pelo nosso\", \"manter compatível\", \"a tecla nova não pegou\", \"integrar com o outro resource\")."
 ---
 
 # Changing upstream resources without editing them
@@ -40,13 +40,13 @@ the feature works with any boss menu or none:
 
 | Bank | Balance | Take out | Account |
 | --- | --- | --- | --- |
-|  (Qbox standard; ps-banking provides it) |  |  | job name, lowercase |
-|  (QBCore) |  |  | job name |
-|  (old QBCore) |  |  | job name |
+| `Renewed-Banking` (Qbox standard; ps-banking provides it) | `getAccountMoney(acc)` | `removeAccountMoney(acc, amount, note)` | job name, lowercase |
+| `qb-banking` (QBCore) | `GetAccountBalance(acc)` | `RemoveMoney(acc, amount, note)` | job name |
+| `qb-management` (old QBCore) | `GetAccount(job)` | `RemoveMoney(job, amount)` | job name |
 
-Pick the first one whose  is  and wrap the call in  (ps-banking
+Pick the first one whose `GetResourceState` is `started` and wrap the call in `pcall` (ps-banking
 throws when its insert fails). No bank running: hide the feature. Reference: mri_Qgarage
- (, buying a job car).
+`modules/fleet/server.lua` (`QG.fleet.funds`, buying a job car).
 
 ## Settings from your resource to the upstream
 
