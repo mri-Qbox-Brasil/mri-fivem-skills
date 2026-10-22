@@ -1,6 +1,8 @@
 # Vehicle targets (aim prompt on a car)
 
-Pattern from mri_Qinteract (`client/vehicle.lua`) and the mri_Qbox `entervehicle` module.
+Pattern from mri_Qinteract (`client/vehicle.lua`, open and close) and the mri_Qbox modules `entervehicle` and
+`trunkitems`. The target system only knows doors; an option tied to another resource (inventory,
+keys) lives in a gameplay module and joins the door prompt by computing the same anchor.
 
 ## Where each option sits
 
