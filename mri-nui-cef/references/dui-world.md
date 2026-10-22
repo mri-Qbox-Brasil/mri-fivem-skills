@@ -47,6 +47,13 @@ GPS route on the road). Lines marked *(not seen in game yet)* still wait for an 
 - Playlist that changes at the same moment for every player: send `GetCloudTimeAsInt()` with the update and
   pick `floor(clock / interval) % count` in the page; cross fade the layers and remove the old one after the
   fade (an idle iframe still costs).
+- Jagged and shimmering from afar *(not seen in game yet)*: a DUI texture has no mipmaps, so a 2048 page on a
+  poster that covers 150 px aliases. Pick the size from the screen: `span / dist x focal` px, with
+  `focal = screenH / (2 tan(fov / 2))` (`GetActiveScreenResolution`, `GetFinalRenderedCamFov`), the smallest
+  size above it, the item quality as the cap. Shrink only under 60% of the current size and at most every 2 s; the new
+  DUI loads under the old one, which is drawn 2 cm toward the camera (coplanar quads fight) and fades out once the new
+  page had 1.5 s. A resize reloads the page: skip it while the item plays sound. Cap the idle pool in total too
+  (several sizes now). Reference: mri_Qposter `client/render.lua` (`sizeFor`).
 - Nothing pops in or out *(not seen in game yet)*: fade the vertex alpha of `DrawTexturedPoly` over the last 15% of the
   reach (at least 4 m), so the quad is already gone before the slot is freed past the keep margin. A slot that loses its
   DUI (cap, hidden, removed) goes to a `leaving` list drawn with alpha falling over ~600 ms, then back to the pool;
