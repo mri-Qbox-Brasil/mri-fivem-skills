@@ -140,3 +140,15 @@ Pattern from `mri_Qgarage` (`modules/lib/cam.lua` `cam.hold` / `cam.nudge`, `mod
   (`1 - exp(-dt * 5)`), so input glides. On close (`cam.hold(false)`) turn and zoom reset and
   the shot eases back to the hero shot.
 - Obstacles, the player's ped and the orbit follow "Obstacles and the player's ped" above.
+
+## Getting into the car on screen
+
+Pattern from `mri_Qgarage` (`modules/garage/preview.lua` `Preview.board`):
+
+- `TaskEnterVehicle` to the driver's seat (-1) takes the passenger door and slides across when the
+  ped stands on the passenger side or the driver's door is blocked. On a showroom shot that reads as
+  a bug ("got in on the wrong side").
+- Pick before the task: driver's door clear (a capsule at `GetEntryPositionOfDoor(veh, 0)`, map,
+  cars and objects, ignoring the car) and the ped nearer to it than to door 1: walk (flag 1).
+  Passenger side: fade the ped out (150 ms), flag 3 (placed at the door, then the enter animation),
+  fade back in. Door blocked: same fade with flag 16 (straight into the seat).
