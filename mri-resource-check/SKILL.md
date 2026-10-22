@@ -118,6 +118,9 @@ Lua traps the parser can't see:
   `io.open` exist in FXServer Lua), skipping web, stream and data folders, in time slices (an
   `os.clock` budget of about 4 ms, then `Wait(0)`). A yield every 40 files froze the server in
   0.5 s chunks over 90 resources (20 s in all). Scan in the background after start and cache.
+  Yield while listing a folder too, and skip picture folders and any folder past a few thousand
+  entries: a 35k photo folder (mri_Qappearance `studio`) listed in one go hung svMain for 45 s and
+  txAdmin restarted the server (2026-10-22).
   Listening to a client event later needs `RegisterNetEvent` in your own resource (net safety is
   per resource); its return goes to `RemoveEventHandler`. Reference: mri_Qrpg `server/events.lua`.
 - Before saying a resource can't tell or do something, read its `fxmanifest.lua` exports,
