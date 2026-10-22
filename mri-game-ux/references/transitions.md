@@ -33,7 +33,10 @@ the peds and the aim point passes behind the camera, so the view spins 180 degre
 - More turn, more time: add up to ~0.7 s at 180 degrees over the base glide.
 - Small turns look the same as a lerp, so every glide can use it.
 
-Reference: `glide()` and `setShot()` in `mri_Qnpc` `client/dialog.lua`.
+- With a crane arc, add the rise to the orbit height and keep the aim as a direction.
+
+Reference: `glide()` and `setShot()` in `mri_Qnpc` `client/dialog.lua`; `blend()` in `mri_Qgarage`
+`modules/lib/cam.lua` (around the car, with the crane arc, into and out of the showroom shot).
 
 ## Arc (crane)
 
