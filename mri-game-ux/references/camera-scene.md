@@ -150,5 +150,6 @@ Pattern from `mri_Qgarage` (`modules/garage/preview.lua` `Preview.board`):
   a bug ("got in on the wrong side").
 - Pick before the task: driver's door clear (a capsule at `GetEntryPositionOfDoor(veh, 0)`, map,
   cars and objects, ignoring the car) and the ped nearer to it than to door 1: walk (flag 1).
-  Passenger side: fade the ped out (150 ms), flag 3 (placed at the door, then the enter animation),
-  fade back in. Door blocked: same fade with flag 16 (straight into the seat).
+  Passenger side: fade the ped out (150 ms), place it yourself at the driver's entry position facing
+  the car (heading of the car minus 90), then flag 1, fade back in. Never flag 2 or 3 for this: they
+  warp to the entry point the task picks, which is the nearest door, the passenger's. Door blocked: same fade with flag 16 (straight into the seat).
