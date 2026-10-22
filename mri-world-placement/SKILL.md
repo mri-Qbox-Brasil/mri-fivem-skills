@@ -112,6 +112,11 @@ ui-kit docs); never a hand-made Leaflet map per resource.
 - Ghost: alpha 170, no collision, frozen, `SetBlockingOfNonTemporaryEvents`. Only move it
   when the aim changed. The model accepts a numeric hash (`tonumber(model) or joaat(model)`).
 - Raycast `1 | 16` (world and objects), ignoring the player's own ped.
+- A spot the admin marked is trusted when it is used later: the ground comes from a probe that sees
+  props (a helipad is often one; `GetGroundZFor_3dCoord` skips them) with the saved height as
+  fallback, and only another vehicle blocks it. A box test against everything at the model's size
+  fails on helicopters (the rotor touches the rails) and the car lands somewhere else (mri_Qgarage
+  `Ghost.isSpotFree(..., marked)`, 2026-10-21).
 - No `lib.showTextUI`, ox_lib menu or instruction `DrawText`: the rail belongs to the NUI.
 
 ## What the system decides by itself
