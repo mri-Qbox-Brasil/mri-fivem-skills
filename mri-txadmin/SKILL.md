@@ -65,7 +65,9 @@ and read it over SSH (`txData/<profile>/logs/fxserver.log`). Close the tunnel af
   Restarted an engine/base resource: also restart those that use it.
 - Resources that list it in `dependencies` are **stopped** with it and don't come back by
   themselves (e.g. `ensure sd-phone` takes down `sd-tablet` and the apps). Read the
-  `Stopping resource` lines in the log and `ensure` each one.
+  `Stopping resource` lines in the log and `ensure` each one; the script prints the ones left
+  stopped (`!!! stopped and not started again`). A `provide` replacement (a target system providing
+  `ox_target`) takes down everything that depends on the old name: with a player in game, ask first.
 - Large resource (e.g. `sd-phone`, 22 MB): on a connected client the dependents may start
   before it finishes downloading, and it stays mounted without running (`No such export` in
   the apps). Check `Creating script environments for <res>` in the FiveM log; without that

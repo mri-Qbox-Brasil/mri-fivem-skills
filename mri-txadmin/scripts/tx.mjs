@@ -163,6 +163,10 @@ async function main() {
   const lines = (await readFrom(logPath, offset)).split(/\r?\n/).filter(Boolean);
   console.log(`--- fxserver.log (${lines.length} new lines) ---`);
   for (const line of lines.slice(-60)) console.log(line);
+  // dependents stopped with the resource do not come back by themselves
+  const started = new Set(lines.map((l) => l.match(/Started resource (S+)/)?.[1]).filter(Boolean));
+  const left = [...new Set(lines.map((l) => l.match(/Stopping resource (S+)/)?.[1]).filter(Boolean))].filter((r) => !started.has(r));
+  if (left.length) console.log(`!!! stopped and not started again: ${left.join(', ')}`);
 }
 
 main().catch((err) => {
