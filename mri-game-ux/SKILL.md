@@ -50,8 +50,9 @@ Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
   do there, never just "this is a quest NPC": yellow **!** = has a quest to offer, yellow **?** = ready
   to hand in, grey **?** (or nothing) = quest running, nothing to do here yet. GTA markers have a ?
   (type 32) but no !, so the ! is drawn another way (DUI in the world, sprite or 3D text); a ? on an
-  offer reads wrong (Murai, 2026-10-22). Blip 66 (the GTA "random character") while offering or
-  handing in. The person is a local ped of that player only, created near and deleted far; at the end
+  offer reads wrong (Murai, 2026-10-22). The marks are 3D text over the head. On the map, an offer
+  uses blip 934 (`radar_attention`, build 3095+, falls back to 66) and a hand-in blip 66 (the GTA
+  "random character"). The person is a local ped of that player only, created near and deleted far; at the end
   it walks off (`TaskWanderStandard`, delete later) instead of vanishing.
 - **Progress is live.** The card of the step in hand moves while the player does it: distances and
   counters add up on the client every second and show at once (server value plus what is pending);
