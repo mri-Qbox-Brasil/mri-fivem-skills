@@ -1,6 +1,6 @@
 ---
 name: mri-world-placement
-description: "World placement standard for FiveM resource creation panels - place an NPC, object or point by aiming with a preview (ghost), mark a box zone with heading and size around the player (elevator floor, garage spot), record a route or path stop by stop with a line on the ground, a key rail on the NUI instead of a textUI, NPCs walking the route without stalling, and NPCs roaming an area like locals (sidewalk spots, ambient scenarios, never down the street), and the shared map panel (list, map, editor). Ships the ready Lua module (WorldPlacer.point, WorldPlacer.zone and WorldPlacer.path), the React rail (PlaceRail) and the rules that prevent flickering markers, missed keys, coordinate fields and typed player ids. Use when asked to \"place in the world\", \"record a route\", \"place the NPC/object/zone in game\", \"in-game creator\", \"the marker flickers\", \"I don't want to type coordinates\" (pt-BR: \"posicionar no mundo\", \"marcar rota\", \"o marcador tá piscando\", \"não quero digitar coordenada\"), or when building any admin panel that stores a position, heading, zone or path."
+description: "World placement standard for FiveM resource creation panels - place an NPC, object or point by aiming with a preview (ghost), mark a box zone with heading and size around the player (elevator floor, garage spot), record a route or path stop by stop with a line on the ground, a key rail on the NUI instead of a textUI, NPCs walking the route without stalling, NPCs roaming an area like locals (sidewalk spots, ambient scenarios, never down the street), collectable props spread over a marked area or picked by model on the map (trees, rocks, wrecks that vanish for everyone and respawn), and the shared map panel (list, map, editor). Ships the ready Lua module (WorldPlacer.point, WorldPlacer.zone and WorldPlacer.path), the React rail (PlaceRail) and the rules that prevent flickering markers, missed keys, coordinate fields and typed player ids. Use when asked to \"place in the world\", \"record a route\", \"place the NPC/object/zone in game\", \"in-game creator\", \"the marker flickers\", \"I don't want to type coordinates\", \"props to collect in an area\" (pt-BR: \"zona de coleta com props\", \"posicionar no mundo\", \"marcar rota\", \"o marcador tá piscando\", \"não quero digitar coordenada\"), or when building any admin panel that stores a position, heading, zone or path."
 ---
 
 # World placement
@@ -207,6 +207,25 @@ coords, as ox_doorlock does) when the object is not frozen: a frozen door stays 
 fixed/loose flag per prop (loose = `FreezeEntityPosition(false)` + `ActivatePhysics`), start
 door and gate models loose, freeze them only while the gizmo holds them. (mri_Qmapeditor,
 2026-10-22)
+
+## Collectable props (farm fields)
+
+Trees, rocks or wrecks anyone with access collects, gone for everyone until they respawn.
+
+- **Props spread over an area:** the area tool (box around the player, wheel width, Shift + wheel
+  length) finds the free ground on the admin's client when E confirms: random points at least
+  3 m apart, `GetGroundZExcludingObjectsFor_3dCoord`, not `IsPointOnRoad`, not under
+  `GetWaterHeightNoWaves`. Save the spots with the area; never probe the ground on other clients.
+- **Which prop on which spot** comes from a pure function seeded with the farm id, so the server and
+  every client agree without sending a list. Spawn local objects (`CreateObjectNoOffset`, not
+  networked) near the area for everyone; only who has access gets the interaction.
+- **Map props by model:** `GetGamePool('CObject')` near the player, model in the set and not
+  `IsEntityAMissionEntity` (another script's copy can't be hidden). Name it `model@x,y,z` rounded
+  to the metre; the server checks the model belongs to the farm and the place is inside the area.
+- **Taken:** the server holds who is collecting (one player per prop), broadcasts taken and back,
+  and answers the taken list to a client that just loaded, after its fields are mounted. Taken zone
+  prop: delete it; map prop: model hide (above). Reference: mri_Qfarm `client/world/fields.lua`,
+  `server/modules/fields.lua` (2026-10-23).
 
 ## NPC walking the route
 
