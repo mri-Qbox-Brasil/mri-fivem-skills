@@ -283,6 +283,10 @@ function callArgs(code, start) {
   return null
 }
 const codeByFile = new Map()
+// Events this resource fires itself: a server net event that only TriggerEvent fires is internal.
+const allLua = files.map((f) => readFileSync(f, 'utf8')).join('\n')
+const firedByClient = new Set([...allLua.matchAll(/\bTriggerServerEvent\s*\(\s*['"]([^'"]+)['"]/g)].map((m) => m[1]))
+const firedLocally = new Set([...allLua.matchAll(/\bTriggerEvent\s*\(\s*['"]([^'"]+)['"]/g)].map((m) => m[1]))
 for (const file of files) {
   const src = readFileSync(file, 'utf8')
   try {
@@ -309,6 +313,12 @@ for (const file of files) {
     const params = new RegExp(`(?:function\\s+${name}\\s*\\(|\\b${name}\\s*=\\s*function\\s*\\()\\s*([^)\\s])`).exec(code)
     if (params) warn(`${show(file)}:${lineAt(code, match.index)}`, `SetTimeout passes its timer id as ${match[1]}'s first argument; wrap it: function() ${match[1]}() end`)
   }
+  // IsThisModelA* takes a model hash; an entity handle never matches, so the check is always false.
+  for (const match of code.matchAll(/\bIsThisModelA(\w+)\s*\(\s*(?:GetVehiclePedIsIn\s*\(|GetVehiclePedIsUsing\s*\(|cache\.vehicle\b|(veh|vehicle|entity|ent|boat|car|plane|heli)\s*\))/g)) {
+    // A variable that was assigned a model in the code above is fine.
+    if (match[2] && new RegExp(`\\b${match[2]}\\s*=\\s*GetEntityModel\\s*\\(`).test(code.slice(0, match.index))) continue
+    warn(`${show(file)}:${lineAt(code, match.index)}`, `IsThisModelA${match[1]} takes a model hash, not an entity; wrap it in GetEntityModel()`)
+  }
   // Player-facing text belongs in the locale files when the resource has them.
   if (hasLocales) {
     src.split('\n').forEach((text, i) => {
@@ -326,6 +336,8 @@ for (const file of files) {
     for (const match of src.matchAll(/\bRegisterNetEvent\s*\(\s*['"]([^'"]+)['"]/g)) {
       if (LOCAL_SERVER_EVENTS.test(match[1]))
         warn(`${show(file)}:${lineAt(src, match.index)}`, `${match[1]} is fired by the framework on the server; RegisterNetEvent lets any client fake it, use AddEventHandler`)
+      else if (firedLocally.has(match[1]) && !firedByClient.has(match[1]))
+        warn(`${show(file)}:${lineAt(src, match.index)}`, `${match[1]} is only fired with TriggerEvent in this resource; RegisterNetEvent lets any client fire it, use AddEventHandler`)
     }
   }
   if (sideOf(sides, relative(resourceDir, file).replace(/\\/g, '/')) === 'client') {

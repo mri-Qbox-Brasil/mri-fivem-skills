@@ -57,6 +57,10 @@ node scripts/check.mjs <resource folder>        # or a list of .lua files; --no-
     `qbx_core:server:onJobUpdate`...): any client can fire it with fake arguments. Listen
     with `AddEventHandler`. Before listening to a framework event, grep the framework for
     who fires it: a name nobody fires (`qbx_core:server:playerLoaded`) is a dead handler.
+    Same for the resource's own internal events: one only fired with `TriggerEvent` in the
+    resource (`mri_hud:db:ready` in mri_Qhud, 2026-10-23) let any client rerun the boot.
+  - `IsThisModelA*` (Bicycle, Car, Boat...) given a vehicle handle instead of
+    `GetEntityModel(vehicle)`: it is always false (mri_Qhud showed the car HUD on bicycles).
   - A handler for a `qbx_core:*` name that qbx_core never fires (`playerLoaded`,
     `playerUnloaded`, `jobChanged`, `gangChanged`, on server or client), with the event to use
     instead.
