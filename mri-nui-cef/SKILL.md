@@ -69,6 +69,15 @@ node scripts/cef-scan.mjs <resources folder> --src-only
 - **No infinite animations** (`animation: ... infinite`, spinners left mounted, looping
   gradients): they make CEF repaint every frame over the game and cost FPS. Animate on
   state change and stop.
+- **Big grids (clothing stores with 1000+ pieces, item catalogs):** a slow render shows up as
+  "arrow keys lag, the selection catches up later, pieces keep changing after I let go":
+  keydowns queue behind each render. Mount only the active tab or category (`hidden` still
+  renders), wrap the cell in `React.memo`, keep the item lists in a cache so the array is the
+  same object between renders, hand the cells a stable callback (ref to the latest handler),
+  load the photo only when the cell gets near the screen (one shared `IntersectionObserver`,
+  not one per cell), and drop the reply of an old NUI request when a newer one exists. Measure
+  it in the dev mock with fake counts (1087 cells): dispatch 10 `ArrowRight` and time each
+  render. In mri_Qappearance this went from ~270 ms to ~30 ms per press (measured in the browser mock, dev build).
 - **Focus:** `SetNuiFocus(true, true)` only while there is something to interact with;
   release it during cutscenes and other resources' editors. One keyboard listener per
   screen, off while a layer (confirmation, settings) is on top. ESC closes through a NUI
