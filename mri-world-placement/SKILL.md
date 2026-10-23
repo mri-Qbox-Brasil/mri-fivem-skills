@@ -126,6 +126,17 @@ ui-kit docs); never a hand-made Leaflet map per resource.
   these rules too. Give them one shared end function (hide the rail, `releaseEsc`) and call it
   from every exit, instead of fixing them one by one when a player trips on it (mri_Qgarage
   `Rail.finish`).
+- Putting the player's ped at a spot it chose (sit anywhere, lean, lie): test the body's volume
+  there first with `StartShapeTestCapsule` (flags `1 | 2 | 16`, async: poll `GetShapeTestResult`
+  until the status is not 1, so only from a thread that may wait), one capsule per body part
+  (torso, legs, standing body at the stand-up spot), plus a line probe from the player's chest to
+  the spot. Guessing from rays alone (ledge in front, ground height) sinks the ped into walls and
+  floors. Scenario poses take different points: seat scenarios (`PROP_HUMAN_SEAT_*`) the seat top,
+  ground ones (`WORLD_HUMAN_PICNIC`, `_LEANING`) the ped root, about 1 m over the feet
+  (`GetEntityCoords(ped).z - floor.z`). After a scenario exit, put the ped back on the stand-up spot
+  when it ended far from it. Show the choice with the ghost in the pose (green ring fits, red does
+  not, the reason on the rail); never sit on a spot the test refused. Reference: mri_Qsit
+  `client/spot.lua` (2026-10-23).
 - Ghost: alpha 170, no collision, frozen, `SetBlockingOfNonTemporaryEvents`. Only move it
   when the aim changed. The model accepts a numeric hash (`tonumber(model) or joaat(model)`).
 - Raycast `1 | 16` (world and objects), ignoring the player's own ped.
