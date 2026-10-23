@@ -40,11 +40,11 @@ Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
 - **The world is the prompt.** A station in the world (bench, machine, terminal) shows its state
   and what this player can do on a display over it (DUI, depth tested, the key as a keycap, "+N"
   on each unit), not a second hint pinned to the screen. The screen keeps only the result card.
-  It reads as a game HUD in the suite look, not a boxed panel: the suite font bundled with the page
-  (Saira, OFL), the accent from `mri:color`, no card behind it (a soft radial shade for legibility),
-  a ring with one segment per unit around the item, HUD corner brackets, big tabular numbers, an angled
-  key chip, and colored states (paused yellow, ready green with a check). Reference: mri_Qcrafting
-  `dui/machine.html`.
+  Lean, in the suite look: the suite font bundled with the page (Saira, OFL), the accent from
+  `mri:color`, no box behind it. Three pieces only: a ring with the whole order's progress around the
+  item, the item name, and one line that is either the state ("2/5 · 0:30", paused, ready with a check)
+  or the work key. Brackets, pips, owner names and per-unit segments read as clutter (Murai,
+  2026-10-23). Reference: mri_Qcrafting `dui/machine.html`.
 - **Glide near, cut far.** A long flight crosses unstreamed world. Above a threshold (18 m in
   the multichar) cut through black; below it, glide.
 - **Glide around the subject.** Orbit the aim point and turn the aim as yaw and pitch; a straight
