@@ -61,6 +61,23 @@ Reference: `beginGlide(target, duration, arc)` in the multichar's `client/showro
 - Removed character (delete): fades out, the following ones move one position (short fade,
   reposition, fade back). Without rebuilding the scene.
 
+## World props collected and coming back
+
+A tree, rock or wreck taken by a player never blinks out (Murai, 2026-10-23: "não é nada triple A").
+
+- **Leave:** a breakage burst of its material from the `core` asset (`ent_brk_tree_trunk_bark` +
+  `ent_brk_tree_leaves` for trees, `ent_brk_concrete` rock, `ent_brk_metal_frag` scrap,
+  `ent_brk_wood_planks` crates), then alpha 255 to 0 over 900 ms with smoothstep while a script
+  prop sinks 0.8 m (`SetEntityCoordsNoOffset`). Delete or model hide only at the end.
+- **Come back:** alpha 0 to 255 over 1.4 s, the script prop rising out of the ground. A map prop
+  streams back a few frames after `RemoveModelHide`: find it with `GetClosestObjectOfType` first.
+- **Only when watched:** farther than 80 m or not `IsSphereVisible`, swap at once. Props already
+  taken when the player connects never animate.
+- **End of the work animation:** never `ClearPedTasks` right on the bar's end. Blend the loop
+  out (`StopAnimTask` exit speed 1.5) and, on success, blend into a short beat that shows the result
+  (`pickup_object` / `pickup_low`, blend 2.0, 1.2 s): the motion covers the tool prop going away.
+  Reference: mri_Qfarm `client/world/fx.lua`, `Utils.endAnimation`.
+
 ## Interface following the camera
 
 Sequence that works to enter a phase (e.g. selection to creation):
