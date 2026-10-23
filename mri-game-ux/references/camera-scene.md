@@ -25,10 +25,19 @@ not only the shot picked at the start:
   come back out slowly (`1 - exp(-dt * 3)`), and with nothing in the way follow the planned
   distance directly, or every zoom and reframe lags. The async probe (`StartShapeTestLosProbe`)
   is only for choosing a side before the move: it waits frames.
-- **The player's own ped.** Peds are left out of the probe on purpose: the camera does not
-  jump because of your own body. Hide it instead: `SetEntityLocallyInvisible(cache.ped)` every
-  frame while the player is customizing or orbiting (only they stop seeing it; others still do).
-  The opening shot still tries to leave the ped out by choosing the side.
+- **The player's own ped never vanishes.** A character that disappears when a screen opens reads
+  as a bug (mri_Qcrafting, 2026-10-23: the bench shot sat inside the body and the old rule here hid
+  it with `SetEntityLocallyInvisible`). Peds stay out of the wall probe (the camera must not jump
+  because of the body), and the shot is framed around the player instead:
+  - Workstation, shop counter, NPC talk: over the shoulder. Turn the ped to the subject
+    (`TaskTurnPedToFaceCoord`, freeze after ~650 ms), camera ~0.95 m behind and ~0.75 m to the side
+    at shoulder height (+0.55), aim at the subject pulled ~25% toward the ped. The back and shoulder
+    sit soft in the foreground (the DOF blurs them), the subject sharp.
+  - Every frame, keep the lens at least ~0.55 m from the ped's vertical axis: closer (a wall pulled
+    the camera in, the ped moved), slide it sideways away from the axis. Never hide the ped to fix it.
+  - Hiding is only for a shot where the player is not part of the scene and the camera has to be
+    where the body is (first person, the inside of a car seen from the seat): fade with alpha over
+    ~150 ms, never a cut, and say why in the code.
 - **Free orbit is a sphere.** Drag (NUI `movementX/Y`, sent at most every ~33 ms) or the mouse in
   a world tool (`GetDisabledControlNormal(0, 1)` and `(0, 2)`) turns and tilts: elevation from a
   few degrees above the ground to ~80 degrees (over the roof), radius kept. Side only, never

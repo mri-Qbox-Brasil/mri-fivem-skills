@@ -1,6 +1,6 @@
 ---
 name: mri-game-ux
-description: "Makes FiveM resource screens and scenes (multichar, character creation, spawn, appearance, loading, cutscenes, NPC conversation) feel like an AAA game - menus that say where they lead, camera and interface transitions without hard cuts, depth of field and handheld camera, music in phases with crossfade, cinema bars, destructive confirmation without a modal, player settings panels with fixed size and a preview card for every visual choice. Use when asked for \"AAA feel\", \"more cinematic\", \"too sudden\", \"it flickers\", \"the music stops\", \"enter shows on the wrong spot\", \"open the trunk inventory from the target\", \"the camera goes through walls\", \"my ped blocks the camera\", \"can't look from above\" (pt-BR: \"a câmera atravessa parede\", \"meu ped atrapalha a câmera\", \"não dá pra olhar por cima\", \"cara de triple A\", \"mais cinematográfico\", \"tá repentino\", \"tá piscando\", \"a música para\", \"o Entrar tá no banco\", \"abrir o porta-malas pelo olhinho\"), or when designing or reviewing an in-game screen flow with a scripted camera and NUI."
+description: "Makes FiveM resource screens and scenes (multichar, character creation, spawn, appearance, loading, cutscenes, NPC conversation, crafting benches and workstations) feel like an AAA game - menus that say where they lead, camera and interface transitions without hard cuts, depth of field and handheld camera, music in phases with crossfade, cinema bars, destructive confirmation without a modal, player settings panels with fixed size and a preview card for every visual choice. Use when asked for \"AAA feel\", \"more cinematic\", \"too sudden\", \"it flickers\", \"the music stops\", \"enter shows on the wrong spot\", \"open the trunk inventory from the target\", \"the camera goes through walls\", \"my ped blocks the camera\", \"my character turns invisible\", \"can't look from above\" (pt-BR: \"a câmera atravessa parede\", \"meu ped atrapalha a câmera\", \"meu personagem fica invisível\", \"não dá pra olhar por cima\", \"cara de triple A\", \"mais cinematográfico\", \"tá repentino\", \"tá piscando\", \"a música para\", \"o Entrar tá no banco\", \"abrir o porta-malas pelo olhinho\"), or when designing or reviewing an in-game screen flow with a scripted camera and NUI."
 ---
 
 # AAA game UX in FiveM resources
@@ -34,6 +34,12 @@ Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
   A useless item disappears instead of being disabled.
 - **Nothing pops.** Peds enter and leave with alpha; a screen leaves with fade and blur; the
   next one enters after the camera started moving.
+- **The player stays in the scene.** Opening a screen never makes the character vanish: frame
+  around them (over the shoulder at a workstation) and keep the lens off the body
+  (`references/camera-scene.md`, "Obstacles and the player's ped").
+- **The world is the prompt.** A station in the world (bench, machine, terminal) shows its state
+  and what this player can do on a display over it (DUI, depth tested, the key as a keycap, "+N"
+  on each unit), not a second hint pinned to the screen. The screen keeps only the result card.
 - **Glide near, cut far.** A long flight crosses unstreamed world. Above a threshold (18 m in
   the multichar) cut through black; below it, glide.
 - **Glide around the subject.** Orbit the aim point and turn the aim as yaw and pitch; a straight
