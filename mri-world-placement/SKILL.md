@@ -62,7 +62,7 @@ or cancel (`HUD_FRONTEND_DEFAULT_SOUNDSET`).
 4. On the panel the result becomes a **summary**, not numbers: "3 stops · 29 m · there and
    back", "Position marked". A "Mark again" button starts over.
    Every placed thing also gets **Go there** (server checks the admin, closes the panel, puts the
-   player on the nearest walkable spot) and **Remove** when it is optional. No X/Y/Z anywhere, not
+   player on the nearest walkable spot), ready in `templates/goto.lua` (copy it, never rewrite it), and **Remove** when it is optional. No X/Y/Z anywhere, not
    even behind an "edit manually" toggle.
    **Edit from the target.** Every placed thing that has a target (stash, bench, NPC, door) gets a
    second option, only for admins: "Edit", which opens the panel with that item already selected,
@@ -78,8 +78,7 @@ or cancel (`HUD_FRONTEND_DEFAULT_SOUNDSET`).
    loop `RequestCollisionAtCoord` + `Wait(0)` until `IsNewLoadSceneLoaded`,
    `HasCollisionLoadedAroundEntity` and `IsNavmeshLoadedInArea` (±20 m) or 8 s pass,
    `NewLoadSceneStop`, only then `GetSafeCoordForPed(x, y, z, false, 32)` (flag 32 = flood fill
-   from the point) and move there if found, unfreeze, fade in. Reference: `mri_Qfarm`
-   (`Utils.tpToLoc` in `shared/utils.lua`).
+   from the point) and move there if found, unfreeze, fade in. `templates/goto.lua` does all of it.
 
 ## Map panel (list, map, editor)
 
@@ -92,7 +91,9 @@ gets a card over the map with its name, a one-line summary and its actions (Go t
 small legend explains the colors. The map only shows, selects and acts: marking a
 position is still done in the world with the tools above (a pin may be dragged to fine tune).
 In a React NUI with `@mriqbox/ui-kit` this is `MriMapEditorLayout` with `MriGameMap` (see the
-ui-kit docs); never a hand-made Leaflet map per resource.
+ui-kit docs); never a hand-made Leaflet map per resource. The card and the legend are the kit's
+(4.39.0+): `<MriGameMap overlay={<>{selected && <MriMapSelectedCard title subtitle goToLabel onGoTo actions />}<MriMapLegend items />}</>}>`,
+with `onGoTo` calling the `goThere` callback of `templates/goto.lua`. A panel with a map and no card with Go there is not done.
 
 ## Frame rules (no flicker, no missed keys)
 
