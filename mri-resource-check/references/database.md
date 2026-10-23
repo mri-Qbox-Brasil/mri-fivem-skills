@@ -59,6 +59,10 @@ end)
   swallowed error leaves the resource running on missing tables.
 - **New column:** check `information_schema.COLUMNS` (or ``SHOW COLUMNS FROM `t` LIKE 'c'``)
   before the `ALTER`. Never `ADD COLUMN IF NOT EXISTS`: MariaDB has it, MySQL 8 does not.
+- **Dates:** oxmysql hands `DATE`, `DATETIME` and `TIMESTAMP` columns to Lua as milliseconds
+  since 1970. Passed back in an `INSERT` they fail with `Incorrect datetime value: '1792033200000'`.
+  Select `UNIX_TIMESTAMP(col) AS time` and write `FROM_UNIXTIME(?)` with seconds (mri_Qbanking
+  importing ps-banking, 2026-10-23).
 - **Table names:** a prefix of the resource name in lowercase (`mri_qstashes_stashes`), so two
   resources never share a table by accident.
 - **Something that must run before the database** (registering jobs before a framework cleanup
