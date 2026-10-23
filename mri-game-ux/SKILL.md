@@ -45,9 +45,12 @@ Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
   item, the item name, and one line that is either the state ("2/5 · 0:30", paused, ready with a check)
   or the work key. Brackets, pips, owner names and per-unit segments read as clutter (Murai,
   2026-10-23). Reference: mri_Qcrafting `dui/machine.html`.
-  Place it over the prop's real top (`GetModelDimensions` max z plus a small clearance and half the
-  quad), never at the work-spot height: the quad is depth tested and a machine taller than its work
-  spot swallows it (mri_Qcrafting, 2026-10-23).
+  Place it at the player's eye height (~1.45 m over the base), never at the prop's top (a tall machine
+  sends it to the sky) nor at the work spot (the quad is depth tested and the body swallows it). Where
+  that point falls inside the prop's box (`GetModelDimensions` with the entity heading), move it out
+  to the side facing the player, clear of the box, gliding as they walk around. The key is the suite's
+  `MriKbd` accent look (outline, thicker bottom border, mono), never a filled custom chip
+  (mri_Qcrafting, 2026-10-23).
 - **Glide near, cut far.** A long flight crosses unstreamed world. Above a threshold (18 m in
   the multichar) cut through black; below it, glide.
 - **Glide around the subject.** Orbit the aim point and turn the aim as yaw and pitch; a straight
