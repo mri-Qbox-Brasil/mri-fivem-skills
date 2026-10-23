@@ -113,6 +113,11 @@ Lua traps the parser can't see:
 - `require 'config.server'` (ox_lib) returns the same cached table everywhere in the
   resource: a field changed at runtime applies to every reader.
 - Event instead of polling. A loop with `Wait(0)` only for drawing and controls.
+- A server net event that hands out an item, a key or a lock by a value the client sends
+  (plate, netId, item name) must check it on the server: a car with that plate near the
+  player, ownership in the database, an allowlist of item names. In mri_Qcarkeys
+  (2026-10-23) `acquirevehiclekeys` gave any client the key of any car on the map. A
+  resource that hands keys far from the car calls the server export, not the client event.
 - Some natives set state for the whole game, not for one entity: outline color and shader
   (`SetEntityDrawOutlineColor`, `SetEntityDrawOutlineShader`), timecycle, `SetNuiFocus`,
   hud and radar toggles. An effect that changes one hands it back when it ends, on every exit
