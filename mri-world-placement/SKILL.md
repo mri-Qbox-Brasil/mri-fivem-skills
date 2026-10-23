@@ -62,6 +62,13 @@ or cancel (`HUD_FRONTEND_DEFAULT_SOUNDSET`).
    Every placed thing also gets **Go there** (server checks the admin, closes the panel, puts the
    player on the nearest walkable spot) and **Remove** when it is optional. No X/Y/Z anywhere, not
    even behind an "edit manually" toggle.
+   **Edit from the target.** Every placed thing that has a target (stash, bench, NPC, door) gets a
+   second option, only for admins: "Edit", which opens the panel with that item already selected,
+   so the admin fixes it standing in front of it instead of hunting it in the list. The client asks
+   the server once on character load (`lib.callback`, the same check the panel uses) and keeps a
+   flag for `canInteract`; the flag only hides the option, every panel callback still checks the
+   admin on the server. Reference: `mri_Qstashes` (`client/stashes.lua`, `Stashes.onEdit` into
+   `Panel.open(id)`).
    **Go there loads the place first.** Far away the map, collision and navmesh aren't streamed:
    a bare `SetEntityCoords` drops the player into an empty world, and `GetSafeCoordForPed` called
    before the move finds no navmesh and returns false. Order: fade out (wait `IsScreenFadedOut`),
