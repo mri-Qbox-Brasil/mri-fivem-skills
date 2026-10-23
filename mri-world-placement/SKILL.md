@@ -29,6 +29,8 @@ a yellow box, an arrow for the heading and the size written above; zones already
 in green with their label (`refs`). `multiple` marks several in a row (floors of an elevator).
 Pattern from `mri_Qelevators` (`client/placement.lua`).
 
+When a **player** places their own thing (a stash from an item, not the admin panel), pass `range` (8 m in mri_Qstashes) so the ghost never goes farther than that from them, and the server checks the same distance again before saving. The server sends the event that opens the tool after the item is used and only spends the item when the spot comes back.
+
 ### Keys (the same in every resource)
 
 | Key | Point | Path | Zone |

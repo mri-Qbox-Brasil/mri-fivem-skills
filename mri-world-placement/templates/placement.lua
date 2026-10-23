@@ -159,7 +159,8 @@ end
 ---Ghost follows the aim; arrows and wheel rotate, E confirms, Backspace or Esc cancels.
 ---Without `model` (an interaction point) a sphere in the suite accent follows the aim instead and there is no heading.
 ---`object` makes the ghost a prop (CreateObject) instead of a ped.
----@param opts { model?: string|number, object?: boolean, heading?: number }
+---`range` keeps the spot within that many meters of the player (a player placing their own thing).
+---@param opts { model?: string|number, object?: boolean, heading?: number, range?: number }
 ---@return { coords: { x: number, y: number, z: number }, heading?: number }|nil
 function WorldPlacer.point(opts)
 	if active then return nil end
@@ -181,6 +182,7 @@ function WorldPlacer.point(opts)
 		block()
 
 		local coords = aim.coords
+		if coords and opts.range and #(coords - GetEntityCoords(cache.ped)) > opts.range then coords = nil end
 		if coords and coords ~= last then
 			last = coords
 			if ghost then SetEntityCoords(ghost, coords.x, coords.y, coords.z, false, false, false, false) end
