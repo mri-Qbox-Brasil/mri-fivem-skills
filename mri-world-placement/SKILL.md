@@ -57,6 +57,11 @@ or cancel (`HUD_FRONTEND_DEFAULT_SOUNDSET`).
    and reopens the tab). When the panel unmounts while hidden and asks for the result on
    mount (a take-once callback), write the result to a module-level draft as soon as it
    arrives: React StrictMode runs the mount effect twice in dev and the first run would eat it.
+   Embedded (the iframe URL carries `?embedded=1`, send it with the request), only
+   `ClosePlugin`/`OpenPlugin(id)` of mri_Qadmin: never `SetNuiFocus(true)` from the plugin's
+   own resource, its invisible ui_page takes the mouse and the panel stops answering. The Qadmin
+   has no hide or forward export; a `pcall` around a missing one fails in silence, so grep the
+   name in mri_Qadmin before calling it (mri_Qmedical, 2026-10-24).
 3. NUI: `templates/PlaceRail.tsx` and the keys from `templates/rail.locales.json`. A store
    with `hud` fed by the `placeHud` message (`false` clears it). The rail shows with the panel
    hidden, on the resource's own ui_page; inside the Qadmin iframe it doesn't render (the
