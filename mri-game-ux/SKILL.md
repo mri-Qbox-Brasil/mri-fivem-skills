@@ -32,8 +32,11 @@ Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
 - **A menu item says where it leads.** "Continue" with the character name below,
   "Characters" for the list. Empty account: only what is possible ("Create character").
   A useless item disappears instead of being disabled.
-- **Nothing pops.** Peds enter and leave with alpha; a screen leaves with fade and blur; the
-  next one enters after the camera started moving.
+- **Nothing pops.** Peds enter and leave with alpha; a screen leaves with a fade; the
+  next one enters after the camera started moving. NUI motion is only `opacity` and
+  `transform`: an animated `filter: blur()` on a panel repaints it every frame in CEF and the
+  open stutters (mri_Qhud I menu, 2026-10-23: 9 frames over 33 ms, worst 152 ms, down to none).
+  Blur the game with the timecycle or a static layer, never an animated filter.
 - **The player stays in the scene.** Opening a screen never makes the character vanish: frame
   around them (over the shoulder at a workstation) and keep the lens off the body
   (`references/camera-scene.md`, "Obstacles and the player's ped").
