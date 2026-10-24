@@ -42,17 +42,19 @@ Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
   (`references/camera-scene.md`, "Obstacles and the player's ped").
 - **The world is the prompt.** A station in the world (bench, machine, terminal) shows its state and
   what this player can do on a widget pinned to it, not a second hint fixed on the screen; the screen
-  keeps only the result card. Build it in the NUI with the suite kit (`MriKbd` + `MriKeyHint` for the
-  key, theme colors), anchored to the station's screen point: Lua projects it
-  (`GetScreenCoordFromWorldCoord`), sends position, scale and alpha at most every ~33 ms and only when
-  they change, and the page writes them straight into a `transform` (no React render, no layout).
-  Smaller with camera distance, fades off screen and behind walls (a line of sight probe every
-  ~250 ms ignoring the prop). A DUI quad for this looked blurry and off-kit (Murai, 2026-10-23).
+  keeps only the result card. Build the card as a page of the resource's own NUI (React with the suite
+  kit, `MriKbd` + `MriKeyHint` for the key) opened in a DUI at its on-screen size times two, and draw it
+  like mri_Qinteract's prompt: `SetDrawOrigin(point)` + `DrawSprite` every frame (width from
+  `GetAspectRatio`), so the game pins it to the world with no lag. Never move a ui_page element to the
+  projected point with NUI messages: it always arrives a frame or more late and shakes when the camera
+  turns (Murai, 2026-10-23). Smaller with camera distance, fades behind walls (a line of sight probe
+  every ~250 ms ignoring the prop). The page announces itself through a NUI callback before Lua sends
+  content, and reads the message as a JSON string or an object.
   It is a card in the suite theme, never a custom shape: `mri-surface` with the theme background,
   border and radius (it follows /uiconfig: dark, glass, liquid, accent), the item photo, the name, one
   line (state or time) and the kit `MriProgressBar`, the key row under it. Still, in the middle of the
   prop (box center) at the player's eye height: it draws over the world, so it never needs to move to
-  a side, and a widget that slides or turns with the camera reads as broken (Murai, 2026-10-23). Reference: mri_Qcrafting `web/src/craft/BenchHud.tsx` and
+  a side, and a widget that slides or turns with the camera reads as broken (Murai, 2026-10-23). Reference: mri_Qcrafting `web/src/craft/BenchCard.tsx` and
   `client/jobs.lua`.
 - **Glide near, cut far.** A long flight crosses unstreamed world. Above a threshold (18 m in
   the multichar) cut through black; below it, glide.
