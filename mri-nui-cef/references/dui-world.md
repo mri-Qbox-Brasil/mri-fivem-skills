@@ -72,6 +72,57 @@ GPS route on the road). Lines marked *(not seen in game yet)* still wait for an 
 - Pool full when a marker is added: leave it without a page and let the slow loop take one as
   soon as another marker frees it, or it never shows.
 
+## An interactive screen on a prop (ATM, tablet, ECU)
+
+A page the player uses on a prop in the world, with the camera close to it. From mri_mechanic
+(ECU, paint booth tablet, vinyl) and the mri_Qbanking ATM (2026-10-23).
+
+Three ways to put the page on the world:
+
+- **Replace the screen texture** (`AddReplaceTexture(model, screenTex, txd, tex)`): fits the screen
+  mesh exactly with no corners to measure, but it is per model, so every prop of that model shows
+  the page. Keep one replace at a time (the prop in use) and `RemoveReplaceTexture` when it changes
+  hands. Only when that texture is the screen alone: `prop_fleeca_atm` shares `prop_fleece_emis`
+  with its logo, so the logo would show the page too.
+- **Quad over the glass** (`DrawTexturedPoly` from corners in the prop's own space,
+  `GetOffsetFromEntityInWorldCoords` every frame, both windings): per instance, several at once.
+  Needs the corners: read them from the model (mri-gta-assets, "Where things are on a prop"), not
+  by eye. Lift the quad 3 to 16 mm along the screen normal (a curved glass needs more).
+- **Decal** (`PatchDecalDiffuseMap(channel, txd, tex)` then `AddDecal`): to paint art on a surface,
+  not to click. Channels 9100-9123 and 10000-10031; validate each at start (`AddDecal` returns 0 for
+  a channel this build lacks) and keep one live DUI per distinct art (the decal reads it live).
+
+Input, with no `SetNuiFocus` (the page is a texture):
+
+- **Virtual cursor** (mri_mechanic): mouse deltas (`GetDisabledControlNormal(0, 1/2)`) move a point
+  the page draws itself; always aligned, no geometry needed. **Game cursor** (mri_Qbanking):
+  `SetMouseCursorThisFrame`, cursor at `GetDisabledControlNormal(0, 239/240)`, projected corners
+  (`GetScreenCoordFromWorldCoord`) define a square-to-quad homography, its inverse gives the page
+  pixel. Needs exact corners, feels native. *(not seen in game yet)*
+- `SendDuiMouseMove` only when the pixel changes, `SendDuiMouseDown/Up(dui, 'left')` on 24 or 237,
+  `SendDuiMouseWheel` on 241/242. The `dui` argument is what `CreateDui` returned.
+- **Physical keys of the prop** (side keys, keypad, card slot): quads in the prop's space read from
+  its texture, projected each frame and hit tested as two triangles; light the hovered one with
+  `DrawPoly` (both windings, 2 mm off the surface) and send `{ key }` to the page. Lay the page's
+  options at the height of each side key (`dot(center - screenTopLeft, down) / |down|²`), sent from
+  Lua per model. *(not seen in game yet)*
+- `DisableAllControlActions(0)` plus `EnableControlAction(0, 249)` (voice), `DisableFrontendThisFrame`
+  every frame and ~600 ms after closing (Esc closes this frame, the pause opens on the next), and the
+  `escBusy` state for the MRI pause.
+
+Page and camera:
+
+- The same React build opened with `?dui=<mode>` from `https://cfx-nui-<resource>/...`; it calls
+  the resource's NUI callbacks like the NUI page does. The page tells Lua it booted (a callback)
+  before the first `SendDuiMessage`. One DUI for every prop of the kind, made on first use and kept.
+- Opaque page (skip the glass theme there) and sizes in px for the DUI resolution; fonts big enough
+  for the screen's share of the view.
+- Camera from `GetFinalRenderedCamCoord/Rot/Fov` (no cut) eased to the center of everything usable
+  (screen, keys, slot) along the screen normal, at `max(halfH / tan(fov/2), halfW / (tan(fov/2) ×
+  GetAspectRatio(false))) / 0.9`; wrap the angles. Hide the ped locally if the camera ends within
+  0.3 m of its head.
+- Props in the hand (card, cash) are local objects (`CreateObject(..., false, false, false)`).
+
 ## Destination height and the waypoint
 
 - A map waypoint has no real height: start at `GetHeightmapTopZForPosition` (works unstreamed),

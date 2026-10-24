@@ -1,6 +1,6 @@
 ---
 name: mri-nui-cef
-description: "FiveM NUI on the Chromium FiveM actually runs: CEF 103 limits and the CEF 144 upgrade (what breaks: alert/confirm, clipboard focus, old fx_version, CSS zoom, mutation events, throttling; what opens up: WASM, modern CSS, Tailwind 4), the browser dev mock, focus and ESC, no infinite animations, uploading video/music/image from the NUI to the server in HTTP parts, loadscreen video, NUI logs, a NUI card over the pause menu map (one cursor, wheel without map zoom, hover and edge scroll), and DUI drawn in the world (destination marker standing on the ground, screen edge indicator, GPS route painted on the road) without per-frame NUI messages. Scanner script, clipboard helper, upload templates. Use when building or debugging a NUI, or asked \"does this work in FiveM's CEF?\", \"what breaks with CEF 144?\", \"copy doesn't work\", \"the NUI lags\", \"works in the browser but not in game\", \"upload a video from the panel\", \"two cursors on the pause map\", \"the wheel zooms the map under my NUI\", \"3D marker at the waypoint\", \"draw the route on the road\" (pt-BR: \"o CEF novo quebra o quê?\", \"copiar não funciona\", \"a NUI tá travando\", \"subir vídeo pelo painel\", \"dois cursores no mapa\", \"scroll dá zoom no mapa\")."
+description: "FiveM NUI on the Chromium FiveM actually runs: CEF 103 limits and the CEF 144 upgrade (what breaks: alert/confirm, clipboard focus, old fx_version, CSS zoom, mutation events, throttling; what opens up: WASM, modern CSS, Tailwind 4), the browser dev mock, focus and ESC, no infinite animations, uploading video/music/image from the NUI to the server in HTTP parts, loadscreen video, NUI logs, a NUI card over the pause menu map (one cursor, wheel without map zoom, hover and edge scroll), and DUI drawn in the world (destination marker standing on the ground, screen edge indicator, GPS route painted on the road, an ATM or tablet screen used with the mouse and the prop's own keys) without per-frame NUI messages. Scanner script, clipboard helper, upload templates. Use when building or debugging a NUI, or asked \"does this work in FiveM's CEF?\", \"what breaks with CEF 144?\", \"copy doesn't work\", \"the NUI lags\", \"works in the browser but not in game\", \"upload a video from the panel\", \"two cursors on the pause map\", \"the wheel zooms the map under my NUI\", \"3D marker at the waypoint\", \"draw the route on the road\", \"click the screen of a prop\" (pt-BR: \"tela do caixa eletrônico com DUI\", \"clicar nos botões do objeto\", \"o CEF novo quebra o quê?\", \"copiar não funciona\", \"a NUI tá travando\", \"subir vídeo pelo painel\", \"dois cursores no mapa\", \"scroll dá zoom no mapa\")."
 ---
 
 # NUI on FiveM's CEF
@@ -126,6 +126,12 @@ indicator, road route texture) are DUI pages drawn by the game, never a NUI move
 never be removed, so creating a DUI each time a thing comes in range leaks (mri_Qposter, 2026-10-21).
 Pool, square page for any shape, billboard quad, screen sprite, edge arrow, GPS route ribbon and
 their costs: `references/dui-world.md`.
+
+A page the player **uses on a prop** (ATM, tablet, car ECU): replace the screen texture (per model,
+one at a time), a quad over the glass (per instance, corners read from the model) or a decal (art,
+not clicks); a virtual cursor or the game cursor mapped by perspective; the prop's own keys hit
+tested as quads; Esc kept off the pause menu. "An interactive screen on a prop" in
+`references/dui-world.md`.
 
 ## Testing in the browser
 
