@@ -318,6 +318,27 @@ Reference: `mri_Qnpc` (`NpcRoute.wander` in `client/route.lua`).
 - Interaction on a moving ped: target on the entity (it follows the ped) or a key prompt checked
   against the ped's position, never a fixed point at its spawn.
 
+## Animals to hunt (networked, same for everyone)
+
+*(Not seen in game yet.)* Reference: mri_Qfarm `server/modules/hunt.lua` and `client/world/hunt.lua`.
+
+- The server creates them: `CreatePed(28, hash, x, y, z, heading, true, true)`, then
+  `SetEntityOrphanMode(ped, 2)` so the owner leaving does not delete it. With `sv_entityLockdown
+  restricted` no client may create a networked entity, and a killable animal must be one.
+- Tag each with a replicated state bag (`Entity(ped).state:set(key, info, true)`: area center and
+  radius, behavior, model, dead). Clients learn about it with `AddStateBagChangeHandler(key, nil, ...)`
+  (bag name `entity:<netId>`); check `GetEntityModel` before trusting a netId later, ids are reused.
+- Only the owner (`NetworkGetEntityOwner(ped) == PlayerId()`) gives tasks: `TaskWanderInArea` again
+  when `GetScriptTaskStatus` says idle (7) or it strayed past the area; skip while `IsPedInCombat` or
+  `IsPedFleeing`. Attacking animal: `HATES_PLAYER` relationship group, flee off, combat attribute 46,
+  `TaskCombatPed` on a player within ~18 m. Fleeing animals need nothing, GTA's AI already runs.
+- Cost: animals exist only while a player is near the area (one server loop every 2 s for every hunt,
+  plain squared distance, put away after 30 s empty), at most ~12 per area and a few spawns per tick.
+- Death and loot on the server: it reads `GetEntityHealth` / `GetPedCauseOfDeath`, marks the carcass in
+  the state bag, and pays only for a carcass it created, dead, near the player at the position it sees.
+- Tests: the server harness runs `CreateThread` at once and `Wait` returns, so start the loop from the
+  resource start (`Hunt.start()`) and call the tick directly in tests.
+
 ## Verify
 
 - Browser: send `placeHud` through the dev mock and check the rail (pt-BR and English,
