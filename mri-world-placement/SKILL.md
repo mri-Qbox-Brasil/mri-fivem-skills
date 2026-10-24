@@ -246,6 +246,13 @@ Trees, rocks or wrecks anyone with access collects, gone for everyone until they
   center (mri_Qinteract's ox_target answer), up in a tree's crown. Pass `offsetAbsolute` (ox_target)
   / `offset` (interact) in metres from the origin: the player's chest height, clamped to the
   model's own `GetModelDimensions` min and max z. Same for bars and hints over the prop.
+- **Breaking into other props:** an item can leave 1 to 6 pieces of another item of the field when
+  its prop comes down. The server places them (`World.piecePlaces`, pure: along the fall line of a
+  tree, 1.8 m then every 2.2 m; scattered on a ring around anything else), names them `b<n>`, keeps
+  depth and root, and broadcasts them with a flag to wait for the tree to land (~2.2 s). On the
+  client a piece is just one more node of the field (same collection, hits and card), dropped in
+  from 0.9 m with one bounce. Pieces go when their root prop respawns or after 10 min, chains stop at
+  3 levels, and a zone item with count 0 exists only as a piece.
 - **Taken:** the server holds who is collecting (one player per prop), broadcasts taken and back,
   and answers the taken list to a client that just loaded, after its fields are mounted. Taken zone
   prop: delete it; map prop: model hide (above). Reference: mri_Qfarm `client/world/fields.lua`,
