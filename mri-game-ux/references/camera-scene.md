@@ -33,6 +33,10 @@ not only the shot picked at the start:
     (`TaskTurnPedToFaceCoord`, freeze after ~650 ms), camera ~0.95 m behind and ~0.75 m to the side
     at shoulder height (+0.55), aim at the subject pulled ~25% toward the ped. The back and shoulder
     sit soft in the foreground (the DOF blurs them), the subject sharp.
+  - A machine operated with the hands up close (ATM, keypad, terminal screen): first person instead.
+    Lens ~12 cm in front of the head bone, aimed at the machine, entered through a short fade with
+    the ped placed while black; the body stays behind the lens and the hands reach into view (the
+    Murai's choice over the shoulder for the mri_Qbanking ATM, 2026-10-24).
   - Every frame, keep the lens at least ~0.55 m from the ped's vertical axis: closer (a wall pulled
     the camera in, the ped moved), slide it sideways away from the axis. Never hide the ped to fix it.
   - Hiding is only for a shot where the player is not part of the scene and the camera has to be
