@@ -12,6 +12,12 @@ GPS route on the road). Lines marked *(not seen in game yet)* still wait for an 
 
 ## Pool and texture
 
+- A DUI page opened as `nui://<resource>/...` has no `GetParentResourceName` and its host is not
+  `cfx-nui-<resource>`: a NUI helper that detects the game by either thinks it runs in a browser and never
+  calls back, so Lua waits for a "loaded" that never comes and draws nothing. Detect `location.protocol ===
+  'nui:'` and post callbacks to a fixed `https://<resource>/<event>` (mri_Qinteract prompt; mri_Qcrafting
+  bench card, 2026-10-24).
+
 - `CreateDui(url, w, h)` per marker leaks texture memory when created and destroyed often: keep a
   pool (8 is plenty), mark entries busy/free, destroy all only in `onResourceStop`.
 - `CreateRuntimeTxd` once, then `CreateRuntimeTextureFromDuiHandle(txd, name, GetDuiHandle(dui))`
