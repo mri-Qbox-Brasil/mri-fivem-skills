@@ -446,5 +446,24 @@ if (checkNatives && codeByFile.size) {
   }
 }
 
-console.log(`${files.length} lua files, ${failed} failed, ${warned} warnings; ${nativeSummary}`)
+// Data and locale JSON the Lua reads (lib.loadJson, locales): one bad escape and the file silently falls back to defaults.
+function walkJson(dir, out) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory()) {
+      if (!SKIP_DIRS.has(entry.name) && !INSTALL_DIR.test(entry.name)) walkJson(join(dir, entry.name), out)
+    } else if (entry.name.endsWith('.json')) out.push(join(dir, entry.name))
+  }
+  return out
+}
+const jsonFiles = statSync(targets[0]).isDirectory() ? walkJson(resourceDir, []) : []
+for (const file of jsonFiles) {
+  try {
+    JSON.parse(readFileSync(file, 'utf8').replace(/^﻿/, ''))
+  } catch (err) {
+    failed++
+    console.log(`FAIL ${show(file)} invalid JSON: ${err.message} (a lone backslash, like "a\\b", must be "a\\\\b" or "a/b")`)
+  }
+}
+
+console.log(`${files.length} lua files, ${jsonFiles.length} json files, ${failed} failed, ${warned} warnings; ${nativeSummary}`)
 process.exit(failed ? 1 : 0)

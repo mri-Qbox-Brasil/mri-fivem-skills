@@ -48,10 +48,11 @@ Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
   they change, and the page writes them straight into a `transform` (no React render, no layout).
   Smaller with camera distance, fades off screen and behind walls (a line of sight probe every
   ~250 ms ignoring the prop). A DUI quad for this looked blurry and off-kit (Murai, 2026-10-23).
-  Lean: a ring with the whole order's progress around the item, the item name, and one line (state
-  or the key). Anchor at the player's eye height (~1.45 m over the base); where that point falls
-  inside the prop's box (`GetModelDimensions` with the entity heading), move it out to the side facing
-  the player, gliding as they walk around. Reference: mri_Qcrafting `web/src/craft/BenchHud.tsx` and
+  It is a card in the suite theme, never a custom shape: `mri-surface` with the theme background,
+  border and radius (it follows /uiconfig: dark, glass, liquid, accent), the item photo, the name, one
+  line (state or time) and the kit `MriProgressBar`, the key row under it. Still, in the middle of the
+  prop (box center) at the player's eye height: it draws over the world, so it never needs to move to
+  a side, and a widget that slides or turns with the camera reads as broken (Murai, 2026-10-23). Reference: mri_Qcrafting `web/src/craft/BenchHud.tsx` and
   `client/jobs.lua`.
 - **Glide near, cut far.** A long flight crosses unstreamed world. Above a threshold (18 m in
   the multichar) cut through black; below it, glide.
