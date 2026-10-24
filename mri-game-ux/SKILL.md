@@ -47,7 +47,7 @@ Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
   like mri_Qinteract's prompt: `SetDrawOrigin(point)` + `DrawSprite` every frame (width from
   `GetAspectRatio`), so the game pins it to the world with no lag. Never move a ui_page element to the
   projected point with NUI messages: it always arrives a frame or more late and shakes when the camera
-  turns (Murai, 2026-10-23). Only up close: it shows from ~6 m and fades in over the last 2 m (mri_Qinteract: prompt at 3 m, marker at 5 m); a card seen from 20 m away is clutter (Murai, 2026-10-24). Smaller with camera distance, fades behind walls (a line of sight probe
+  turns (Murai, 2026-10-23). Only up close: it shows from ~6 m and fades in over the last 2 m (mri_Qinteract: prompt at 3 m, marker at 5 m); a card seen from 20 m away is clutter (Murai, 2026-10-24). The page animates it in and out (opacity, a small rise and 95% to 100% scale, ~250 ms) when Lua says show or hide; a sprite alpha fade alone reads as popping. Show and hide never flip on the edge: hide only ~0.75 m past the range, and only after a wall stayed in the way ~500 ms (back after ~250 ms clear). Smaller with camera distance, hides behind walls (a line of sight probe
   every ~250 ms ignoring the prop). The page announces itself through a NUI callback before Lua sends
   content, and reads the message as a JSON string or an object.
   It is a card in the suite theme, never a custom shape: `mri-surface` with the theme background,
