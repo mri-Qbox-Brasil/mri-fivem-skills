@@ -12,7 +12,8 @@ local BLOCKED_CONTROLS = { 14, 15, 16, 17, 24, 25, 37, 44, 140, 141, 142, 200 }
 local KEY = { mark = 38, shoot = 24, undo = 177, finish = 191, cancel = 200, left = 174, right = 175, wheelUp = 15, wheelDown = 14 }
 local START_COLOR = { 0, 230, 153 }
 local STOP_COLOR = { 255, 255, 255 }
-local ZONE_COLOR = { 255, 210, 0 }
+-- zone being marked: walls at this alpha, edges solid; zones marked before: fainter (mri_Qbox zone drawer look)
+local FILL, PLACED_FILL, PLACED_LINE = 50, 20, 150
 local ZONE_MIN, ZONE_MAX, ZONE_STEP = 0.5, 50.0, 0.5
 local SHIFT = 21
 
@@ -90,8 +91,16 @@ local function drawStop(point, color)
 	DrawMarker(1, point.x, point.y, point.z - 0.02, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6, 0.6, 0.35, color[1], color[2], color[3], 170, false, false, 2, false, nil, nil, false)
 end
 
--- Box centered on `c`, turned by `heading`, `size` = { x, y, z } full lengths.
-local function drawBox(c, size, heading, color, alpha)
+-- One wall from p to n (bottom z0, top z1), both windings so it shows from inside and outside.
+local function drawWall(p, n, z0, z1, r, g, b, fill)
+	DrawPoly(p[1], p[2], z0, n[1], n[2], z0, n[1], n[2], z1, r, g, b, fill)
+	DrawPoly(n[1], n[2], z1, n[1], n[2], z0, p[1], p[2], z0, r, g, b, fill)
+	DrawPoly(p[1], p[2], z0, n[1], n[2], z1, p[1], p[2], z1, r, g, b, fill)
+	DrawPoly(p[1], p[2], z1, n[1], n[2], z1, p[1], p[2], z0, r, g, b, fill)
+end
+
+-- Box centered on `c`, turned by `heading`, `size` = { x, y, z } full lengths: see-through walls, solid edges.
+local function drawBox(c, size, heading, color, fill, line)
 	local rad = math.rad(heading)
 	local cos, sin = math.cos(rad), math.sin(rad)
 	local hx, hy, hz = size.x / 2, size.y / 2, size.z / 2
@@ -100,12 +109,14 @@ local function drawBox(c, size, heading, color, alpha)
 		local rx, ry = offset[1] * cos - offset[2] * sin, offset[1] * sin + offset[2] * cos
 		corners[i] = { c.x + rx, c.y + ry }
 	end
-	local r, g, b, a = color[1], color[2], color[3], alpha or 255
+	local r, g, b, a = color[1], color[2], color[3], line or 255
+	local z0, z1 = c.z - hz, c.z + hz
 	for i = 1, 4 do
 		local p, n = corners[i], corners[i % 4 + 1]
-		DrawLine(p[1], p[2], c.z - hz, n[1], n[2], c.z - hz, r, g, b, a)
-		DrawLine(p[1], p[2], c.z + hz, n[1], n[2], c.z + hz, r, g, b, a)
-		DrawLine(p[1], p[2], c.z - hz, p[1], p[2], c.z + hz, r, g, b, a)
+		drawWall(p, n, z0, z1, r, g, b, fill or FILL)
+		DrawLine(p[1], p[2], z0, n[1], n[2], z0, r, g, b, a)
+		DrawLine(p[1], p[2], z1, n[1], n[2], z1, r, g, b, a)
+		DrawLine(p[1], p[2], z0, p[1], p[2], z1, r, g, b, a)
 	end
 end
 
@@ -227,7 +238,7 @@ end
 
 ---Box with heading around the player: walk to place it, the player's heading turns it, wheel sizes it,
 ---Shift + wheel sets the height, E marks. With `multiple`, Backspace undoes and Enter finishes; otherwise
----E returns at once and Backspace cancels. Esc always cancels. `refs` are zones already placed, drawn green.
+---E returns at once and Backspace cancels. Esc always cancels. `refs` are zones already placed, drawn fainter.
 ---@param opts { size?: { x: number, y: number, z: number }, multiple?: boolean, refs?: { coords: table, size: table, heading: number, label?: string }[] }
 ---@return { coords: table, heading: number, size: table }|{ coords: table, heading: number, size: table }[]|nil
 function WorldPlacer.zone(opts)
@@ -238,6 +249,7 @@ function WorldPlacer.zone(opts)
 	local marks = {}
 
 	active = true
+	local color = accent()
 	local function push() hud({ mode = 'zone', size = size, count = #marks, multiple = opts.multiple == true }) end
 	push()
 
@@ -246,14 +258,14 @@ function WorldPlacer.zone(opts)
 		block()
 
 		for _, ref in ipairs(refs) do
-			drawBox(ref.coords, ref.size, ref.heading or 0.0, START_COLOR, 200)
+			drawBox(ref.coords, ref.size, ref.heading or 0.0, color, PLACED_FILL, PLACED_LINE)
 			if ref.label then drawLabel(vec3(ref.coords.x, ref.coords.y, ref.coords.z + ref.size.z / 2 + 0.2), ref.label) end
 		end
-		for _, mark in ipairs(marks) do drawBox(mark.coords, mark.size, mark.heading, START_COLOR, 200) end
+		for _, mark in ipairs(marks) do drawBox(mark.coords, mark.size, mark.heading, color, PLACED_FILL, PLACED_LINE) end
 
 		local coords, heading = GetEntityCoords(cache.ped), GetEntityHeading(cache.ped)
-		drawBox(coords, size, heading, ZONE_COLOR)
-		drawArrow(coords, heading, ZONE_COLOR)
+		drawBox(coords, size, heading, color)
+		drawArrow(coords, heading, color)
 		drawLabel(vec3(coords.x, coords.y, coords.z + size.z / 2 + 0.3), ('%.1f x %.1f x %.1f m'):format(size.x, size.y, size.z))
 
 		local step = (IsDisabledControlJustPressed(0, KEY.wheelUp) and 1 or 0) - (IsDisabledControlJustPressed(0, KEY.wheelDown) and 1 or 0)

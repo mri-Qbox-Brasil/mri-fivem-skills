@@ -27,8 +27,9 @@ frame. Reference: `mri_Qdoorlock` `client/picker.lua` (one or two leaves of a do
 
 Pick by shape: a model to stand somewhere is a point; a sequence is a path; a volume with a
 front is a zone. The zone sits on the player (walk to it, the player's heading turns it), with
-a yellow box, an arrow for the heading and the size written above; zones already placed show
-in green with their label (`refs`). `multiple` marks several in a row (floors of an elevator).
+a box in the suite look (the `mri:color` accent, see-through `DrawPoly` walls at alpha 50 and solid
+edges, like the mri_Qbox zone drawer and the mri_Qgarage zones; never a yellow wireframe), an arrow for
+the heading and the size written above; zones already placed show fainter with their label (`refs`). `multiple` marks several in a row (floors of an elevator).
 Pattern from `mri_Qelevators` (`client/placement.lua`).
 
 When a **player** places their own thing (a stash from an item, not the admin panel), pass `range` (8 m in mri_Qstashes) so the ghost never goes farther than that from them, and the server checks the same distance again before saving. The server sends the event that opens the tool after the item is used and only spends the item when the spot comes back.
