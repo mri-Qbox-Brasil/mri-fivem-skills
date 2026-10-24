@@ -257,6 +257,17 @@ Trees, rocks or wrecks anyone with access collects, gone for everyone until they
   pieces are thrown from its middle in an arc (650 ms, 1.4 m peak, linear time; no spin, a spinning
   piece reads as crazy), bounce with chips, 70 ms apart; a tree's logs hop out of the trunk. Pieces
   go when the root respawns or after 10 min.
+- **Size and lying down through the entity matrix** *(not seen in game yet)*. GTA has no scale native:
+  multiply the matrix axes (`GetEntityMatrix` / `SetEntityMatrix`) by the scale. It only changes the
+  render: the collision stays the model's (a prop much smaller than its model blocks the player
+  invisibly), vehicles ignore it, and the game drops it when it rebuilds the entity, so the scripts
+  that do it put the matrix back every frame (cfx.re "Scale object", ped scale threads). Keep one loop
+  for the scaled props only (scale 1 costs nothing), and move them during animations by translating
+  the matrix (`SetEntityCoords` would snap them back to full size); keep the choices modest (0.5 to
+  1.5). To lay a log along a direction, take its long side from `GetModelDimensions` (the longest of
+  x, y, z) and build the axes so that side goes along the direction and up stays up (r = f x u keeps
+  the matrix right handed); its origin sits `-min` of the up axis over the ground. Reference: mri_Qfarm
+  `client/world/fx.lua` (`Fx.pose`) and `client/world/fields.lua` (`lying`, `shape`).
 - **Taken:** the server holds who is collecting (one player per prop), broadcasts taken and back,
   and answers the taken list to a client that just loaded, after its fields are mounted. Taken zone
   prop: delete it; map prop: model hide (above). Reference: mri_Qfarm `client/world/fields.lua`,
