@@ -123,11 +123,14 @@ Page and camera:
   before the first `SendDuiMessage`. One DUI for every prop of the kind, made on first use and kept.
 - Opaque page (skip the glass theme there) and sizes in px for the DUI resolution; fonts big enough
   for the screen's share of the view.
-- Camera from `GetFinalRenderedCamCoord/Rot/Fov` (no cut) eased to the center of everything usable
-  (screen, keys, slot) along the screen normal, at `max(halfH / tan(fov/2), halfW / (tan(fov/2) ×
-  GetAspectRatio(false))) / 0.9`; wrap the angles. Never hide the ped to clear the view: that
-  hides the hands, the card and the cash too. Stop the camera ~0.28 m in front of where the player
-  stands and open the FOV instead (cap ~75).
+- A machine the player stands at (ATM): first person. The lens ~12 cm in front of the head bone
+  (31086), toward the machine, aimed at the center of everything usable (screen, keys, slot), FOV
+  from the widest point (`2 atan(max tan / 0.88)`, 38 to 70). The body stays behind the lens and only
+  the hands reach into view, so nothing is hidden. Enter and leave through a 250/300 ms fade (place
+  the ped while black) with a small lens push after it: a glide from the game view crosses the body
+  (mri_Qbanking, 2026-10-24: the framed shot along the screen normal went through the torso and the
+  Murai asked for the old mri_Qatm view). Never `SetEntityLocallyInvisible` here: it hides the hands,
+  the card and the cash. Keep drawing the screen until the fade is black.
 - The prop's animations (`anim@mp_atm@*`, `mp_common givetake2_a`) only line up with the ped placed
   square in front and held: `FreezeEntityPosition`, `SetEntityCoords` at a fixed offset on the
   prop's front (ATM: 0.6 m, wall `prop_atm_01` 0.8 m), the prop's heading; unfreeze on close.
