@@ -23,6 +23,8 @@ raycast and, for props without collision (doors driven by the DoorSystem), the o
 outlines the aimed entity (`SetEntityDrawOutline`) and reads it. Outline color and shader are global to the whole game, so set them right before every `SetEntityDrawOutline(entity, true)` (`SetEntityDrawOutlineShader(0)`, `SetEntityDrawOutlineColor(255, 255, 255, 255)`): another script that fades the alpha to 0 (mri_Qspawn arrival pulse) otherwise leaves every outline invisible, and the code logs the outline as on. Never `FindFirstObject` every
 frame. Reference: `mri_Qdoorlock` `client/picker.lua` (one or two leaves of a double door).
 
+**Object on the floor:** the saved point is where the aim hit the floor, and many props have their origin in the middle of the model, so moving the ghost with `SetEntityCoords` sinks half of it (mri_Qstashes, 2026-10-23). The ghost moves with `SetEntityCoordsNoOffset` at `z - GetModelDimensions(model).z` (min z, the bottom), and the resource spawns the final prop the same way (`CreateObjectNoOffset` with the same lift), so what the admin saw is what stays.
+
 Pick by shape: a model to stand somewhere is a point; a sequence is a path; a volume with a
 front is a zone. The zone sits on the player (walk to it, the player's heading turns it), with
 a yellow box, an arrow for the heading and the size written above; zones already placed show

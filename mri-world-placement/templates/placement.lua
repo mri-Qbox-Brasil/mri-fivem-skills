@@ -175,6 +175,9 @@ function WorldPlacer.point(opts)
 	hud({ mode = ghost and 'place' or 'spot' })
 	local aim = trackAim()
 	local color = accent()
+	-- Many props have their origin mid-model; lifting by the model's bottom stands the ghost on the floor like the final prop.
+	local lift = 0.0
+	if ghost and opts.object then lift = -GetModelDimensions(GetEntityModel(ghost)).z end
 
 	local result, last
 	while active do
@@ -185,7 +188,11 @@ function WorldPlacer.point(opts)
 		if coords and opts.range and #(coords - GetEntityCoords(cache.ped)) > opts.range then coords = nil end
 		if coords and coords ~= last then
 			last = coords
-			if ghost then SetEntityCoords(ghost, coords.x, coords.y, coords.z, false, false, false, false) end
+			if ghost and opts.object then
+				SetEntityCoordsNoOffset(ghost, coords.x, coords.y, coords.z + lift, false, false, false)
+			elseif ghost then
+				SetEntityCoords(ghost, coords.x, coords.y, coords.z, false, false, false, false)
+			end
 		end
 
 		if ghost then
