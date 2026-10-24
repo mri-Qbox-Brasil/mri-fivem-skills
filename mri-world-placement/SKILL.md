@@ -39,7 +39,7 @@ When a **player** places their own thing (a stash from an item, not the admin pa
 | --- | --- | --- | --- |
 | Aim / walk | moves the ghost | previews the next stop | the box follows the player |
 | `E` or shot (left click) | confirm | mark stop | mark (single: confirm) |
-| `←` `→`, wheel | rotate | | wheel: width; `Shift` + wheel: height |
+| `←` `→`, wheel | rotate (`Shift` held: about 10x slower, for the last degrees) | | wheel: width; `Shift` + wheel: height |
 | `Backspace` | cancel | undo the last one | undo the last one (single: cancel) |
 | `Enter` | | finish (no stop = cancel) | finish (no zone = cancel) |
 | `Esc` | cancel | cancel | cancel |
