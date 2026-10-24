@@ -251,7 +251,7 @@ Trees, rocks or wrecks anyone with access collects, gone for everyone until they
   tree, 1.8 m then every 2.2 m; scattered on a ring around anything else), names them `b<n>`, keeps
   depth and root, and broadcasts them with a flag to wait for the tree to land (~2.2 s). On the
   client a piece is just one more node of the field (same collection, hits and card), dropped in
-  out of the prop that broke, never popping in place around it (Murai, 2026-10-24): rock and wreck pieces are thrown from its middle in an arc (650 ms, 1.4 m peak, spinning less and less, linear time, not eased) with a bounce and chips on landing, 70 ms apart; a tree's logs hop out of the fallen trunk where they lie. The server sends the broken prop's coords as the origin. Pieces go when their root prop respawns or after 10 min, chains stop at
+  out of the prop that broke, never popping in place around it (Murai, 2026-10-24): rock and wreck pieces are thrown from its middle in an arc (650 ms, 1.4 m peak, linear time, not eased; no spin, a spinning piece reads as crazy) with a bounce and chips on landing, 70 ms apart; a tree's logs hop out of the fallen trunk where they lie. The server sends the broken prop's coords as the origin. Pieces go when their root prop respawns or after 10 min, chains stop at
   3 levels, and a zone item with count 0 exists only as a piece.
 - **Taken:** the server holds who is collecting (one player per prop), broadcasts taken and back,
   and answers the taken list to a client that just loaded, after its fields are mounted. Taken zone
