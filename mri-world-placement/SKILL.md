@@ -222,6 +222,11 @@ Trees, rocks or wrecks anyone with access collects, gone for everyone until they
 - **Map props by model:** `GetGamePool('CObject')` near the player, model in the set and not
   `IsEntityAMissionEntity` (another script's copy can't be hidden). Name it `model@x,y,z` rounded
   to the metre; the server checks the model belongs to the farm and the place is inside the area.
+- **Picking a model by aiming** (any game object, not only the photo list): camera raycast on its
+  own thread with flags `1 | 16 | 256` (256 = foliage, or trees and bushes are missed), keep only
+  `GetEntityType == 3`, name it with `GetEntityArchetypeName` (empty = can't pick), outline the
+  aimed one (`SetEntityDrawOutline`, cleared when the aim moves and on exit) and show the name on
+  the rail. E picks, Backspace undoes, Enter finishes.
 - **Taken:** the server holds who is collecting (one player per prop), broadcasts taken and back,
   and answers the taken list to a client that just loaded, after its fields are mounted. Taken zone
   prop: delete it; map prop: model hide (above). Reference: mri_Qfarm `client/world/fields.lua`,

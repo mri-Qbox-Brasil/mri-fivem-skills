@@ -71,6 +71,13 @@ A tree, rock or wreck taken by a player never blinks out (Murai, 2026-10-23: "n√
   prop sinks 0.8 m (`SetEntityCoordsNoOffset`). Delete or model hide only at the end.
 - **Come back:** alpha 0 to 255 over 1.4 s, the script prop rising out of the ground. A map prop
   streams back a few frames after `RemoveModelHide`: find it with `GetClosestObjectOfType` first.
+- **A standing tree falls** (not logs, stumps or fallen ones): turn its matrix around the base
+  (`GetEntityMatrix`, Rodrigues around `Z x direction`, `SetEntityMatrix`) to 86 degrees with
+  `angle * t^2` over 1.8 s, away from where the collector stood (the server sends it, so every
+  client drops it the same way). On impact: leaves at 60% of the height, a thud, a light
+  `SMALL_EXPLOSION_SHAKE` (0.08) within 25 m, a 5 degree bounce, 1.2 s at rest, then fade and sink.
+  A map tree is hidden at once and a script copy at its exact matrix does the falling (the model
+  hide skips script objects).
 - **Only when watched:** farther than 80 m or not `IsSphereVisible`, swap at once. Props already
   taken when the player connects never animate.
 - **End of the work animation:** never `ClearPedTasks` right on the bar's end. Blend the loop
