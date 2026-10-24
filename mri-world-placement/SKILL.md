@@ -236,6 +236,14 @@ Trees, rocks or wrecks anyone with access collects, gone for everyone until they
   and a gap between hits, wears the weapon (`GetCurrentWeapon` + `SetDurability`) and pays on the
   hit that empties the life. The hitter sees the impact at once; the others get it from the broadcast,
   with the attacker id so nobody plays it twice.
+  **Lock the aim** while a working tool is in hand: the nearest such prop in reach gets an outline
+  (`SetEntityDrawOutline`, cleared on change and on resource stop) and its life bar stays up; on
+  the attack controls (24, 140, 141, 142) turn the ped to it (`SetEntityHeading` from
+  `GetHeadingFromVector_2d`) and land the blow on it, so a swing from the side still counts.
+- **Prompt height on a tall prop:** an entity interaction without an offset sits at the model box
+  center (mri_Qinteract's ox_target answer), up in a tree's crown. Pass `offsetAbsolute` (ox_target)
+  / `offset` (interact) in metres from the origin: the player's chest height, clamped to the
+  model's own `GetModelDimensions` min and max z. Same for bars and hints over the prop.
 - **Taken:** the server holds who is collecting (one player per prop), broadcasts taken and back,
   and answers the taken list to a client that just loaded, after its fields are mounted. Taken zone
   prop: delete it; map prop: model hide (above). Reference: mri_Qfarm `client/world/fields.lua`,
