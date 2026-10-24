@@ -42,6 +42,9 @@ node scripts/check.mjs <resource folder>        # or a list of .lua files; --no-
     for a near native name. Calls guarded by `if Name then` and test folders are skipped.
     Usually a typo, a native that never existed, or a global from another resource that
     isn't loaded (`exports` handlers don't create globals).
+  - `lib.callback.await(name, 5000)`: the number is a throttle, not a timeout. A call repeated
+    inside it returns `nil` without reaching the server (the "Go there" of mri_Qhousing died on
+    the second click, 2026-10-23). Pass `false`; `check.mjs` flags it.
   - `cond and false or x` / `cond and nil or x`: always `x`. Use `if`/`else` (or
     `not cond and x or nil`).
     The same trap hides in a settings merge: `local n = type(new) == 'table' and new[k] or nil`

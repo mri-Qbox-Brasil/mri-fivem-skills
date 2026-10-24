@@ -32,7 +32,7 @@ end
 -- `closePanel` is the resource's own close (SetNuiFocus false + hide); inside mri_Qadmin the host closes instead.
 RegisterNUICallback('goThere', function(data, cb)
 	if type(data) ~= 'table' or not tonumber(data.x) or not tonumber(data.y) or not tonumber(data.z) then return cb({ ok = false }) end
-	if lib.callback.await('my_resource:server:canGoThere', 8000) ~= true then return cb({ ok = false, reason = 'not_allowed' }) end
+	if lib.callback.await('my_resource:server:canGoThere', false) ~= true then return cb({ ok = false, reason = 'not_allowed' }) end
 	cb({ ok = true })
 	if data.embedded == true and GetResourceState('mri_Qadmin') == 'started' then
 		exports.mri_Qadmin:ClosePlugin()
