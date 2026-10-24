@@ -119,8 +119,16 @@ Page and camera:
   for the screen's share of the view.
 - Camera from `GetFinalRenderedCamCoord/Rot/Fov` (no cut) eased to the center of everything usable
   (screen, keys, slot) along the screen normal, at `max(halfH / tan(fov/2), halfW / (tan(fov/2) ×
-  GetAspectRatio(false))) / 0.9`; wrap the angles. Hide the ped locally if the camera ends within
-  0.3 m of its head.
+  GetAspectRatio(false))) / 0.9`; wrap the angles. Never hide the ped to clear the view: that
+  hides the hands, the card and the cash too. Stop the camera ~0.28 m in front of where the player
+  stands and open the FOV instead (cap ~75).
+- The prop's animations (`anim@mp_atm@*`, `mp_common givetake2_a`) only line up with the ped placed
+  square in front and held: `FreezeEntityPosition`, `SetEntityCoords` at a fixed offset on the
+  prop's front (ATM: 0.6 m, wall `prop_atm_01` 0.8 m), the prop's heading; unfreeze on close.
+  Turning toward it is not enough (mri_Qbanking, 2026-10-24).
+- A machine sound that lasts: a looping game sound with `GetSoundId`, `PlaySoundFrontend(id, ...)`,
+  `StopSound` and `ReleaseSoundId` (note counter: `Money_Counter_Loop`,
+  `DLC_Biker_Business_CFM_Sounds`). Let Lua tell the page when it ended. *(not heard in game yet)*
 - Props in the hand (card, cash) are local objects (`CreateObject(..., false, false, false)`).
 
 ## Destination height and the waypoint
