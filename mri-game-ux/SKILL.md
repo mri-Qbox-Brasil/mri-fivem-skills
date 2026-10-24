@@ -40,20 +40,19 @@ Reference: MRI's `mri_Qmultichar` (title, showroom, creation, arrival).
 - **The player stays in the scene.** Opening a screen never makes the character vanish: frame
   around them (over the shoulder at a workstation) and keep the lens off the body
   (`references/camera-scene.md`, "Obstacles and the player's ped").
-- **The world is the prompt.** A station in the world (bench, machine, terminal) shows its state
-  and what this player can do on a display over it (DUI, depth tested, the key as a keycap, "+N"
-  on each unit), not a second hint pinned to the screen. The screen keeps only the result card.
-  Lean, in the suite look: the suite font bundled with the page (Saira, OFL), the accent from
-  `mri:color`, no box behind it. Three pieces only: a ring with the whole order's progress around the
-  item, the item name, and one line that is either the state ("2/5 · 0:30", paused, ready with a check)
-  or the work key. Brackets, pips, owner names and per-unit segments read as clutter (Murai,
-  2026-10-23). Reference: mri_Qcrafting `dui/machine.html`.
-  Place it at the player's eye height (~1.45 m over the base), never at the prop's top (a tall machine
-  sends it to the sky) nor at the work spot (the quad is depth tested and the body swallows it). Where
-  that point falls inside the prop's box (`GetModelDimensions` with the entity heading), move it out
-  to the side facing the player, clear of the box, gliding as they walk around. The key is the suite's
-  `MriKbd` accent look (outline, thicker bottom border, mono), never a filled custom chip
-  (mri_Qcrafting, 2026-10-23).
+- **The world is the prompt.** A station in the world (bench, machine, terminal) shows its state and
+  what this player can do on a widget pinned to it, not a second hint fixed on the screen; the screen
+  keeps only the result card. Build it in the NUI with the suite kit (`MriKbd` + `MriKeyHint` for the
+  key, theme colors), anchored to the station's screen point: Lua projects it
+  (`GetScreenCoordFromWorldCoord`), sends position, scale and alpha at most every ~33 ms and only when
+  they change, and the page writes them straight into a `transform` (no React render, no layout).
+  Smaller with camera distance, fades off screen and behind walls (a line of sight probe every
+  ~250 ms ignoring the prop). A DUI quad for this looked blurry and off-kit (Murai, 2026-10-23).
+  Lean: a ring with the whole order's progress around the item, the item name, and one line (state
+  or the key). Anchor at the player's eye height (~1.45 m over the base); where that point falls
+  inside the prop's box (`GetModelDimensions` with the entity heading), move it out to the side facing
+  the player, gliding as they walk around. Reference: mri_Qcrafting `web/src/craft/BenchHud.tsx` and
+  `client/jobs.lua`.
 - **Glide near, cut far.** A long flight crosses unstreamed world. Above a threshold (18 m in
   the multichar) cut through black; below it, glide.
 - **Glide around the subject.** Orbit the aim point and turn the aim as yaw and pitch; a straight
