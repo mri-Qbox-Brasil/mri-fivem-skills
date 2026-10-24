@@ -240,13 +240,15 @@ Trees, rocks or wrecks anyone with access collects, gone for everyone until they
   (`SetEntityDrawOutline`, cleared on change and on resource stop) and its life bar stays up; on
   the attack controls (24, 140, 141, 142) turn the ped to it (`SetEntityHeading` from
   `GetHeadingFromVector_2d`) and land the blow on it, so a swing from the side still counts.
-- **Prompt height on a tall prop:** an entity interaction without an offset sits at the model box
-  center (mri_Qinteract's ox_target answer), up in a tree's crown. Pass `offsetAbsolute` (ox_target)
-  / `offset` (interact) in metres from the origin: the player's chest height, clamped to the
-  model's own `GetModelDimensions` min and max z. Put it **beside** the prop (to the right of the
-  player's line to it, out of the box edge, capped at 1.2 m for tree crowns), never on its axis: the
-  DUI is depth tested and the player's own body covers it with the camera behind. Re-add it when the
-  player walks to another quarter around the prop. Same spot for bars and hints over the prop.
+- **The prompt of a collectable prop is a card drawn on the screen, not a DUI** (Murai, 2026-10-23:
+  "falei pra não fazer por DUI"). An entity interaction of ox_target/interact (mri_Qinteract) is a
+  depth-tested DUI: in a tree's crown, then behind the player's body with the camera behind, and
+  moving it beside the prop as the player walks reads as broken. Draw one card for the prop in focus
+  with `DrawRect` and text (size by `EndTextCommandGetWidth`), at `GetScreenCoordFromWorldCoord` of a
+  **fixed point on the object** (its axis, 1.2 m over its lowest point, or its top if lower), never a
+  point that depends on the player. It follows the object with the camera and nothing covers it.
+  Fade 180 ms between props. Content by state: "[E] Collect", the life with a working tool in hand,
+  or which tools work. Reference: mri_Qfarm `client/world/prompt.lua`.
 - **Taken:** the server holds who is collecting (one player per prop), broadcasts taken and back,
   and answers the taken list to a client that just loaded, after its fields are mounted. Taken zone
   prop: delete it; map prop: model hide (above). Reference: mri_Qfarm `client/world/fields.lua`,
