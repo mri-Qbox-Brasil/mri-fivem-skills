@@ -42,8 +42,6 @@ RegisterNUICallback('goThere', function(data, cb)
 	PanelGoThere.go(data.x + 0.0, data.y + 0.0, data.z + 0.0)
 end)
 
---[[ server (same ACE the panel actions check, the one in the plugin requiredPerms):
-lib.callback.register('my_resource:server:canGoThere', function(src)
-	return IsPlayerAceAllowed(src, 'my_resource.admin') or IsPlayerAceAllowed(src, 'command')
-end)
+--[[ server: IsAdmin from the mri-resource-check skill (Admin check), the same ACE as the plugin requiredPerms.
+lib.callback.register('my_resource:server:canGoThere', function(src) return IsAdmin(src) end)
 ]]

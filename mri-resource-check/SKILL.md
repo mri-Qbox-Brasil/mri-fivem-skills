@@ -103,6 +103,33 @@ with `strict`:
 - Test once with `strict` on: a client-created networked entity shows for the creator only,
   or not at all, and other players never see it.
 
+### Admin check
+
+One function per resource, on the server, the same ACE the mri_Qadmin plugin lists in
+`requiredPerms`, and every panel callback calls it. The client never decides; a flag sent to the
+NUI only hides buttons.
+
+```lua
+-- IsPlayerAceAllowed reaches Lua as 1/0 on this server: callers comparing with true would deny.
+local function ace(src, perm)
+    local allowed = IsPlayerAceAllowed(src, perm)
+    return allowed == true or allowed == 1
+end
+
+function IsAdmin(src)
+    return src == 0 or ace(src, 'my_resource.admin') or ace(src, 'command')
+end
+```
+
+- Always return a real boolean: the value goes to the NUI and to `lib.callback` answers that the
+  client compares with `true` (mri_Qhousing "Go there" said `canTeleport=1` and refused,
+  2026-10-23).
+- `group.admin` is a principal, not an ace: `IsPlayerAceAllowed(src, 'group.admin')` is always
+  false. Grant through an ace the group has (`command`, `admin`, `<resource>.admin`).
+- No own list of identifiers in the config: who is admin is decided in `permissions.cfg` and in
+  the mri_Qadmin groups.
+- `check.mjs` flags `IsPlayerAceAllowed(..., 'group.x')`.
+
 ## 2. Read the flow
 
 Before saying it works, follow the path end to end across every resource involved: the

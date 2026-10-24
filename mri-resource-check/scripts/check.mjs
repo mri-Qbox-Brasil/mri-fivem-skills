@@ -307,6 +307,10 @@ for (const file of files) {
   for (const match of src.matchAll(DEAD_QBX_EVENT)) {
     warn(`${show(file)}:${lineAt(src, match.index)}`, `qbx_core:${match[1]}:${match[2]} is never fired by qbx_core; listen to ${DEAD_QBX_EVENTS[match[2]][match[1]]}`)
   }
+  // `code` has strings blanked out, so the ace name is read from `src`.
+  for (const match of src.matchAll(/\b\w*(?:Ace|ace|Perm|perm)\w*\s*\([^,()]+,\s*['"](group\.[\w.]+)['"]/g)) {
+    warn(`${show(file)}:${lineAt(src, match.index)}`, `${match[1]} is a principal, not an ace: IsPlayerAceAllowed is always false; check an ace the group has (command, <resource>.admin)`)
+  }
   // The second argument of lib.callback.await is a throttle, not a timeout: a repeat inside it returns nil without asking the server.
   for (const match of code.matchAll(/\blib\.callback\.await\s*\(\s*[^,()]+,\s*([A-Z_][A-Z0-9_]*|\d+)\s*[,)]/g)) {
     if (match[1] !== '0') warn(`${show(file)}:${lineAt(code, match.index)}`, `lib.callback.await delay ${match[1]} is a throttle, not a timeout: calls repeated inside it return nil; pass false`)
