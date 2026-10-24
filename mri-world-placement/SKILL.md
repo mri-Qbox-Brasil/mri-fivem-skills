@@ -246,13 +246,17 @@ Trees, rocks or wrecks anyone with access collects, gone for everyone until they
   center (mri_Qinteract's ox_target answer), up in a tree's crown. Pass `offsetAbsolute` (ox_target)
   / `offset` (interact) in metres from the origin: the player's chest height, clamped to the
   model's own `GetModelDimensions` min and max z. Same for bars and hints over the prop.
-- **Breaking into other props:** an item can leave 1 to 6 pieces of another item of the field when
-  its prop comes down. The server places them (`World.piecePlaces`, pure: along the fall line of a
-  tree, 1.8 m then every 2.2 m; scattered on a ring around anything else), names them `b<n>`, keeps
-  depth and root, and broadcasts them with a flag to wait for the tree to land (~2.2 s). On the
-  client a piece is just one more node of the field (same collection, hits and card), dropped in
-  out of the prop that broke, never popping in place around it (Murai, 2026-10-24): rock and wreck pieces are thrown from its middle in an arc (650 ms, 1.4 m peak, linear time, not eased; no spin, a spinning piece reads as crazy) with a bounce and chips on landing, 70 ms apart; a tree's logs hop out of the fallen trunk where they lie. The server sends the broken prop's coords as the origin. Pieces go when their root prop respawns or after 10 min, chains stop at
-  3 levels, and a zone item with count 0 exists only as a piece.
+- **Breaking into other props:** stages of the same item, not other items (Murai, 2026-10-24: "a
+  árvore quebrar em toras e as toras depois dropar a madeira"). Per item: the piece props (by photo or
+  aim), how many (1 to 6) and the hits each takes with the item's tools. The prop that breaks pays
+  nothing; each piece pays the item and never breaks again. The server places them
+  (`World.piecePlaces`, pure: along the fall line of a tree, 1.8 m then every 2.2 m; on a ring around
+  anything else), names them `b<n>` with their root and sends the broken prop's coords as the origin;
+  a tree's pieces wait for it to land (~2.2 s). On the client a piece is one more node of the field
+  (same collection, hits and card) that comes out of the prop, never popping in place: rock and wreck
+  pieces are thrown from its middle in an arc (650 ms, 1.4 m peak, linear time; no spin, a spinning
+  piece reads as crazy), bounce with chips, 70 ms apart; a tree's logs hop out of the trunk. Pieces
+  go when the root respawns or after 10 min.
 - **Taken:** the server holds who is collecting (one player per prop), broadcasts taken and back,
   and answers the taken list to a client that just loaded, after its fields are mounted. Taken zone
   prop: delete it; map prop: model hide (above). Reference: mri_Qfarm `client/world/fields.lua`,
