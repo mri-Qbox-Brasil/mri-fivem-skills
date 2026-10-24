@@ -227,6 +227,15 @@ Trees, rocks or wrecks anyone with access collects, gone for everyone until they
   `GetEntityType == 3`, name it with `GetEntityArchetypeName` (empty = can't pick), outline the
   aimed one (`SetEntityDrawOutline`, cleared when the aim moves and on exit) and show the name on
   the rail. E picks, Backspace undoes, Enter finishes.
+- **Props with life, brought down by hitting:** per item, a list of melee weapons with hits to
+  bring it down (and wear per hit); each hit takes 1/hits of the prop's life, so weapons and players
+  add up, and it heals after 2 min untouched. Detect the swing on the client by the rising edge of
+  `IsPedPerformingMeleeAction`, land it ~300 ms later on the nearest prop in front (2D distance and
+  forward dot), not by damage events (frozen local objects and map props don't report melee
+  reliably). The server reads the weapon itself (`GetSelectedPedWeapon`, server side), checks reach
+  and a gap between hits, wears the weapon (`GetCurrentWeapon` + `SetDurability`) and pays on the
+  hit that empties the life. The hitter sees the impact at once; the others get it from the broadcast,
+  with the attacker id so nobody plays it twice.
 - **Taken:** the server holds who is collecting (one player per prop), broadcasts taken and back,
   and answers the taken list to a client that just loaded, after its fields are mounted. Taken zone
   prop: delete it; map prop: model hide (above). Reference: mri_Qfarm `client/world/fields.lua`,
