@@ -243,7 +243,10 @@ Trees, rocks or wrecks anyone with access collects, gone for everyone until they
 - **Prompt height on a tall prop:** an entity interaction without an offset sits at the model box
   center (mri_Qinteract's ox_target answer), up in a tree's crown. Pass `offsetAbsolute` (ox_target)
   / `offset` (interact) in metres from the origin: the player's chest height, clamped to the
-  model's own `GetModelDimensions` min and max z. Same for bars and hints over the prop.
+  model's own `GetModelDimensions` min and max z. Put it **beside** the prop (to the right of the
+  player's line to it, out of the box edge, capped at 1.2 m for tree crowns), never on its axis: the
+  DUI is depth tested and the player's own body covers it with the camera behind. Re-add it when the
+  player walks to another quarter around the prop. Same spot for bars and hints over the prop.
 - **Taken:** the server holds who is collecting (one player per prop), broadcasts taken and back,
   and answers the taken list to a client that just loaded, after its fields are mounted. Taken zone
   prop: delete it; map prop: model hide (above). Reference: mri_Qfarm `client/world/fields.lua`,
