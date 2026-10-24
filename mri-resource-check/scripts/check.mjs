@@ -309,6 +309,7 @@ for (const file of files) {
   }
   // `code` has strings blanked out, so the ace name is read from `src`.
   for (const match of src.matchAll(/\b\w*(?:Ace|ace|Perm|perm)\w*\s*\([^,()]+,\s*['"](group\.[\w.]+)['"]/g)) {
+    if (src.slice(src.lastIndexOf('\n', match.index) + 1, match.index).includes('--')) continue
     warn(`${show(file)}:${lineAt(src, match.index)}`, `${match[1]} is a principal, not an ace: IsPlayerAceAllowed is always false; check an ace the group has (command, <resource>.admin)`)
   }
   // The second argument of lib.callback.await is a throttle, not a timeout: a repeat inside it returns nil without asking the server.
